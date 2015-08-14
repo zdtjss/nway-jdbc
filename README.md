@@ -2,7 +2,7 @@ Nway-JDBC基于Spring JDBC，扩展自Spring的JdbcTemplate，完全兼容Spring JDBC。
 
 如遇问题可联系zdtjss@163.com或QQ:670950251。
 
-如果您通过开源中国访问，发现不登录不能下载，可以到https://github.com/zdtjss/nway-jdbc完成您的操作。
+如果您通过开源中国访问，发现不登录不能下载，可以到 https://github.com/zdtjss/nway-jdbc 完成您的操作。
 
 使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
 
