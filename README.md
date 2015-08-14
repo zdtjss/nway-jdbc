@@ -57,3 +57,5 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查询有类似方法)
         Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination("select * from t_user where id <> ? order by id", new Object[]{ 10000 }, 1, 10);
 		
         users使用同queryForBeanPagination
+
+	分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
