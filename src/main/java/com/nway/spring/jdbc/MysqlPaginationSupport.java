@@ -16,17 +16,19 @@ package com.nway.spring.jdbc;
 public final class MysqlPaginationSupport implements PaginationSupport {
 
 	@Override
-	public String buildPaginationSql(StringBuilder sql, int start, int pageSize) {
+	public String buildPaginationSql(String sql, int start, int pageSize) {
 
 		if (start <= 0 || pageSize <= 0) {
 
 			throw new IllegalArgumentException("页数或页面数据量应该大于零");
 		}
 
+		StringBuilder paginationSql = new StringBuilder(sql.length() + 15);
+		
 		// mysql limit 是从0开始的
-		sql.append(" limit ").append(start - 1).append(',').append(pageSize);
+		paginationSql.append(" limit ").append(start - 1).append(',').append(pageSize);
 
-		return sql.toString();
+		return paginationSql.toString();
 	}
 
 }

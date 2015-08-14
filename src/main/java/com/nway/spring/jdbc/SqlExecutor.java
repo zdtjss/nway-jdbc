@@ -148,15 +148,15 @@ public class SqlExecutor extends JdbcTemplate {
 
 		List<T> item = Collections.emptyList();
 
-		StringBuilder sbSql = new StringBuilder(sql.toUpperCase());
+		String upperSql = sql.toUpperCase();
 
-		String countSql = buildPaginationCountSql(sbSql);
+		String countSql = buildPaginationCountSql(upperSql);
 
 		int totalCount = queryCount(countSql, params, argTypes);
 		
 		if (totalCount != 0) {
 
-			String paginationSql = paginationSupport.buildPaginationSql(sbSql, page, pageSize);
+			String paginationSql = paginationSupport.buildPaginationSql(upperSql, page, pageSize);
 
 			if (argTypes == null) {
 				
@@ -196,7 +196,7 @@ public class SqlExecutor extends JdbcTemplate {
 
 		List<Map<String, Object>> item = Collections.emptyList();
 
-		StringBuilder upperCaseSql = new StringBuilder(sql.toUpperCase());
+		String upperCaseSql = sql.toUpperCase();
 
 		String countSql = buildPaginationCountSql(upperCaseSql);
 
@@ -229,7 +229,7 @@ public class SqlExecutor extends JdbcTemplate {
 		
 		StringBuilder json = new StringBuilder("{");
 		
-		StringBuilder upperCaseSql = new StringBuilder(sql.toUpperCase());
+		String upperCaseSql = sql.toUpperCase();
 
 		String countSql = buildPaginationCountSql(upperCaseSql);
 
@@ -318,7 +318,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 *            ¥Û–¥SQL
 	 * @return
 	 */
-	private String buildPaginationCountSql(StringBuilder sql) {
+	private String buildPaginationCountSql(String sql) {
 		
 		StringBuilder countSql = new StringBuilder(sql);
 

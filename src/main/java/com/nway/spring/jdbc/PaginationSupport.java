@@ -22,6 +22,6 @@ package com.nway.spring.jdbc;
  */
 public interface PaginationSupport {
 
-	String buildPaginationSql(StringBuilder sql, int start, int pageSize);
+	String buildPaginationSql(String sql, int start, int pageSize);
 
 }

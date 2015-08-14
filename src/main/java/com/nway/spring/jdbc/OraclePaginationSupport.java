@@ -16,20 +16,20 @@ package com.nway.spring.jdbc;
 public final class OraclePaginationSupport implements PaginationSupport {
 
 	@Override
-	public String buildPaginationSql(StringBuilder sql, int page, int pageSize) {
+	public String buildPaginationSql(String sql, int page, int pageSize) {
 
 		if (page <= 0 || pageSize <= 0) {
 
 			throw new IllegalArgumentException("页数或页面数据量应该大于零");
 		}
 
-		StringBuilder sbSql = new StringBuilder(sql.length() + 90);
+		StringBuilder paginationSql = new StringBuilder(sql.length() + 90);
 
 		// oracle rownum是从1开始的
-		sbSql.append("SELECT * FROM ( SELECT ROWNUM RN, T.* FROM ( ").append(sql).append(" ) T WHERE ROWNUM <= ")
+		paginationSql.append("SELECT * FROM ( SELECT ROWNUM RN, T.* FROM ( ").append(sql).append(" ) T WHERE ROWNUM <= ")
 				.append(page * pageSize).append(" ) WHERE RN  >= ").append(page);
 
-		return sbSql.toString();
+		return paginationSql.toString();
 	}
 	
 }
