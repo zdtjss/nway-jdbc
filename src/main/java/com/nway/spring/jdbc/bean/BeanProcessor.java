@@ -29,7 +29,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,25 +93,6 @@ class BeanProcessor {
     private static final boolean HAS_ASM = ClassUtils.isPresent("org.objectweb.asm.ClassWriter", ClassUtils.getDefaultClassLoader());
 	
 	private static final boolean HAS_JAVASSIST = ClassUtils.isPresent("javassist.ClassPool", ClassUtils.getDefaultClassLoader());
-
-    /**
-     * Set a bean's primitive properties to these defaults when SQL NULL is returned. These are the
-     * same as the defaults that ResultSet get* methods return in the event of a NULL column.
-     */
-    private static final Map<Class<?>, Object> primitiveDefaults = new HashMap<Class<?>, Object>();
-
-    static {
-
-        primitiveDefaults.put(Integer.TYPE, 0);
-        primitiveDefaults.put(Short.TYPE, (short) 0);
-        primitiveDefaults.put(Byte.TYPE, (byte) 0);
-        primitiveDefaults.put(Float.TYPE, 0.0f);
-        primitiveDefaults.put(Double.TYPE, 0.0d);
-        primitiveDefaults.put(Long.TYPE, 0L);
-        primitiveDefaults.put(Boolean.TYPE, Boolean.FALSE);
-        primitiveDefaults.put(Character.TYPE, (char) 0);
-
-    }
 
 	private BeanProcessor() {
 		
@@ -218,7 +198,7 @@ class BeanProcessor {
 			} 
 			else {
 
-				throw new RuntimeException("");
+				throw new UnsupportedOperationException("找不到类org.objectweb.asm.ClassWriter或javassist.ClassPool");
 			}
 
 //		}

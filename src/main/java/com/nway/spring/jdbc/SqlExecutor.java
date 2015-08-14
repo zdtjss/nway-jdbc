@@ -122,7 +122,7 @@ public class SqlExecutor extends JdbcTemplate {
 		return super.query(sql, new JsonListHandler(type));
 	}
 	
-	public String queryForJsonList(String sql, Class<?> type,Object... args) throws DataAccessException {
+	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
 		
 		return super.query(sql, new JsonListHandler(type), args);
 	}
@@ -376,7 +376,7 @@ public class SqlExecutor extends JdbcTemplate {
 		} 
 		else {
 			
-			throw new UnsupportedOperationException("不支持本数据库的分页操作");
+			throw new UnsupportedOperationException("暂不支持本数据库的分页操作，请实现com.nway.spring.jdbc.PaginationSupport接口，通过本类setPaginationSupport方法引入。");
 		}
 	}
 	
