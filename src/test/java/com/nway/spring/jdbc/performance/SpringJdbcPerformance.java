@@ -32,10 +32,10 @@ public class SpringJdbcPerformance implements Performance {
 
 		Computer computer = jdbcTemplate.query(computerSql, new BeanPropertyRowMapper<Computer>(Computer.class), id).get(0);
 
-		computer.setMainframe(jdbcTemplate.query(mainframeSql, new BeanPropertyRowMapper<Mainframe>(Mainframe.class), computer.getMainframeId()).get(0));
-		computer.setMonitor(jdbcTemplate.query(monitorSql, new BeanPropertyRowMapper<Monitor>(Monitor.class), computer.getMonitorId()).get(0));
-		computer.setMouse(jdbcTemplate.query(mouseSql, new BeanPropertyRowMapper<Mouse>(Mouse.class), computer.getMouseId()).get(0));
-		computer.setKeyboard(jdbcTemplate.query(keyboardSql, new BeanPropertyRowMapper<Keyboard>(Keyboard.class), computer.getKeyboardId()).get(0));
+		computer.setMainframe(jdbcTemplate.query(mainframeSql, BeanPropertyRowMapper.newInstance(Mainframe.class), computer.getMainframeId()).get(0));
+		computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
+		computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
+		computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
 
 		return computer;
 	}
@@ -49,14 +49,14 @@ public class SpringJdbcPerformance implements Performance {
 		String mouseSql = "select * from t_mouse where id = ?";
 		String keyboardSql = "select * from t_keyboard where id = ?";
 
-		List<Computer> computers = jdbcTemplate.query(computerSql, new BeanPropertyRowMapper<Computer>(Computer.class));
+		List<Computer> computers = jdbcTemplate.query(computerSql, BeanPropertyRowMapper.newInstance(Computer.class));
 
 		for (Computer computer : computers) {
 
-			computer.setMainframe(jdbcTemplate.query(mainframeSql, new BeanPropertyRowMapper<Mainframe>(Mainframe.class), computer.getMainframeId()).get(0));
-			computer.setMonitor(jdbcTemplate.query(monitorSql, new BeanPropertyRowMapper<Monitor>(Monitor.class), computer.getMonitorId()).get(0));
-			computer.setMouse(jdbcTemplate.query(mouseSql, new BeanPropertyRowMapper<Mouse>(Mouse.class), computer.getMouseId()).get(0));
-			computer.setKeyboard(jdbcTemplate.query(keyboardSql, new BeanPropertyRowMapper<Keyboard>(Keyboard.class), computer.getKeyboardId()).get(0));
+			computer.setMainframe(jdbcTemplate.query(mainframeSql, BeanPropertyRowMapper.newInstance(Mainframe.class), computer.getMainframeId()).get(0));
+			computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
+			computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
+			computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
 		}
 
 		return computers;
@@ -65,13 +65,13 @@ public class SpringJdbcPerformance implements Performance {
 	@Override
 	public Monitor getMonitor(int id) {
 
-		return jdbcTemplate.query("select * from t_monitor where id=?", new BeanPropertyRowMapper<Monitor>(Monitor.class), id).get(0);
+		return jdbcTemplate.query("select * from t_monitor where id=?", BeanPropertyRowMapper.newInstance(Monitor.class), id).get(0);
 	}
 
 	@Override
 	public List<Monitor> listMonitor(int num) {
 
-		return jdbcTemplate.query("select * from t_monitor where rownum < ?", new BeanPropertyRowMapper<Monitor>(Monitor.class), num);
+		return jdbcTemplate.query("select * from t_monitor where rownum < ?", BeanPropertyRowMapper.newInstance(Monitor.class), num);
 	}
 	
 }
