@@ -1,75 +1,75 @@
-Nway-JDBC»ùÓÚSpring JDBC£¬À©Õ¹×ÔSpringµÄJdbcTemplate£¬ÍêÈ«¼æÈİSpring JDBC¡£
+Nway-JDBCåŸºäºSpring JDBCï¼Œæ‰©å±•è‡ªSpringçš„JdbcTemplateï¼Œå®Œå…¨å…¼å®¹Spring JDBCã€‚
 
-ÈçÓöÎÊÌâ¿ÉÁªÏµzdtjss@163.com»òQQ:670950251¡£
+å¦‚é‡é—®é¢˜å¯è”ç³»zdtjss@163.comæˆ–QQ:670950251ã€‚
 
-Èç¹ûÄúÍ¨¹ı¿ªÔ´ÖĞ¹ú·ÃÎÊ£¬·¢ÏÖ²»µÇÂ¼²»ÄÜÏÂÔØ£¬¿ÉÒÔµ½ https://github.com/zdtjss/nway-jdbc Íê³ÉÄúµÄ²Ù×÷¡£
+å¦‚æœæ‚¨é€šè¿‡å¼€æºä¸­å›½è®¿é—®ï¼Œå‘ç°ä¸ç™»å½•ä¸èƒ½ä¸‹è½½ï¼Œå¯ä»¥åˆ° https://github.com/zdtjss/nway-jdbc å®Œæˆæ‚¨çš„æ“ä½œã€‚
 
-Ê¹ÓÃÖĞSqlExecutorµÄÈÕÖ¾¼¶±ğĞèÒªµ¥¶ÀÅäÖÃ£¬ÇÒÒª¸ßÓÚdebug£¬²»È»»áÓ°ÏìĞÔÄÜ£¬ÒòÎªJdbcTemplate.handleWarnings()±È½ÏºÄÊ±¡£
+ä½¿ç”¨ä¸­SqlExecutorçš„æ—¥å¿—çº§åˆ«éœ€è¦å•ç‹¬é…ç½®ï¼Œä¸”è¦é«˜äºdebugï¼Œä¸ç„¶ä¼šå½±å“æ€§èƒ½ï¼Œå› ä¸ºJdbcTemplate.handleWarnings()æ¯”è¾ƒè€—æ—¶ã€‚
 
-²éÑ¯²»µ½Êı¾İÊ±£º 
-	?queryForBean·µ»Ønull
-	?queryForBeanList·µ»ØÖµsize() == 0
-	?queryForBeanPagination·µ»ØÖµgetTotalCount() == 0
-	?queryForMapListPagination·µ»ØÖµgetTotalCount() == 0
-	?queryForJson·µ»Ø"{}"
-	?queryForJsonList·µ»Ø"[]"
-	?testJsonPagination·µ»ØÖµtotalCount == 0
+æŸ¥è¯¢ä¸åˆ°æ•°æ®æ—¶ï¼š 
+	queryForBeanè¿”å›null
+	queryForBeanListè¿”å›å€¼size() == 0
+	queryForBeanPaginationè¿”å›å€¼getTotalCount() == 0
+	queryForMapListPaginationè¿”å›å€¼getTotalCount() == 0
+	queryForJsonè¿”å›"{}"
+	queryForJsonListè¿”å›"[]"
+	testJsonPaginationè¿”å›å€¼totalCount == 0
 
-µÚÈı·½ÒÀÀµ£º
-	ASM»òJavassist
+ç¬¬ä¸‰æ–¹ä¾èµ–ï¼š
+	ASMæˆ–Javassist
 
-Êı¾İ¿â±í×Ö¶ÎÓëJavaÀàÊôĞÔÓ³Éä¹æÔò£º
+æ•°æ®åº“è¡¨å­—æ®µä¸Javaç±»å±æ€§æ˜ å°„è§„åˆ™ï¼š
 
-    È¥³ı±í×Ö¶ÎÖĞÏÂ»®Ïß(_)ÓëJavaÀàÊôĞÔÃû³ÆºöÂÔ´óĞ¡Ğ´±È½Ï£¬ÏàµÈÔò¸³Öµ£¬Èç£º±í×Ö¶ÎÃû³ÆÎªuser_name£¬»áÍ¨¹ıÀàÖĞsetUserName·½·¨¸³Öµ¡£
-	Ò²¿ÉÒÔÍ¨¹ıcom.nway.spring.jdbc.annotation.ColumnĞŞ¸ÄÄ¬ÈÏ¹æÔò¡£Èç£º
+    å»é™¤è¡¨å­—æ®µä¸­ä¸‹åˆ’çº¿(_)ä¸Javaç±»å±æ€§åç§°å¿½ç•¥å¤§å°å†™æ¯”è¾ƒï¼Œç›¸ç­‰åˆ™èµ‹å€¼ï¼Œå¦‚ï¼šè¡¨å­—æ®µåç§°ä¸ºuser_nameï¼Œä¼šé€šè¿‡ç±»ä¸­setUserNameæ–¹æ³•èµ‹å€¼ã€‚
+	ä¹Ÿå¯ä»¥é€šè¿‡com.nway.spring.jdbc.annotation.Columnä¿®æ”¹é»˜è®¤è§„åˆ™ã€‚å¦‚ï¼š
 	
       @Column("user_name")
       public String getName()
 	  
-Java¶ÔÏó²éÑ¯Ö§³Ö(JSON×Ö·û´®µ¥¶ÔÏó¼°¶ÔÏó¼¯²éÑ¯ÓëJava¶ÔÏó²éÑ¯ÓĞÀàËÆ·½·¨)
+Javaå¯¹è±¡æŸ¥è¯¢æ”¯æŒ(JSONå­—ç¬¦ä¸²å•å¯¹è±¡åŠå¯¹è±¡é›†æŸ¥è¯¢ä¸Javaå¯¹è±¡æŸ¥è¯¢æœ‰ç±»ä¼¼æ–¹æ³•)
 
-    µ¥¶ÔÏó£º
+    å•å¯¹è±¡ï¼š
 	
-        ¸÷ÖÖ²ÎÊıµÄqueryForBean·½·¨Ö§³Öµ¥¸öJava¶ÔÏó²éÑ¯
+        å„ç§å‚æ•°çš„queryForBeanæ–¹æ³•æ”¯æŒå•ä¸ªJavaå¯¹è±¡æŸ¥è¯¢
 		
         User usr = sqlExecutor.queryForBean("select * from t_user where id = ?", User.class, 10000);
 		
-    ¶ÔÏó¼¯£º
+    å¯¹è±¡é›†ï¼š
 	
-        ¸÷ÖÖ²ÎÊıµÄqueryForBeanList·½·¨Ö§³Ö¶à¸öJava¶ÔÏó²éÑ¯
+        å„ç§å‚æ•°çš„queryForBeanListæ–¹æ³•æ”¯æŒå¤šä¸ªJavaå¯¹è±¡æŸ¥è¯¢
 		
         List<User> users = sqlExecutor.queryForBeanList("select * from t_user where id <> ?", User.class, 10000);
 		
-    ·ÖÒ³¶ÔÏó¼¯£º
+    åˆ†é¡µå¯¹è±¡é›†ï¼š
 	
-        ¸÷ÖÖ²ÎÊıµÄqueryForBeanPagination·½·¨Ö§³ÖJava¶ÔÏó·ÖÒ³²éÑ¯
+        å„ç§å‚æ•°çš„queryForBeanPaginationæ–¹æ³•æ”¯æŒJavaå¯¹è±¡åˆ†é¡µæŸ¥è¯¢
 		
         Pagination<User> users = sqlExecutor.queryForBeanPagination("select * from t_user where id <> ? order by id", new Object[]{ 10000 }, 1, 10, User.class);
 		
-        //Ò³ÃæÊı¾İ List<T>
+        //é¡µé¢æ•°æ® List<T>
         users.getPageData();
 		
-        //Ò³ÃæÊı¾İÌõÊı
+        //é¡µé¢æ•°æ®æ¡æ•°
         users.getPageSize();
 		
-        //×ÜÊı¾İÌõÊı
+        //æ€»æ•°æ®æ¡æ•°
         users.getTotalCount()
 		
-        //Ò³Ãæ´óĞ¡
+        //é¡µé¢å¤§å°
         users.getPageSize();
 		
-        //Ò³Êı
+        //é¡µæ•°
         users.getPageCount();
 		
-        //µ±Ç°Ò³Âë
+        //å½“å‰é¡µç 
         users.getCurrentPage();
 		
-    Map¶ÔÏó¼¯·ÖÒ³£º
+    Mapå¯¹è±¡é›†åˆ†é¡µï¼š
 	
-        ¸÷ÖÖ²ÎÊıµÄqueryForMapListPagination·½·¨Ö§³ÖMap¶ÔÏó·ÖÒ³²éÑ¯
+        å„ç§å‚æ•°çš„queryForMapListPaginationæ–¹æ³•æ”¯æŒMapå¯¹è±¡åˆ†é¡µæŸ¥è¯¢
 		
         Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination("select * from t_user where id <> ? order by id", new Object[]{ 10000 }, 1, 10);
 		
-        usersÊ¹ÓÃÍ¬queryForBeanPagination
+        usersä½¿ç”¨åŒqueryForBeanPagination
 
-	·ÖÒ³Ä¬ÈÏÖ§³ÖOracle¡¢Mysql¡¢MariaDB£¬¹ØÓÚÆäËûÊı¾İ¿âµÄ·ÖÒ³¿ÉÒÔÊµÏÖcom.nway.spring.jdbc.PaginationSupport½Ó¿Ú£¬Í¨¹ıcom.nway.spring.jdbc.SqlExecutor.setPaginationSupport·½·¨ÒıÈë¡£
+	åˆ†é¡µé»˜è®¤æ”¯æŒOracleã€Mysqlã€MariaDBï¼Œå…³äºå…¶ä»–æ•°æ®åº“çš„åˆ†é¡µå¯ä»¥å®ç°com.nway.spring.jdbc.PaginationSupportæ¥å£ï¼Œé€šè¿‡com.nway.spring.jdbc.SqlExecutor.setPaginationSupportæ–¹æ³•å¼•å…¥ã€‚
