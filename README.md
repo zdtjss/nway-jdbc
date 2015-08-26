@@ -6,6 +6,15 @@ Nway-JDBC基于Spring JDBC，扩展自Spring的JdbcTemplate，完全兼容Spring JDBC。
 
 使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
 
+查询不到数据时： 
+	?queryForBean返回null
+	?queryForBeanList返回值size() == 0
+	?queryForBeanPagination返回值getTotalCount() == 0
+	?queryForMapListPagination返回值getTotalCount() == 0
+	?queryForJson返回"{}"
+	?queryForJsonList返回"[]"
+	?testJsonPagination返回值totalCount == 0
+
 第三方依赖：
 	ASM或Javassist
 

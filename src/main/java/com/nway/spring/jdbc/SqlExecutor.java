@@ -35,8 +35,19 @@ import com.nway.spring.jdbc.json.JsonHandler;
 import com.nway.spring.jdbc.json.JsonListHandler;
 
 /**
- * 本类所有的queryForBeanXXX方法，查询不到数据时，返回null；所有的queryForJsonXXX方法，查询不到数据时，返回"{}"
- *
+ * 注意：
+ * <p>
+ * &nbsp;&nbsp;查询不到数据时：
+ * <ul>
+ * <li>queryForBean返回null；</li>
+ * <li>queryForBeanList返回值size() == 0；</li>
+ * <li>queryForBeanPagination返回值getTotalCount() == 0；</li>
+ * <li>queryForMapListPagination返回值getTotalCount() == 0；</li>
+ * <li>queryForJson返回"{}"</li>
+ * <li>queryForJsonList返回"[]"</li>
+ * <li>testJsonPagination返回对象中totalCount == 0</li>
+ * </ul>
+ * 
  * @author zdtjss@163.com
  *
  * @since 2014-03-28
