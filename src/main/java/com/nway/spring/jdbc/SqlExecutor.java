@@ -110,42 +110,42 @@ public class SqlExecutor extends JdbcTemplate {
 	
 	public String queryForJson(String sql, Class<?> type) throws DataAccessException {
 
-		return super.query(sql, new JsonHandler(type));
+		return super.query(sql, new JsonHandler(type, extractQuerying(sql)));
 	}
 	
 	public String queryForJson(String sql, Class<?> type,Object... args) throws DataAccessException {
 		
-		return super.query(sql, new JsonHandler(type), args);
+		return super.query(sql, new JsonHandler(type, extractQuerying(sql)), args);
 	}
 	
 	public String queryForJson(String sql,Object[] args, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonHandler(type));
+		return super.query(sql, args, new JsonHandler(type, extractQuerying(sql)));
 	}
 	
 	public String queryForJson(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new JsonHandler(type));
+		return super.query(sql, args, argTypes, new JsonHandler(type, extractQuerying(sql)));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type));
+		return super.query(sql, new JsonListHandler(type, extractQuerying(sql)));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type), args);
+		return super.query(sql, new JsonListHandler(type, extractQuerying(sql)), args);
 	}
 	
 	public String queryForJsonList(String sql,Object[] args, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonListHandler(type));
+		return super.query(sql, args, new JsonListHandler(type, extractQuerying(sql)));
 	}
 	
 	public String queryForJsonList(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, argTypes, new JsonListHandler(type));
+		return super.query(sql, args, argTypes, new JsonListHandler(type, extractQuerying(sql)));
 	}
 	
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page,

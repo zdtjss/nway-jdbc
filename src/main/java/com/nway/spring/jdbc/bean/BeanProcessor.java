@@ -143,8 +143,10 @@ class BeanProcessor {
         String cacheKey = makeCacheKey(rs, querying, type.getName());
 		
         do {
+        	
             results.add(toBean(rs, type, cacheKey, false));
-        } while (rs.next());
+        }
+        while (rs.next());
 
         return results;
     }

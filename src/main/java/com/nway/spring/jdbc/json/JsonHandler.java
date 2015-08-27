@@ -14,21 +14,23 @@ public class JsonHandler implements ResultSetExtractor<String>
 	private static final JsonProcessor JSON_PROCESSOR = new JsonProcessor();
 
 	private final Class<?> type;
+	
+	private String querying;
 
-	public JsonHandler(Class<?> type)
-	{
+	public JsonHandler(Class<?> type, String querying) {
 		this.type = type;
+		this.querying = querying;
 	}
 
 	@Override
-	public String extractData(ResultSet rs)
-	{
-		try
-		{
-			return rs.next() ? JSON_PROCESSOR.buildJson(rs, type) : "{}";
-		}
-		catch (Exception e)
-		{
+	public String extractData(ResultSet rs) {
+		
+		try {
+
+			return rs.next() ? JSON_PROCESSOR.buildJson(rs, type, querying, true) : "{}";
+		} 
+		catch (Exception e) {
+			
 			throw new JsonBuildException("´´½¨JSONÊ§°Ü [ " + this.type + " ]", e);
 		}
 	}

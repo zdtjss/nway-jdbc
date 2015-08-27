@@ -11,20 +11,20 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtNewMethod;
-import javassist.LoaderClassPath;
-
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
 
 import com.nway.spring.classwork.DynamicBeanClassLoader;
 import com.nway.spring.classwork.DynamicObjectException;
 import com.nway.spring.jdbc.annotation.Column;
+
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtNewMethod;
 
 /**
  * 
@@ -52,123 +52,69 @@ class JsonProcessor extends JsonBuilder
     
 	private static final String DYNAMIC_BEAN_PACKAGE = "com.nway.spring.jdbc.json.";
 	
+    private static final boolean HAS_ASM = ClassUtils.isPresent("org.objectweb.asm.ClassWriter", ClassUtils.getDefaultClassLoader());
+	
+	private static final boolean HAS_JAVASSIST = ClassUtils.isPresent("javassist.ClassPool", ClassUtils.getDefaultClassLoader());
+	
 	/**
      * 缓存动态生成的 DbBeanFactory，这里的cache是静态的，意味着无论BeanProcessor被new多少次，cache都是同一个
      */
     private static final Map<String, JsonBuilder> JSON_BUILDER_CACHE = new ConcurrentHashMap<String, JsonBuilder>();
 
-	public String buildJson(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException
-	{
-		if (ClassUtils.isPresent("org.objectweb.asm.ClassWriter", ClassUtils.getDefaultClassLoader())) {
+	public String buildJson(ResultSet rs, Class<?> type, String querying, boolean makeKey)
+			throws SQLException, IntrospectionException {
+	
+		String cacheKey = null;
 
-			String key = getColunmNames(rs.getMetaData()) + type.getName() + type.getClassLoader().hashCode();
-			
-            return buildJsonByAsm(rs, type, key);
-        } else if (ClassUtils.isPresent("javassist.ClassPool", ClassUtils.getDefaultClassLoader())) {
+		if (makeKey) {
 
-			String key = getColunmNames(rs.getMetaData()) + type.getName() + type.getClassLoader().hashCode();
-			
-            return buildJsonByJavassist(rs, type, key);
-        } else {
+			cacheKey = makeCacheKey(rs, querying, type.getName());
+		} 
+		else {
 
-            return buildJsonWithJdk(rs, type);
-        }
+			cacheKey = querying;
+		}
+
+		/*
+		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
+		 * 如果不做线程同步，只有当存在某一查询一开始就大量并发访问时，才会在前几次查询中重复定义动态相同的DbBeanFactory
+		 * 以type对象作为同步锁，降低线程同步对系统整体吞吐量的影响
+		 */
+//		synchronized (type) {
+
+			if (!HAS_ASM) {
+
+				return buildJsonByAsm(rs, type, cacheKey);
+			} 
+			else if (HAS_JAVASSIST) {
+
+				return buildJsonByJavassist(rs, type, cacheKey);
+			} 
+			else {
+
+				throw new UnsupportedOperationException("找不到类org.objectweb.asm.ClassWriter或javassist.ClassPool");
+			}
+//		}
 	}
 	
-	public String toJsonList(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException
-	{
+	public String toJsonList(ResultSet rs, Class<?> type, String querying) throws SQLException, IntrospectionException {
+	
 		StringBuilder json = new StringBuilder("[");
 
-		do
-		{
-			json.append(buildJson(rs, type)).append(',');
+		String cacheKey = makeCacheKey(rs, querying, type.getName());
+		
+		do {
+			
+			json.append(buildJson(rs, type, cacheKey, false)).append(',');
 		}
 		while (rs.next());
 
-		if (json.length() > 1)
-		{
+		if (json.length() > 1) {
+			
 			json = json.deleteCharAt(json.length() - 1);
 		}
 
 		return json.append(']').toString();
-	}
-
-	private String buildJsonWithJdk(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException
-	{
-		ResultSetMetaData rsmd = rs.getMetaData();
-
-		PropertyDescriptor[] props = Introspector.getBeanInfo(type).getPropertyDescriptors();
-
-		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
-
-		StringBuilder json = new StringBuilder("{");
-
-		for (int index = 1; index < columnToProperty.length; index++)
-		{
-			if (columnToProperty[index] == PROPERTY_NOT_FOUND)
-			{
-				continue;
-			}
-
-			PropertyDescriptor prop = props[columnToProperty[index]];
-			Class<?> propType = prop.getPropertyType();
-
-			json.append('\"').append(prop.getName()).append("\":");
-
-			if (String.class.equals(propType) || Clob.class.equals(propType))
-			{
-				stringValue(rs.getString(index), json);
-			}
-			else if (boolean.class.equals(propType) || Boolean.class.equals(propType))
-			{
-				booleanValue(rs.getBoolean(index), rs.wasNull(), json);
-			}
-			else if (int.class.equals(propType) || Integer.class.equals(propType))
-			{
-				integerValue(rs.getInt(index), rs.wasNull(), json);
-			}
-			else if (long.class.equals(propType) || Long.class.equals(propType))
-			{
-				longValue(rs.getLong(index), rs.wasNull(), json);
-			}
-			else if (float.class.equals(propType) || Float.class.equals(propType))
-			{
-				floatValue(rs.getFloat(index), rs.wasNull(), json);
-			}
-			else if (double.class.equals(propType) || Double.class.equals(propType))
-			{
-				doubleValue(rs.getDouble(index), rs.wasNull(), json);
-			}
-			else if (java.util.Date.class.equals(propType))
-			{
-				dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
-			}
-			else if (java.sql.Timestamp.class.equals(propType))
-			{
-				dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
-			}
-			else if (java.sql.Date.class.equals(propType))
-			{
-				dateValue(rs.getDate(index), "yyyy-MM-dd", json);
-			}
-			else if (java.sql.Time.class.equals(propType))
-			{
-				dateValue(rs.getTime(index), "HH:mm:ss", json);
-			} 
-			else 
-			{
-				json.append('\"').append(rs.getObject(index)).append('\"');
-			}
-			
-			json.append(',');
-		}
-
-		if (json.length() > 1)
-		{
-			json = json.deleteCharAt(json.length() - 1);
-		}
-
-		return json.append('}').toString();
 	}
 	
 	private String buildJsonByJavassist(ResultSet rs, Class<?> type, String key) throws SQLException, IntrospectionException {
@@ -184,8 +130,7 @@ class JsonProcessor extends JsonBuilder
 		
 		try {
 
-            ClassPool classPool = ClassPool.getDefault();
-            classPool.appendClassPath(new LoaderClassPath(ClassUtils.getDefaultClassLoader()));
+            ClassPool classPool = ClassPoolCreator.getClassPool();
             
             CtClass ctHandler = classPool.makeClass(getProcessorName(type));
             CtClass superClass = classPool.get("com.nway.spring.jdbc.json.JsonBuilder");
@@ -220,8 +165,8 @@ class JsonProcessor extends JsonBuilder
 
 		for (int index = 1; index < columnToProperty.length; index++)
 		{
-			if (columnToProperty[index] == PROPERTY_NOT_FOUND)
-			{
+			if (columnToProperty[index] == PROPERTY_NOT_FOUND) {
+				
 				continue;
 			}
 			
@@ -230,102 +175,103 @@ class JsonProcessor extends JsonBuilder
 			Class<?> propType = prop.getPropertyType();
 			
 			json.append('\"').append(propName).append("\":");
+			
+			handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\")");
 
 			if (String.class.equals(propType) || Clob.class.equals(propType))
 			{
 				stringValue(rs.getString(index), json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");stringValue($1.getString(").append(index).append("),json);json.append(',');");
+				handlerScript.append(";stringValue($1.getString(").append(index).append("),json);json.append(',');");
 			}
 			else if (boolean.class.equals(propType))
 			{
 				json.append(rs.getBoolean(index));
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\").append($1.getBoolean(").append(index).append(").append(',');");
+				handlerScript.append(".append($1.getBoolean(").append(index).append(")).append(',');");
 			}
 			else if (Boolean.class.equals(propType))
 			{
 				booleanValue(rs.getBoolean(index), rs.wasNull(), json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");booleanValue($1.getBoolean(").append(index).append("),$1.wasNull(),json);json.append(',');");
+				handlerScript.append(";booleanValue($1.getBoolean(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
 			else if (int.class.equals(propType))
 			{
 				json.append(rs.getInt(index));
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\").append($1.getInt(").append(index).append(").append(',');");
+				handlerScript.append(".append($1.getInt(").append(index).append(")).append(',');");
 			}
 			else if (Integer.class.equals(propType))
 			{
 				integerValue(rs.getInt(index), rs.wasNull(), json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");intValue($1.getInt(").append(index).append("),$1.wasNull(),json);json.append(',');");
+				handlerScript.append(";integerValue($1.getInt(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
 			else if (long.class.equals(propType))
 			{
 				json.append(rs.getLong(index));
 
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\").append($1.getLong(").append(index).append(").append(',');");
+				handlerScript.append(".append($1.getLong(").append(index).append(")).append(',');");
 			}
 			else if (Long.class.equals(propType))
 			{
 				longValue(rs.getLong(index), rs.wasNull(), json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");longValue($1.getLong(").append(index).append("),$1.wasNull(),json);json.append(',');");
+				handlerScript.append(";longValue($1.getLong(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
 			else if (float.class.equals(propType))
 			{
 				json.append(rs.getFloat(index));
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\").append($1.getFloat(").append(index).append(").append(',');");
+				handlerScript.append(".append($1.getFloat(").append(index).append(")).append(',');");
 			}
 			else if (Float.class.equals(propType))
 			{
 				floatValue(rs.getFloat(index), rs.wasNull(), json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");floatValue($1.getString(").append(index).append("),$1.wasNull(),json);json.append(',');");
+				handlerScript.append(";floatValue($1.getFloat(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
 			else if (double.class.equals(propType))
 			{
 				json.append(rs.getDouble(index));
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\").append($1.getDouble(").append(index).append(").append(',');");
+				handlerScript.append(".append($1.getDouble(").append(index).append(")).append(',');");
 			}
 			else if (Double.class.equals(propType))
 			{
 				doubleValue(rs.getDouble(index), rs.wasNull(), json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");doubleValue($1.getString(").append(index).append("),$1.wasNull(),json);json.append(',');");
+				handlerScript.append(";doubleValue($1.getDouble(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
 			else if (java.util.Date.class.equals(propType))
 			{
 				dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd HH:mm:ss\",json);json.append(',');");
+				handlerScript.append(";dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd HH:mm:ss\",json);json.append(',');");
 			}
 			else if (java.sql.Timestamp.class.equals(propType))
 			{
 				dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");dateValue($1.getTimestamp(").append(index).append("),\"yyyy-MM-dd HH:mm:ss.fffffffff\",json);json.append(',');");
+				handlerScript.append(";dateValue($1.getTimestamp(").append(index).append("),\"yyyy-MM-dd HH:mm:ss.SSS\",json);json.append(',');");
 			}
 			else if (java.sql.Date.class.equals(propType))
 			{
 				dateValue(rs.getDate(index), "yyyy-MM-dd", json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd\",json);json.append(',');");
+				handlerScript.append(";dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd\",json);json.append(',');");
 			}
 			else if (java.sql.Time.class.equals(propType))
 			{
 				dateValue(rs.getTime(index), "HH:mm:ss", json);
 				
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\");dateValue($1.getTime(").append(index).append("),\"HH:mm:ss\",json);json.append(',');");
+				handlerScript.append(";dateValue($1.getTime(").append(index).append("),\"HH:mm:ss\",json);json.append(',');");
 			}
 			else 
 			{
 				json.append('\"').append(rs.getObject(index).toString()).append('\"');
-				handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\").append($1.getObject(").append(index).append(").toString()).append('\"').append(',');");
-				
+				handlerScript.append(".append($1.getObject(").append(index).append(").toString()).append('\"').append(',');");
 			}
 			
 			json.append(',');
@@ -378,7 +324,7 @@ class JsonProcessor extends JsonBuilder
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		
-		PropertyDescriptor[] props = Introspector.getBeanInfo(type).getPropertyDescriptors();
+		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(type);
 		
 		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
 		
@@ -392,8 +338,8 @@ class JsonProcessor extends JsonBuilder
 		
 		for (int index = 1; index < columnToProperty.length; index++)
 		{
-			if (columnToProperty[index] == PROPERTY_NOT_FOUND)
-			{
+			if (columnToProperty[index] == PROPERTY_NOT_FOUND) {
+				
 				continue;
 			}
 			
@@ -629,7 +575,6 @@ class JsonProcessor extends JsonBuilder
 		mv.visitIntInsn(Opcodes.BIPUSH, 44);
 		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;", false);
 		mv.visitInsn(Opcodes.POP);
-
 	}
 	
 	private void visitIndex(MethodVisitor mv, int index) {
@@ -874,7 +819,7 @@ class JsonProcessor extends JsonBuilder
 	 */
 	private void visitMethodInsnDate(MethodVisitor mv, int dateType) {
 		
-		switch(dateType){
+		switch (dateType) {
 		
 		case PROPERTY_TYPE_DATE:
 			mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/sql/ResultSet", "getTimestamp", "(I)Ljava/sql/Timestamp;", true);
@@ -927,6 +872,7 @@ class JsonProcessor extends JsonBuilder
 	private void visitComma(MethodVisitor mv, int lineNumber) {
 
 		Label l3 = new Label();
+		
 		mv.visitLabel(l3);
 		mv.visitLineNumber(lineNumber, l3);
 		mv.visitVarInsn(Opcodes.ALOAD, 2);
@@ -955,9 +901,7 @@ class JsonProcessor extends JsonBuilder
 	 * @return An int[] with column index to property index mappings. The 0th
 	 *         element is meaningless because JDBC column indexing starts at 1.
 	 */
-	protected int[] mapColumnsToProperties(ResultSetMetaData rsmd, PropertyDescriptor[] props)
-			throws SQLException
-	{
+	private int[] mapColumnsToProperties(ResultSetMetaData rsmd, PropertyDescriptor[] props) throws SQLException {
 
 		int cols = rsmd.getColumnCount();
 		int[] columnToProperty = new int[cols + 1];
@@ -993,6 +937,22 @@ class JsonProcessor extends JsonBuilder
 		return columnToProperty;
 	}
 
+	private String makeCacheKey(ResultSet rs, String querying, String className) throws SQLException {
+	 	
+    	String cacheKey = null;
+    	
+    	if (querying == null) {
+
+			cacheKey = getColunmNames(rs.getMetaData()) + className;
+		} 
+		else {
+			
+			cacheKey = querying + className;
+		}
+    	
+    	return cacheKey;
+    }
+	
 	/**
      * 获取查询的所有列名，而非列的别名
      *
@@ -1006,7 +966,7 @@ class JsonProcessor extends JsonBuilder
 
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 
-            columnNames.append(rsmd.getColumnName(i));
+            columnNames.append(rsmd.getColumnLabel(i));
         }
 
         return columnNames.toString();
@@ -1014,12 +974,12 @@ class JsonProcessor extends JsonBuilder
 
 	private String getProcessorName(Class<?> type) {
 
-		return DYNAMIC_BEAN_PACKAGE + type.getSimpleName() + System.currentTimeMillis() + String.valueOf((int)(Math.random() * 1000));
+		return DYNAMIC_BEAN_PACKAGE + type.getSimpleName() + System.nanoTime();
 	}
 
 	@Override
-	public String buildJson(ResultSet rs) throws SQLException
-	{
+	public String buildJson(ResultSet rs) throws SQLException {
+		
 		throw new UnsupportedClassVersionError("本实现不支持此方法");
 	}
 }

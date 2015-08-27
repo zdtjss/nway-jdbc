@@ -38,7 +38,7 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      */
     private final Class<T> type;
     
-    private final String cacheKey;
+    private String querying;
 
     /**
      * 考虑本类可能在不同 ClassLoader中使用，这里不应该是静态的 *
@@ -50,10 +50,10 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      *
      * @param type The Class that objects returned from <code>handle()</code> are created from.
      */
-    public BeanHandler(Class<T> type, String cacheKey) {
+    public BeanHandler(Class<T> type, String querying) {
         
         this.type = type;
-        this.cacheKey = cacheKey;
+        this.querying = querying;
     }
 
     /**
@@ -71,7 +71,7 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
 	public T extractData(ResultSet rs) throws DataAccessException {
 
 		try {
-			return rs.next() ? beanProcessor.toBean(rs, this.type, this.cacheKey) : null;
+			return rs.next() ? beanProcessor.toBean(rs, type, querying) : null;
 		} catch (SQLException e) {
 			throw new DynamicObjectException("创建动态对象失败 [ " + this.type + " ]", e);
 		}
