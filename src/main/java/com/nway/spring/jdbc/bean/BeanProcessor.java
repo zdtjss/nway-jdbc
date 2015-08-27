@@ -41,6 +41,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.ClassUtils;
 
+import com.nway.spring.classwork.ClassPoolCreator;
 import com.nway.spring.classwork.DynamicBeanClassLoader;
 import com.nway.spring.classwork.DynamicObjectException;
 import com.nway.spring.jdbc.annotation.Column;
