@@ -40,16 +40,8 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
     
     private String querying;
 
-    /**
-     * 考虑本类可能在不同 ClassLoader中使用，这里不应该是静态的 *
-     */
-    private final BeanProcessor beanProcessor = BeanProcessor.getInstance();
+    private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
 
-    /**
-     * Creates a new instance of BeanHandler.
-     *
-     * @param type The Class that objects returned from <code>handle()</code> are created from.
-     */
     public BeanHandler(Class<T> type, String querying) {
         
         this.type = type;

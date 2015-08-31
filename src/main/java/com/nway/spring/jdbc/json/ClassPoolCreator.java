@@ -1,4 +1,4 @@
-package com.nway.spring.classwork;
+package com.nway.spring.jdbc.json;
 
 import org.springframework.util.ClassUtils;
 
@@ -12,7 +12,7 @@ import javassist.LoaderClassPath;
  *
  * @since 2015-08-11
  */
-public class ClassPoolCreator {
+class ClassPoolCreator {
 
 	public static ClassPool getClassPool() {
 
