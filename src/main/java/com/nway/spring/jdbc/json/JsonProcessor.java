@@ -92,7 +92,7 @@ class JsonProcessor extends JsonBuilder
 			} 
 			else {
 
-				throw new UnsupportedOperationException("找不到类org.objectweb.asm.ClassWriter或javassist.ClassPool");
+				return buildJsonWithJdk(rs, type);
 			}
 //		}
 	}
@@ -115,6 +115,84 @@ class JsonProcessor extends JsonBuilder
 		}
 
 		return json.append(']').toString();
+	}
+	
+	private String buildJsonWithJdk(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException
+	{
+		ResultSetMetaData rsmd = rs.getMetaData();
+
+		PropertyDescriptor[] props = Introspector.getBeanInfo(type).getPropertyDescriptors();
+
+		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
+
+		StringBuilder json = new StringBuilder("{");
+
+		for (int index = 1; index < columnToProperty.length; index++)
+		{
+			if (columnToProperty[index] == PROPERTY_NOT_FOUND)
+			{
+				continue;
+			}
+
+			PropertyDescriptor prop = props[columnToProperty[index]];
+			Class<?> propType = prop.getPropertyType();
+
+			json.append('\"').append(prop.getName()).append("\":");
+
+			if (String.class.equals(propType) || Clob.class.equals(propType))
+			{
+				stringValue(rs.getString(index), json);
+			}
+			else if (boolean.class.equals(propType) || Boolean.class.equals(propType))
+			{
+				booleanValue(rs.getBoolean(index), rs.wasNull(), json);
+			}
+			else if (int.class.equals(propType) || Integer.class.equals(propType))
+			{
+				integerValue(rs.getInt(index), rs.wasNull(), json);
+			}
+			else if (long.class.equals(propType) || Long.class.equals(propType))
+			{
+				longValue(rs.getLong(index), rs.wasNull(), json);
+			}
+			else if (float.class.equals(propType) || Float.class.equals(propType))
+			{
+				floatValue(rs.getFloat(index), rs.wasNull(), json);
+			}
+			else if (double.class.equals(propType) || Double.class.equals(propType))
+			{
+				doubleValue(rs.getDouble(index), rs.wasNull(), json);
+			}
+			else if (java.util.Date.class.equals(propType))
+			{
+				dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
+			}
+			else if (java.sql.Timestamp.class.equals(propType))
+			{
+				dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
+			}
+			else if (java.sql.Date.class.equals(propType))
+			{
+				dateValue(rs.getDate(index), "yyyy-MM-dd", json);
+			}
+			else if (java.sql.Time.class.equals(propType))
+			{
+				dateValue(rs.getTime(index), "HH:mm:ss", json);
+			} 
+			else 
+			{
+				json.append('\"').append(rs.getObject(index)).append('\"');
+			}
+			
+			json.append(',');
+		}
+
+		if (json.length() > 1)
+		{
+			json = json.deleteCharAt(json.length() - 1);
+		}
+
+		return json.append('}').toString();
 	}
 	
 	private String buildJsonByJavassist(ResultSet rs, Class<?> type, String key) throws SQLException, IntrospectionException {
