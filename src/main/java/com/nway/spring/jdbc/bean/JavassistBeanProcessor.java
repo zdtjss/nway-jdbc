@@ -100,7 +100,7 @@ class JavassistBeanProcessor implements BeanProcessor {
      * @throws SQLException if a database access error occurs
      * @return the newly created List of beans
      */
-    public <T> List<T> toBeanList(ResultSet rs, Class<T> type, String querying) throws SQLException {
+    public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
 
         if (!rs.next()) {
         	
@@ -109,11 +109,11 @@ class JavassistBeanProcessor implements BeanProcessor {
         
         final List<T> results = new ArrayList<T>();
 
-        String cacheKey = DynamicBeanUtils.makeCacheKey(rs, querying, type.getName());
+        String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		
         do {
         	
-            results.add(toBean(rs, type, cacheKey, false));
+            results.add(toBean(rs, type, cacheKey));
         }
         while (rs.next());
 
@@ -135,22 +135,17 @@ class JavassistBeanProcessor implements BeanProcessor {
      *
      * @throws SQLException
      */
-    public <T> T toBean(ResultSet rs, Class<T> type, String querying) throws SQLException {
+    public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
     	
-    	return toBean(rs, type, querying, true);
+    	return toBean(rs, type, null);
     }
 
-	private <T> T toBean(ResultSet rs, Class<T> type, String querying, boolean makeKey) throws SQLException {
+	private <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
-		String cacheKey = null;
+		if (cacheKey == null) {
 
-		if (makeKey) {
-
-			cacheKey = DynamicBeanUtils.makeCacheKey(rs, querying, type.getName());
-		} else {
-
-			cacheKey = querying;
-		}
+			cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
+		} 
 
 		/*
 		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
@@ -216,7 +211,7 @@ class JavassistBeanProcessor implements BeanProcessor {
 
     		classPool.appendClassPath(new LoaderClassPath(ClassUtils.getDefaultClassLoader()));
 
-            CtClass ctHandler = classPool.makeClass(DynamicBeanUtils.getProcessorName(mappedClass));
+            CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getProcessorName(mappedClass));
             ctHandler.setSuperclass(classPool.get("com.nway.spring.jdbc.bean.DbBeanFactory"));
             
             CtMethod mapRow = CtNewMethod

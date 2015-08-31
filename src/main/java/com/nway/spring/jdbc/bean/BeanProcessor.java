@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BeanProcessor {
 
-	<T> T toBean(ResultSet rs, Class<T> type, String querying) throws SQLException;
+	<T> T toBean(ResultSet rs, Class<T> type) throws SQLException;
 
-	<T> List<T> toBeanList(ResultSet rs, Class<T> type, String querying) throws SQLException;
+	<T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException;
 }

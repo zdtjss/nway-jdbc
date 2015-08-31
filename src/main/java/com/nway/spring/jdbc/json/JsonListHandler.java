@@ -32,11 +32,9 @@ public final class JsonListHandler implements ResultSetExtractor<String>
 
 	private final Class<?> type;
 	
-	private String querying;
-
-	public JsonListHandler(Class<?> type, String querying) {
+	public JsonListHandler(Class<?> type) {
+		
 		this.type = type;
-		this.querying = querying;
 	}
 
 	@Override
@@ -44,7 +42,7 @@ public final class JsonListHandler implements ResultSetExtractor<String>
 	{
 		try
 		{
-			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type, querying) : "[]";
+			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type) : "[]";
 		}
 		catch (Exception e)
 		{

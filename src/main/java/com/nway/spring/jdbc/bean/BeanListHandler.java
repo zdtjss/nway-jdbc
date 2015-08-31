@@ -33,28 +33,20 @@ public final class BeanListHandler<T> implements ResultSetExtractor<List<T>> {
 
     private final Class<T> type;
     
-    private String querying;
-
     /**
      * 考虑本类可能在不同 ClassLoader中使用，这里不应该是静态的 *
      */
     private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
 
-    /**
-     *
-     *
-     * @param type
-     */
-    public BeanListHandler(Class<T> type, String querying) {
+    public BeanListHandler(Class<T> type) {
         this.type = type;
-        this.querying = querying;
     }
 
 	@Override
 	public List<T> extractData(ResultSet rs) throws DataAccessException {
 
 		try {
-			return beanProcessor.toBeanList(rs, type, querying);
+			return beanProcessor.toBeanList(rs, type);
 		} catch (SQLException e) {
 			throw new DynamicObjectException("获取列表失败 [ " + this.type + " ]", e);
 		}

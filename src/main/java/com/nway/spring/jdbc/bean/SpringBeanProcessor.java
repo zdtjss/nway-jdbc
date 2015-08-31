@@ -31,7 +31,7 @@ import com.nway.spring.jdbc.annotation.Column;
 public class SpringBeanProcessor implements BeanProcessor {
 
 	@Override
-	public <T> List<T> toBeanList(ResultSet rs, Class<T> mappedClass, String querying) throws SQLException {
+	public <T> List<T> toBeanList(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
 		BeanPropertyRowMapper<T> mapper = new BeanPropertyRowMapper<T>(mappedClass);
 
@@ -47,7 +47,7 @@ public class SpringBeanProcessor implements BeanProcessor {
 	}
 
 	@Override
-	public <T> T toBean(ResultSet rs, Class<T> mappedClass, String querying) throws SQLException {
+	public <T> T toBean(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
 		BeanPropertyRowMapper<T> mapper = new BeanPropertyRowMapper<T>(mappedClass);
 		

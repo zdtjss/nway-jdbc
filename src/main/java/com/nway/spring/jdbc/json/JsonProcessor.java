@@ -21,6 +21,7 @@ import org.springframework.util.ClassUtils;
 import com.nway.spring.classwork.DynamicBeanClassLoader;
 import com.nway.spring.classwork.DynamicObjectException;
 import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.bean.DynamicClassUtils;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -50,8 +51,6 @@ class JsonProcessor extends JsonBuilder
     private static final int  DYNAMIC_CLASS_ORIGIN_LINE_NUMBER = 7;
     private static final int  DYNAMIC_CLASS_LINE_NUMBER_STEP  = 3;
     
-	private static final String DYNAMIC_BEAN_PACKAGE = "com.nway.spring.jdbc.json.";
-	
     private static final boolean HAS_ASM = ClassUtils.isPresent("org.objectweb.asm.ClassWriter", ClassUtils.getDefaultClassLoader());
 	
 	private static final boolean HAS_JAVASSIST = ClassUtils.isPresent("javassist.ClassPool", ClassUtils.getDefaultClassLoader());
@@ -61,19 +60,17 @@ class JsonProcessor extends JsonBuilder
      */
     private static final Map<String, JsonBuilder> JSON_BUILDER_CACHE = new ConcurrentHashMap<String, JsonBuilder>();
 
-	public String buildJson(ResultSet rs, Class<?> type, String querying, boolean makeKey)
-			throws SQLException, IntrospectionException {
+	public String buildJson(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException {
+
+		return buildJson(rs, type);
+	}
+    
+	private String buildJson(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
 	
-		String cacheKey = null;
+		if (cacheKey == null) {
 
-		if (makeKey) {
-
-			cacheKey = makeCacheKey(rs, querying, type.getName());
+			cacheKey = DynamicClassUtils.makeCacheKey(rs,  type.getName());
 		} 
-		else {
-
-			cacheKey = querying;
-		}
 
 		/*
 		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
@@ -97,15 +94,15 @@ class JsonProcessor extends JsonBuilder
 //		}
 	}
 	
-	public String toJsonList(ResultSet rs, Class<?> type, String querying) throws SQLException, IntrospectionException {
+	public String toJsonList(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException {
 	
 		StringBuilder json = new StringBuilder("[");
 
-		String cacheKey = makeCacheKey(rs, querying, type.getName());
+		String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		
 		do {
 			
-			json.append(buildJson(rs, type, cacheKey, false)).append(',');
+			json.append(buildJson(rs, type, cacheKey)).append(',');
 		}
 		while (rs.next());
 
@@ -210,7 +207,7 @@ class JsonProcessor extends JsonBuilder
 
             ClassPool classPool = ClassPoolCreator.getClassPool();
             
-            CtClass ctHandler = classPool.makeClass(getProcessorName(type));
+            CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getProcessorName(type));
             CtClass superClass = classPool.get("com.nway.spring.jdbc.json.JsonBuilder");
             
             ctHandler.setSuperclass(superClass);
@@ -378,7 +375,7 @@ class JsonProcessor extends JsonBuilder
 		
 		ClassWriter cw = new ClassWriter(0);
 		
-		String processorName = getProcessorName(type);
+		String processorName = DynamicClassUtils.getProcessorName(type);
 		
 		String json = processByAsm( cw, processorName, rs, type);
 		
@@ -1013,46 +1010,6 @@ class JsonProcessor extends JsonBuilder
 		}
 
 		return columnToProperty;
-	}
-
-	private String makeCacheKey(ResultSet rs, String querying, String className) throws SQLException {
-	 	
-    	String cacheKey = null;
-    	
-    	if (querying == null) {
-
-			cacheKey = getColunmNames(rs.getMetaData()) + className;
-		} 
-		else {
-			
-			cacheKey = querying + className;
-		}
-    	
-    	return cacheKey;
-    }
-	
-	/**
-     * 获取查询的所有列名，而非列的别名
-     *
-     * @param rsmd {@link java.sql.ResultSetMetaData}
-     * @return 大写的所有列名（没有间隔符）
-     * @throws SQLException
-     */
-    private String getColunmNames(ResultSetMetaData rsmd) throws SQLException {
-
-        StringBuilder columnNames = new StringBuilder(64);
-
-        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-
-            columnNames.append(rsmd.getColumnLabel(i));
-        }
-
-        return columnNames.toString();
-    }
-
-	private String getProcessorName(Class<?> type) {
-
-		return DYNAMIC_BEAN_PACKAGE + type.getSimpleName() + System.nanoTime();
 	}
 
 	@Override

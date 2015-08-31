@@ -108,7 +108,7 @@ class AsmBeanProcessor implements BeanProcessor {
      * @throws SQLException if a database access error occurs
      * @return the newly created List of beans
      */
-    public <T> List<T> toBeanList(ResultSet rs, Class<T> type, String querying) throws SQLException {
+    public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
 
         if (!rs.next()) {
         	
@@ -117,11 +117,11 @@ class AsmBeanProcessor implements BeanProcessor {
         
         final List<T> results = new ArrayList<T>();
 
-        String cacheKey = DynamicBeanUtils.makeCacheKey(rs, querying, type.getName());
+        String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		
         do {
         	
-            results.add(toBean(rs, type, cacheKey, false));
+            results.add(toBean(rs, type, cacheKey));
         }
         while (rs.next());
 
@@ -143,22 +143,18 @@ class AsmBeanProcessor implements BeanProcessor {
      *
      * @throws SQLException
      */
-    public <T> T toBean(ResultSet rs, Class<T> type, String querying) throws SQLException {
+    public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
     	
-    	return toBean(rs, type, querying, true);
+    	return toBean(rs, type, null);
     }
 
-	private <T> T toBean(ResultSet rs, Class<T> type, String querying, boolean makeKey) throws SQLException {
+	private <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
-		String cacheKey = null;
 
-		if (makeKey) {
+		if (cacheKey == null) {
 
-			cacheKey = DynamicBeanUtils.makeCacheKey(rs, querying, type.getName());
-		} else {
-
-			cacheKey = querying;
-		}
+			cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
+		} 
 
 		/*
 		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
@@ -207,7 +203,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
         String beanName = mappedClass.getName().replace('.', '/');
         
-        String processorName = DynamicBeanUtils.getProcessorName(mappedClass);
+        String processorName = DynamicClassUtils.getProcessorName(mappedClass);
         
         String internalProcessorName = processorName.replace('.', '/');
 

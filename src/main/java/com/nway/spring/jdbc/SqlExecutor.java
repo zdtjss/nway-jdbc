@@ -68,84 +68,84 @@ public class SqlExecutor extends JdbcTemplate {
 
 	public <T> T queryForBean(String sql, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, new BeanHandler<T>(type, extractQuerying(sql)));
+		return super.query(sql, new BeanHandler<T>(type));
 	}
 	
 	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new BeanHandler<T>(type, extractQuerying(sql)), args);
+		return super.query(sql, new BeanHandler<T>(type), args);
 	}
 
 	public <T> T queryForBean(String sql, Object[] args, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, args, new BeanHandler<T>(type, extractQuerying(sql)));
+		return super.query(sql, args, new BeanHandler<T>(type));
 	}
 
 	public <T> T queryForBean(String sql, Object[] args, int[] argTypes, Class<T> type)
 			throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new BeanHandler<T>(type, extractQuerying(sql)));
+		return super.query(sql, args, argTypes, new BeanHandler<T>(type));
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, new BeanListHandler<T>(type, extractQuerying(sql)));
+		return super.query(sql, new BeanListHandler<T>(type));
 	}
 	
 	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new BeanListHandler<T>(type, extractQuerying(sql)), args);
+		return super.query(sql, new BeanListHandler<T>(type), args);
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Object[] args, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, args, new BeanListHandler<T>(type, extractQuerying(sql)));
+		return super.query(sql, args, new BeanListHandler<T>(type));
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Object[] args, int[] argTypes, Class<T> type)
 			throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new BeanListHandler<T>(type, extractQuerying(sql)));
+		return super.query(sql, args, argTypes, new BeanListHandler<T>(type));
 	}
 	
 	public String queryForJson(String sql, Class<?> type) throws DataAccessException {
 
-		return super.query(sql, new JsonHandler(type, extractQuerying(sql)));
+		return super.query(sql, new JsonHandler(type));
 	}
 	
 	public String queryForJson(String sql, Class<?> type,Object... args) throws DataAccessException {
 		
-		return super.query(sql, new JsonHandler(type, extractQuerying(sql)), args);
+		return super.query(sql, new JsonHandler(type), args);
 	}
 	
 	public String queryForJson(String sql,Object[] args, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonHandler(type, extractQuerying(sql)));
+		return super.query(sql, args, new JsonHandler(type));
 	}
 	
 	public String queryForJson(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new JsonHandler(type, extractQuerying(sql)));
+		return super.query(sql, args, argTypes, new JsonHandler(type));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type, extractQuerying(sql)));
+		return super.query(sql, new JsonListHandler(type));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type, extractQuerying(sql)), args);
+		return super.query(sql, new JsonListHandler(type), args);
 	}
 	
 	public String queryForJsonList(String sql,Object[] args, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonListHandler(type, extractQuerying(sql)));
+		return super.query(sql, args, new JsonListHandler(type));
 	}
 	
 	public String queryForJsonList(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, argTypes, new JsonListHandler(type, extractQuerying(sql)));
+		return super.query(sql, args, argTypes, new JsonListHandler(type));
 	}
 	
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page,
@@ -452,55 +452,6 @@ public class SqlExecutor extends JdbcTemplate {
 		}
 	}
 
-	/**
-	 * 获取sql中查询字段，from 指定表时，返回查询信息，from 子查询，且未明确查询字段时，返回null
-	 * 
-	 * <ul>
-	 * <li>select * from table_name,返回select *</li>
-	 * <li>select * from (select * from table_name),返回null</li>
-	 * </ul>
-	 * 
-	 * @param sql
-	 * @param type
-	 * @return
-	 */
-	private String extractQuerying(String sql) {
-
-		int fromIndex = firstFromIndex(sql.toUpperCase(), 0);
-		
-		String querying = sql.substring(0, fromIndex);
-
-		ambiguous: for (int ambiguousIndex = 6; ambiguousIndex < querying.length(); ambiguousIndex++) {
-
-			// 查询字段中包含 *，但不是 '*'
-			if (querying.charAt(ambiguousIndex) == '*' && (ambiguousIndex + 1 == querying.length()
-					|| (querying.charAt(ambiguousIndex - 1) != '\'' && querying.charAt(ambiguousIndex + 1) != '\''))) {
-
-				// from 后的第一个字符
-				char nextChar = sql.charAt(fromIndex + 4);
-
-				if (nextChar == '(') {
-
-					querying = null;
-					break;
-				} 
-				else if (nextChar == ' ') {
-
-					for (int index = fromIndex + 6; index < sql.length(); index++) {
-
-						if (sql.charAt(index) == '(') {
-
-							querying = null;
-							break ambiguous;
-						}
-					}
-				}
-			}
-		}
-		
-		return querying;
-	}
-	
 	private int firstFromIndex(String sql, int startIndex) {
 
 		int fromIndex = sql.indexOf("FROM", startIndex);
