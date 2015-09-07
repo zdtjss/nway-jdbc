@@ -28,6 +28,10 @@ public class SyncPerformanceTest extends BaseTest {
 	@Autowired
 	@Qualifier("hibernatePerformance")
 	private Performance hibernatePerformance;
+	
+	@Autowired
+	@Qualifier("myBatisPerformance")
+	private Performance myBatisPerformance;
 
 	@Test
 	public void testGetMonitor() throws InterruptedException {
@@ -199,15 +203,18 @@ public class SyncPerformanceTest extends BaseTest {
 	@Test
 	public void testListComputer() throws InterruptedException {
 
-		int times = 100;
+		int times = 50;
+		int nThread = 2;
 
-		ExecutorService nway = Executors.newFixedThreadPool(times);
-		ExecutorService spring = Executors.newFixedThreadPool(times);
-		ExecutorService hibernate = Executors.newFixedThreadPool(times);
+		ExecutorService nway = Executors.newFixedThreadPool(nThread);
+		ExecutorService spring = Executors.newFixedThreadPool(nThread);
+		ExecutorService hibernate = Executors.newFixedThreadPool(nThread);
+		ExecutorService mybatis = Executors.newFixedThreadPool(nThread);
 
 		Collection<Callable<List<Computer>>> nwayTask = new ArrayList<Callable<List<Computer>>>(times);
 		Collection<Callable<List<Computer>>> springTask = new ArrayList<Callable<List<Computer>>>(times);
 		Collection<Callable<List<Computer>>> hibernateTask = new ArrayList<Callable<List<Computer>>>(times);
+		Collection<Callable<List<Computer>>> mybatisTask = new ArrayList<Callable<List<Computer>>>(times);
 
 		for (int i = 0; i < times; i++) {
 
@@ -237,19 +244,29 @@ public class SyncPerformanceTest extends BaseTest {
 					return hibernatePerformance.listComputer();
 				}
 			});
+			
+			mybatisTask.add(new Callable<List<Computer>>() {
+				
+				@Override
+				public List<Computer> call() throws Exception {
+					
+					return myBatisPerformance.listComputer();
+				}
+			});
 		}
-
 		long begin = System.currentTimeMillis();
 		
 //		nwayPerformance.listComputer();
 //		nway.invokeAll(nwayTask);
 //		nwayPerformance.listComputer();
 		
-		spring.invokeAll(springTask);
-		springJdbcPerformance.listComputer();
+//		spring.invokeAll(springTask);
+//		springJdbcPerformance.listComputer();
 		
 //		hibernate.invokeAll(hibernateTask);
 //		hibernatePerformance.listComputer();
+		
+		mybatis.invokeAll(mybatisTask);
 		
 		System.out.println(System.currentTimeMillis() - begin);
 	}

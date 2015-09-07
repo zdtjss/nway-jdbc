@@ -24,7 +24,7 @@ public class SpringJdbcPerformance implements Performance {
 	@Override
 	public Computer getComputer(int id) {
 
-		String computerSql = "select * from t_computer where id = ? and 1 = 2";
+		String computerSql = "select * from t_computer where id = ?";
 		String mainframeSql = "select * from t_mainframe where id = ?";
 		String monitorSql = "select * from t_monitor where id = ?";
 		String mouseSql = "select * from t_mouse where id = ?";

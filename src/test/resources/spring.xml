@@ -32,6 +32,17 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity"/>
+		<property name="mapperLocations"
+			value="classpath*:com/nway/spring/jdbc/performance/entity/*-mapper.xml" />
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
 	<bean class="org.apache.tomcat.jdbc.pool.DataSource">
 		<constructor-arg>
 			<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
@@ -39,7 +50,6 @@
 				<property name="username" value="root" />
 				<property name="password" value="Nway#" />
 
-				<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 				<property name="url" value="jdbc:mysql://localhost:3306/nway?cacheResultSetMetadata=true&amp;metadataCacheSize=1" />
 
 				<!-- <property name="driverClassName" value="oracle.jdbc.OracleDriver" />

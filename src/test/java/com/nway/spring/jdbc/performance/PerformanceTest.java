@@ -19,6 +19,10 @@ public class PerformanceTest extends BaseTest {
 	@Autowired
 	@Qualifier("hibernatePerformance")
 	private Performance hibernatePerformance;
+	
+	@Autowired
+	@Qualifier("myBatisPerformance")
+	private Performance myBatisPerformance;
 
 	@Test
 	public void testGetMonitor() {
@@ -66,6 +70,8 @@ public class PerformanceTest extends BaseTest {
 			hibernatePerformance.getComputer(id);
 
 			springJdbcPerformance.getComputer(id);
+			
+			myBatisPerformance.getComputer(id);
 
 			System.out.println();
 		}
@@ -81,7 +87,9 @@ public class PerformanceTest extends BaseTest {
 			hibernatePerformance.listComputer();
 
 			springJdbcPerformance.listComputer();
-
+			
+			myBatisPerformance.listComputer();
+			
 			System.out.println();
 		}
 	}
