@@ -26,7 +26,7 @@ public final class MysqlPaginationSupport implements PaginationSupport {
 		StringBuilder paginationSql = new StringBuilder(sql.length() + 15);
 		
 		// mysql limit 是从0开始的
-		paginationSql.append(" limit ").append(start - 1).append(',').append(pageSize);
+		paginationSql.append(sql).append(" limit ").append(start - 1).append(',').append(pageSize);
 
 		return paginationSql.toString();
 	}
