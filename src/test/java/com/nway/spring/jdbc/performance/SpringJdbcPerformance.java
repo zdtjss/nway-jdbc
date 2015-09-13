@@ -1,10 +1,19 @@
 package com.nway.spring.jdbc.performance;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +29,9 @@ public class SpringJdbcPerformance implements Performance {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private SqlSessionTemplate sqlSession;
 
 	@Override
 	public Computer getComputer(int id) {
@@ -43,7 +55,7 @@ public class SpringJdbcPerformance implements Performance {
 	@Override
 	public List<Computer> listComputer() {
 
-		String computerSql = "select * from t_computer";
+		/*String computerSql = "select * from t_computer";
 		String mainframeSql = "select * from t_mainframe where id = ?";
 		String monitorSql = "select * from t_monitor where id = ?";
 		String mouseSql = "select * from t_mouse where id = ?";
@@ -57,6 +69,90 @@ public class SpringJdbcPerformance implements Performance {
 			computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
 			computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
 			computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
+		}*/
+		
+		List<Computer> computers = new ArrayList<>();
+		
+		try {
+			
+			DataSource ds = jdbcTemplate.getDataSource();
+		Connection conn = ds.getConnection();
+		String sql = sqlSession.getConfiguration().getMappedStatement("listComputer").getBoundSql(null).getSql();
+		
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			while(rs.next()) {
+				
+				Computer computer = new Computer();
+				
+				computer.setId(rs.getInt("computer_id"));
+				computer.setBrand(rs.getString("computer_brand"));
+				computer.setModel(rs.getString("computer_model"));
+				computer.setPhoto(rs.getBytes("computer_photo"));
+				computer.setPrice(rs.getFloat("computer_price"));
+				computer.setProductionDate(rs.getDate("computer_production_date"));
+				
+				Mainframe mainframe = new Mainframe();
+				
+				mainframe.setId(rs.getInt("mainframe_id"));
+				mainframe.setBrand(rs.getString("mainframe_brand"));
+				mainframe.setModel(rs.getString("mainframe_model"));
+				mainframe.setPhoto(rs.getBytes("mainframe_photo"));
+				mainframe.setPrice(rs.getFloat("mainframe_price"));
+				mainframe.setType(rs.getInt("mainframe_type"));
+				mainframe.setProductionDate(rs.getDate("mainframe_production_date"));
+				
+				computer.setMainframe(mainframe);
+				
+				Monitor monitor = new Monitor();
+				
+				monitor.setId(rs.getInt("monitor_id"));
+				monitor.setBrand(rs.getString("monitor_brand"));
+				monitor.setModel(rs.getString("monitor_model"));
+				monitor.setPhoto(rs.getBytes("monitor_photo"));
+				monitor.setPrice(rs.getFloat("monitor_price"));
+				monitor.setMaxResolution(rs.getString("monitor_max_resolution"));
+				monitor.setType(rs.getInt("monitor_type"));
+				monitor.setProductionDate(rs.getDate("monitor_production_date"));
+				
+				computer.setMonitor(monitor);
+
+				Keyboard keyboard = new Keyboard();
+				
+				keyboard.setId(rs.getInt("keyboard_id"));
+				keyboard.setBrand(rs.getString("keyboard_brand"));
+				keyboard.setModel(rs.getString("keyboard_model"));
+				keyboard.setPhoto(rs.getBytes("keyboard_photo"));
+				keyboard.setPrice(rs.getFloat("keyboard_price"));
+				keyboard.setColor(rs.getString("keyboard_color"));
+				keyboard.setInterfaceType(rs.getInt("keyboard_interface_type"));
+				keyboard.setType(rs.getInt("keyboard_type"));
+				keyboard.setWireless(rs.getBoolean("keyboard_wireless"));
+				keyboard.setProductionDate(rs.getDate("keyboard_production_date"));
+				
+				computer.setKeyboard(keyboard);
+				
+				Mouse mouse = new Mouse();
+				
+				mouse.setId(rs.getInt("mouse_id"));
+				mouse.setBrand(rs.getString("mouse_brand"));
+				mouse.setModel(rs.getString("mouse_model"));
+				mouse.setPhoto(rs.getBytes("mouse_photo"));
+				mouse.setPrice(rs.getFloat("mouse_price"));
+				mouse.setColor(rs.getString("mouse_color"));
+				mouse.setWireless(rs.getBoolean("mouse_wireless"));
+				mouse.setProductionDate(rs.getDate("mouse_production_date"));
+				
+				computer.setMouse(mouse);
+				
+				computers.add(computer);
+				
+			}
+			rs.close();
+			pstmt.close();
+			DataSourceUtils.doCloseConnection(conn, ds);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 
 		return computers;

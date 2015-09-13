@@ -17,14 +17,14 @@
 	</select>
 
 	<select id="listMonitor" resultType="Monitor">
-		select * from t_monitor
+		select * from t_monitor where rownum &lt; #{rownum}
 	</select>
 
 	<sql id="computer">
 		SELECT
 		c.id computer_id,
 		c.brand computer_brand,
-		c.model computer_modle,
+		c.model computer_model,
 		c.photo computer_photo,
 		c.price computer_price,
 		c.production_date computer_production_date,
@@ -33,21 +33,23 @@
 		mf.model mainframe_model,
 		mf.photo mainframe_photo,
 		mf.price mainframe_price,
-		mf.production_date mainfrme_production_date,
-		mf.`type` mainframe_type,
+		mf.production_date mainframe_production_date,
+		mf.type mainframe_type,
 		monitor.id monitor_id,
+		monitor.brand monitor_brand,
 		monitor.model monitor_model,
 		monitor.photo monitor_photo,
 		monitor.price monitor_price,
-		monitor.max_resolution mainframe_max_resolution,
+		monitor.max_resolution monitor_max_resolution,
 		monitor.production_date monitor_production_date,
-		monitor.`type` monitor_type,
+		monitor.type monitor_type,
 		k.id keyboard_id,
 		k.brand keyboard_brand,
 		k.color keyboard_color,
 		k.model keyboard_model,
 		k.photo keyboard_photo,
 		k.price keyboard_price,
+		k.interface_type keyboard_interface_type,
 		k.production_date keyboard_production_date,
 		k.type keyboard_type,
 		k.wireless keyboard_wireless,
@@ -69,7 +71,7 @@
 		LEFT JOIN
 		t_keyboard k ON c.keyboard_id = k.id
 		LEFT JOIN
-		t_mouse mouse ON c.mouse_id = mouse.id;
+		t_mouse mouse ON c.mouse_id = mouse.id
 	</sql>
 
 	<resultMap id="computerMap" type="Computer">

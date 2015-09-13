@@ -4,8 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -23,6 +26,8 @@ import com.nway.spring.jdbc.performance.entity.Mouse;
 public class HibernatePerformance implements Performance {
 
 	private SessionFactory sessionFactory = null;
+	
+	private EntityManagerFactory entityManagerFactory;
 
 	@PostConstruct
 	private void buildSessionFactory() {
@@ -30,7 +35,7 @@ public class HibernatePerformance implements Performance {
 		try {
 
 			Configuration cfg = new Configuration().configure();
-
+			
 			// Create the SessionFactory from hibernate.cfg.xml
 			sessionFactory = cfg.buildSessionFactory(
 					new StandardServiceRegistryBuilder().applySettings(cfg.getProperties()).build());
@@ -39,6 +44,8 @@ public class HibernatePerformance implements Performance {
 			System.err.println("Initial SessionFactory creation failed." + ex);
 			throw new ExceptionInInitializerError(ex);
 		}
+		
+		entityManagerFactory = Persistence.createEntityManagerFactory("nway.perfomance.jpa");
 	}
 
 	@Override
@@ -56,24 +63,33 @@ public class HibernatePerformance implements Performance {
 	@Override
 	public List<Computer> listComputer() {
 
-		Session session = sessionFactory.openSession();
+//		Session session = sessionFactory.openSession();
+		
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
 		@SuppressWarnings("unchecked")
-		List<Computer> computers = session.createQuery("from Computer").list();
+//		List<Computer> computers = session.createQuery("from com.nway.spring.jdbc.performance.entity.Computer").list();
+		List<Computer> computers = entityManager.createQuery("from Computer", Computer.class).getResultList();
 
-		session.close();
-
+//		session.close();
+		entityManager.close();
+		
 		return computers;
 	}
 
 	@Override
 	public Monitor getMonitor(int id) {
 
-		Session session = sessionFactory.openSession();
+//		Session session = sessionFactory.openSession();
+		
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-		Monitor mouse = (Monitor) session.get(Monitor.class, id);
+//		Monitor mouse = (Monitor) session.get(Monitor.class, id);
+		Monitor mouse = entityManager.find(Monitor.class, id);
 
-		session.close();
+//		session.close();
+		
+		entityManager.close();
 
 		return mouse;
 	}
@@ -81,18 +97,24 @@ public class HibernatePerformance implements Performance {
 	@Override
 	public List<Monitor> listMonitor(int num) {
 
-		Session session = sessionFactory.openSession();
+//		Session session = sessionFactory.openSession();
+		
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-		Query query = session.createQuery("from Monitor");
+//		Query query = session.createQuery("from Monitor");
+		
+		TypedQuery<Monitor> query = entityManager.createQuery("from Monitor", Monitor.class);
 
 		query.setFirstResult(1);
 
 		query.setMaxResults(10);
 
 		@SuppressWarnings("unchecked")
-		List<Monitor> monitor = query.list();
+		List<Monitor> monitor = query.getResultList();
 
-		session.close();
+//		session.close();
+		
+		entityManager.close();
 
 		return monitor;
 	}

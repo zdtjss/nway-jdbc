@@ -10,6 +10,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.hibernate.HibernateException;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.service.UnknownUnwrapTypeException;
@@ -62,17 +63,15 @@ public class JndiConnectionProvider implements ConnectionProvider, Configurable,
 	@Override
 	public void configure(Map configurationValues) {
 
-		try 
-		{
+		try {
 			Context initCtx = new InitialContext();
-			this.dataSource = (DataSource) initCtx.lookup((String) configurationValues.get("connection.datasource"));
-		} 
-		catch (NamingException e) {
+			this.dataSource = (DataSource) initCtx.lookup((String) configurationValues.get(AvailableSettings.DATASOURCE));
+		} catch (NamingException e) {
 			throw new HibernateException("Unable to lookup Datasource");
 		}
-		
-		if ( this.dataSource == null ) {
-			throw new HibernateException( "Unable to determine appropriate DataSource to use" );
+
+		if (this.dataSource == null) {
+			throw new HibernateException("Unable to determine appropriate DataSource to use");
 		}
 	}
 
