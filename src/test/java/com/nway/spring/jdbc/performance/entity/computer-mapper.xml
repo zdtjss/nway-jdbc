@@ -127,6 +127,13 @@
 			<result property="productionDate" column="mouse_production_date" />
 			<result property="photo" column="mouse_photo" />
 		</association>
+		<collection property="software" ofType="Software">
+			<id property="id" column="software_id" />
+			<result property="name" column="software_name"/>
+			<result property="size" column="software_size"/>
+			<result property="vender" column="software_vender"/>
+			<result property="version" column="software_version"/>
+		</collection>
 	</resultMap>
 
 </mapper>

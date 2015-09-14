@@ -2,20 +2,28 @@ package com.nway.spring.jdbc.performance.entity;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "t_computer")
@@ -48,6 +56,8 @@ public class Computer {
 	private Date productionDate;
 	/** 设备图片 **/
 	private byte[] photo;
+	/** 预装软件 **/
+	private List<Software> software;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.TABLE)
@@ -88,6 +98,7 @@ public class Computer {
 
 	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "mainframe_id")
+	@Fetch(FetchMode.JOIN)
 	public Mainframe getMainframe() {
 		return mainframe;
 	}
@@ -98,6 +109,7 @@ public class Computer {
 
 	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "monitor_id")
+	@Fetch(FetchMode.JOIN)
 	public Monitor getMonitor() {
 		return monitor;
 	}
@@ -108,6 +120,7 @@ public class Computer {
 
 	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "mouse_id")
+	@Fetch(FetchMode.JOIN)
 	public Mouse getMouse() {
 		return mouse;
 	}
@@ -118,6 +131,7 @@ public class Computer {
 
 	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "keyboard_id")
+	@Fetch(FetchMode.JOIN)
 	public Keyboard getKeyboard() {
 		return keyboard;
 	}
@@ -143,6 +157,17 @@ public class Computer {
 
 	public void setPhoto(byte[] photo) {
 		this.photo = photo;
+	}
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "t_computer_software", joinColumns = {
+			@JoinColumn(columnDefinition = "computer_id", referencedColumnName = "id") })
+	public List<Software> getSoftware() {
+		return software;
+	}
+
+	public void setSoftware(List<Software> software) {
+		this.software = software;
 	}
 
 	@Transient

@@ -1,5 +1,6 @@
 package com.nway.spring.jdbc.performance;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import com.nway.spring.jdbc.performance.entity.Keyboard;
 import com.nway.spring.jdbc.performance.entity.Mainframe;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.entity.Mouse;
+import com.nway.spring.jdbc.performance.entity.Software;
 
 @Service("hibernatePerformance")
 public class HibernatePerformance implements Performance {
@@ -105,10 +107,6 @@ public class HibernatePerformance implements Performance {
 		
 		TypedQuery<Monitor> query = entityManager.createQuery("from Monitor", Monitor.class);
 
-		query.setFirstResult(1);
-
-		query.setMaxResults(10);
-
 		@SuppressWarnings("unchecked")
 		List<Monitor> monitor = query.getResultList();
 
@@ -174,6 +172,37 @@ public class HibernatePerformance implements Performance {
 			computer.setMonitor(monitor);
 			computer.setMouse(mouse);
 			computer.setKeyboard(keyboard);
+			
+			List<Software> software = new ArrayList<Software>();
+			
+			Software s1 = new Software();
+			
+			s1.setName("º∆À„∆˜");
+			s1.setSize(100);
+			s1.setVender("Œ¢»Ì");
+			s1.setVender("1.0");
+			
+			software.add(s1);
+			
+			Software s2 = new Software();
+			
+			s2.setName("º∆À„∆˜");
+			s2.setSize(100);
+			s2.setVender("Œ¢»Ì");
+			s2.setVender("1.0");
+			
+			software.add(s2);
+			
+			Software s3 = new Software();
+			
+			s3.setName("º∆À„∆˜");
+			s3.setSize(100);
+			s3.setVender("Œ¢»Ì");
+			s3.setVender("1.0");
+			
+			software.add(s3);
+			
+			computer.setSoftware(software);
 
 			session.save(computer);
 		}
