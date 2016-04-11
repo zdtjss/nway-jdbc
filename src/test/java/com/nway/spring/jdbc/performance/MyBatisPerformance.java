@@ -29,14 +29,14 @@ public class MyBatisPerformance implements Performance {
 
 	@Override
 	public Monitor getMonitor(int id) {
-		
+		sqlSession.getConfiguration().getDatabaseId();
 		return sqlSession.selectOne("selectMonitor", id);
 	}
 
 	@Override
 	public List<Monitor> listMonitor(int num) {
 		
-		return sqlSession.selectList("listMonitor");
+		return sqlSession.selectList("listMonitor", num);
 	}
 
 }

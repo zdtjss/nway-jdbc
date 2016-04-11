@@ -70,7 +70,7 @@ public class NwayPerformance implements Performance {
 	@Override
 	public List<Monitor> listMonitor(int num) {
 
-		return sqlExecutor.queryForBeanList("select * from t_monitor limit ?", Monitor.class, num);
+		return sqlExecutor.queryForBeanList("select * from t_monitor where rownum < ?", Monitor.class, num);
 	}
 	
 	public String queryComputerJson(int id) {

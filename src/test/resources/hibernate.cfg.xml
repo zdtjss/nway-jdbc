@@ -10,10 +10,10 @@
 
 		<property name="connection.provider_class">com.nway.spring.jdbc.performance.JndiConnectionProvider</property>
 
-		<property name="show_sql">false</property>
+		<property name="show_sql">true</property>
 
 		<property name="hbm2ddl.auto">update</property>
-
+		
 		<mapping class="com.nway.spring.jdbc.ExampleEntity" />
 		
 		<mapping class="com.nway.spring.jdbc.performance.entity.Mouse" />
@@ -21,6 +21,7 @@
 		<mapping class="com.nway.spring.jdbc.performance.entity.Keyboard" />
 		<mapping class="com.nway.spring.jdbc.performance.entity.Mainframe" />
 		<mapping class="com.nway.spring.jdbc.performance.entity.Monitor" />
+		<mapping class="com.nway.spring.jdbc.performance.entity.Software" />
 
 	</session-factory>
 </hibernate-configuration>

@@ -3,6 +3,7 @@ package com.nway.spring.jdbc;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +133,38 @@ public class SqlExecutorTest extends BaseTest
 		String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5, ExampleEntity.class);
 
 		System.out.println(json);
+	}
+	
+	@Test
+	public void testUpdate() {
+		
+		String sql = "insert into t_monitor (ID,BRAND,MAX_RESOLUTION,MODEL,PHOTO,PRICE,PRODUCTION_DATE,TYPE) values (?,?,?,?,?,?,?,?)";
+		
+		sqlExecutor.update(sql, new Object[] { 100, "abc", "aa", "bb",null, 1.0, new Date(), 0 });
+		
+		long begin = System.currentTimeMillis();
+		
+		for (int i = 0; i < 10; i++) {
+
+			Object[] param = new Object[] { i, "abc", "aa", "bb",null, 1.0, new Date(), 0 };
+
+			sqlExecutor.update(sql, param);
+		}
+		
+		System.out.println(System.currentTimeMillis() - begin);
+		
+		begin = System.currentTimeMillis();
+		
+		List<Object[]> batchArgs = new ArrayList<>();
+		
+		for (int i = 10; i < 20; i++) {
+
+			batchArgs.add(new Object[] { i, "abc", "aa","bb", null, 1.0, new Date(), 0 });
+		}
+		
+		sqlExecutor.batchUpdate(sql, batchArgs);
+		
+		System.out.println(System.currentTimeMillis() - begin);
 	}
 	
 	@Test

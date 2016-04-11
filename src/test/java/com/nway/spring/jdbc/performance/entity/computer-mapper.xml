@@ -12,8 +12,10 @@
 	</select>
 
 	<select id="selectMonitor" resultType="Monitor">
-		select * from t_monitor
-		where id = #{id}
+		<if test="_databaseId == 'oracle'">
+			select * from t_monitor
+			where id = #{id}
+		</if>
 	</select>
 
 	<select id="listMonitor" resultType="Monitor">
@@ -61,17 +63,20 @@
 		mouse.price mouse_price,
 		mouse.production_date mouse_production_date,
 		mouse.type mouse_type,
-		mouse.wireless mouse_wireless
+		mouse.wireless mouse_wireless,
+		cs.software_id
 		FROM
 		t_computer c
-		LEFT JOIN
+		inner JOIN
 		t_mainframe mf ON c.mainframe_id = mf.id
-		LEFT JOIN
+		inner JOIN
 		t_monitor monitor ON c.monitor_id = monitor.id
-		LEFT JOIN
+		inner JOIN
 		t_keyboard k ON c.keyboard_id = k.id
-		LEFT JOIN
+		inner JOIN
 		t_mouse mouse ON c.mouse_id = mouse.id
+		inner join
+		t_computer_software cs on cs.T_COMPUTER_ID = c.id 
 	</sql>
 
 	<resultMap id="computerMap" type="Computer">
@@ -135,5 +140,9 @@
 			<result property="version" column="software_version"/>
 		</collection>
 	</resultMap>
+	
+	<select id="software" resultType="Software">
+		select * from t_software s,t_computer_software cs where s.id = cs.software_id and cs.T_COMPUTER_ID = #{id}
+	</select>
 
 </mapper>

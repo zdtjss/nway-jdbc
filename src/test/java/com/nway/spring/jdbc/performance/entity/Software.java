@@ -54,7 +54,7 @@ public class Software {
 		this.version = version;
 	}
 
-	@Column
+	@Column(name="file_size")
 	public long getSize() {
 		return size;
 	}

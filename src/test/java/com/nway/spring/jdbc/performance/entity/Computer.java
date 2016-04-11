@@ -8,7 +8,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -160,8 +159,8 @@ public class Computer {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "t_computer_software", joinColumns = {
-			@JoinColumn(columnDefinition = "computer_id", referencedColumnName = "id") })
+	@JoinTable(name = "t_computer_software")
+	@Fetch(FetchMode.JOIN)
 	public List<Software> getSoftware() {
 		return software;
 	}

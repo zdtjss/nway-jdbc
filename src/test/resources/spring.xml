@@ -33,11 +33,20 @@
 	</bean>
 
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity"/>
-		<property name="mapperLocations"
-			value="classpath*:com/nway/spring/jdbc/performance/entity/*-mapper.xml" />
-	</bean>
+	<property name="dataSource" ref="dataSource" />
+	<property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity" />
+	<property name="mapperLocations"
+		value="classpath*:com/nway/spring/jdbc/performance/entity/*-mapper.xml" />
+	<property name="databaseIdProvider">
+		<bean class="org.apache.ibatis.mapping.VendorDatabaseIdProvider">
+			<property name="properties">
+				<map>
+					<entry key="Oracle" value="oracle" />
+				</map>
+			</property>
+		</bean>
+	</property>
+</bean>
 
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
@@ -47,13 +56,14 @@
 		<constructor-arg>
 			<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
 
-				<property name="username" value="root" />
-				<property name="password" value="Nway#" />
+				<property name="username" value="nway" />
+				<property name="password" value="nway" />
 
-				<property name="url" value="jdbc:mysql://localhost:3306/nway?cacheResultSetMetadata=true&amp;metadataCacheSize=1" />
+				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://localhost:3306/nway?cacheResultSetMetadata=true&amp;metadataCacheSize=1" /> -->
 
-				<!-- <property name="driverClassName" value="oracle.jdbc.OracleDriver" />
-				 <property name="url" value="jdbc:oracle:thin:@localhost:1521:XE" /> -->
+				<property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+				<property name="url" value="jdbc:oracle:thin:@localhost:1521:XE" />
 
 				<property name="initialSize" value="5" />
 				<property name="maxActive" value="15" />

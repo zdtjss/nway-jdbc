@@ -1,10 +1,13 @@
 package com.nway.spring.jdbc.performance;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.nway.spring.jdbc.BaseTest;
+import com.nway.spring.jdbc.performance.entity.Computer;
 
 public class PerformanceTest extends BaseTest {
 
@@ -27,7 +30,7 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testGetMonitor() {
 
-		int id = 1;
+		int id = 32768;
 
 		for (int i = 0; i < 30; i++) {
 
@@ -36,6 +39,8 @@ public class PerformanceTest extends BaseTest {
 			hibernatePerformance.getMonitor(id);
 
 			springJdbcPerformance.getMonitor(id);
+			
+			myBatisPerformance.getMonitor(id);
 
 			System.out.println();
 		}
@@ -53,6 +58,8 @@ public class PerformanceTest extends BaseTest {
 			hibernatePerformance.listMonitor(num);
 
 			springJdbcPerformance.listMonitor(num);
+			
+			myBatisPerformance.listMonitor(num);
 
 			System.out.println();
 		}
@@ -80,15 +87,21 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testListComputer() {
 
-		for (int i = 0; i < 30; i++) {
+		List<Computer> cs = null;
+		
+		for (int i = 0; i < 100; i++) {
 
-			nwayPerformance.listComputer();
+//			nwayPerformance.listComputer();
 
-			hibernatePerformance.listComputer();
+//			cs = hibernatePerformance.listComputer();
 
-			springJdbcPerformance.listComputer();
+//			System.out.println(cs.get(0));
 			
-			myBatisPerformance.listComputer();
+//			springJdbcPerformance.listComputer();
+			
+			cs = myBatisPerformance.listComputer();
+			
+			System.out.println(cs.get(0));
 			
 			System.out.println();
 		}

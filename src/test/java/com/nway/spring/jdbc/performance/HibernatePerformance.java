@@ -127,6 +127,10 @@ public class HibernatePerformance implements Performance {
 
 			Computer computer = new Computer();
 
+			computer.setBrand("hp");
+			computer.setPrice(1.1f);
+			computer.setProductionDate(new Date());
+			
 			Monitor monitor = new Monitor();
 
 			monitor.setBrand("aoc");
@@ -163,10 +167,6 @@ public class HibernatePerformance implements Performance {
 			keyboard.setWireless(false);
 			keyboard.setPhoto(null);
 			keyboard.setProductionDate(new Date());
-
-			computer.setBrand("hp");
-			computer.setPrice(1.1f);
-			computer.setProductionDate(new Date());
 
 			computer.setMainframe(mainframe);
 			computer.setMonitor(monitor);
@@ -208,6 +208,8 @@ public class HibernatePerformance implements Performance {
 		}
 
 		transaction.commit();
+		
+		session.close();
 	}
 
 }

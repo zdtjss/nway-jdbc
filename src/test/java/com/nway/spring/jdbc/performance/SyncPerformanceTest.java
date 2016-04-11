@@ -148,15 +148,18 @@ public class SyncPerformanceTest extends BaseTest {
 	public void testGetComputer() throws InterruptedException {
 
 		int times = 30;
+		int nThread = 2;
 		final int id = 1;
 
-		ExecutorService nway = Executors.newFixedThreadPool(times);
-		ExecutorService spring = Executors.newFixedThreadPool(times);
-		ExecutorService hibernate = Executors.newFixedThreadPool(times);
+		ExecutorService nway = Executors.newFixedThreadPool(nThread);
+		ExecutorService spring = Executors.newFixedThreadPool(nThread);
+		ExecutorService hibernate = Executors.newFixedThreadPool(nThread);
+		ExecutorService mybatis = Executors.newFixedThreadPool(nThread);
 
 		Collection<Callable<Computer>> nwayTask = new ArrayList<Callable<Computer>>(times);
 		Collection<Callable<Computer>> springTask = new ArrayList<Callable<Computer>>(times);
 		Collection<Callable<Computer>> hibernateTask = new ArrayList<Callable<Computer>>(times);
+		Collection<Callable<Computer>> mybatisTask = new ArrayList<Callable<Computer>>(times);
 
 		for (int i = 0; i < times; i++) {
 
@@ -186,16 +189,31 @@ public class SyncPerformanceTest extends BaseTest {
 					return hibernatePerformance.getComputer(id);
 				}
 			});
+			
+			mybatisTask.add(new Callable<Computer>() {
+				
+				@Override
+				public Computer call() throws Exception {
+					
+					return myBatisPerformance.getComputer(id);
+				}
+			});
 		}
+		
+//		myBatisPerformance.getComputer(id);
+		
+		hibernatePerformance.getComputer(id);
 
 		long begin = System.currentTimeMillis();
 		
-		nwayPerformance.getComputer(id);
-		nway.invokeAll(nwayTask);
+//		nwayPerformance.getComputer(id);
+//		nway.invokeAll(nwayTask);
 		
 //		spring.invokeAll(springTask);
 		
-//		hibernate.invokeAll(hibernateTask);
+		hibernate.invokeAll(hibernateTask);
+		
+//		mybatis.invokeAll(mybatisTask);
 		
 		System.out.println(System.currentTimeMillis() - begin);
 	}
@@ -203,7 +221,7 @@ public class SyncPerformanceTest extends BaseTest {
 	@Test
 	public void testListComputer() throws InterruptedException {
 
-		int times = 50;
+		int times = 30;
 		int nThread = 2;
 
 		ExecutorService nway = Executors.newFixedThreadPool(nThread);
@@ -254,6 +272,13 @@ public class SyncPerformanceTest extends BaseTest {
 				}
 			});
 		}
+		
+//		nwayPerformance.listComputer();
+		
+//		myBatisPerformance.listComputer();
+		
+		hibernatePerformance.listComputer();
+		
 		long begin = System.currentTimeMillis();
 		
 //		nwayPerformance.listComputer();
@@ -263,10 +288,10 @@ public class SyncPerformanceTest extends BaseTest {
 //		spring.invokeAll(springTask);
 //		springJdbcPerformance.listComputer();
 		
-//		hibernate.invokeAll(hibernateTask);
+		hibernate.invokeAll(hibernateTask);
 //		hibernatePerformance.listComputer();
 		
-		mybatis.invokeAll(mybatisTask);
+//		mybatis.invokeAll(mybatisTask);
 		
 		System.out.println(System.currentTimeMillis() - begin);
 	}
