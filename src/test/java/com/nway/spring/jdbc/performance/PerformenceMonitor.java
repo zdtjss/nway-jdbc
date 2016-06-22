@@ -17,7 +17,7 @@ public class PerformenceMonitor {
 		Object retVal = pjp.proceed();
 
 		System.out.println(String.format("%d     %s     %s", System.currentTimeMillis() - begin,
-				Thread.currentThread().getName(), pjp.getSignature().toShortString()));
+				 pjp.getSignature().toShortString(), Thread.currentThread().getName()));
 
 		return retVal;
 	}

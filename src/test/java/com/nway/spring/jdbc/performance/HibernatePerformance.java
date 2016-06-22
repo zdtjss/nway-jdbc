@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
-
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Keyboard;
@@ -25,33 +20,14 @@ import com.nway.spring.jdbc.performance.entity.Mouse;
 import com.nway.spring.jdbc.performance.entity.Software;
 
 @Service("hibernatePerformance")
+@Transactional(transactionManager = "hibernateTxManager", readOnly = true)
 public class HibernatePerformance implements Performance {
 
-	private SessionFactory sessionFactory = null;
+    @Autowired
+    private SessionFactory sessionFactory;
 	
-	private EntityManagerFactory entityManagerFactory;
-
-	@PostConstruct
-	private void buildSessionFactory() {
-
-		try {
-
-			Configuration cfg = new Configuration().configure();
-			
-			// Create the SessionFactory from hibernate.cfg.xml
-			sessionFactory = cfg.buildSessionFactory(
-					new StandardServiceRegistryBuilder().applySettings(cfg.getProperties()).build());
-		} catch (Throwable ex) {
-			// Make sure you log the exception, as it might be swallowed
-			System.err.println("Initial SessionFactory creation failed." + ex);
-			throw new ExceptionInInitializerError(ex);
-		}
-		
-		entityManagerFactory = Persistence.createEntityManagerFactory("nway.perfomance.jpa");
-	}
-
 	@Override
-	public Computer getComputer(int id) {
+	public Computer getComputerById(int id) {
 
 		Session session = sessionFactory.openSession();
 
@@ -65,65 +41,51 @@ public class HibernatePerformance implements Performance {
 	@Override
 	public List<Computer> listComputer() {
 
-//		Session session = sessionFactory.openSession();
+		Session session = sessionFactory.openSession();
 		
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-
 		@SuppressWarnings("unchecked")
-//		List<Computer> computers = session.createQuery("from com.nway.spring.jdbc.performance.entity.Computer").list();
-		List<Computer> computers = entityManager.createQuery("from Computer", Computer.class).getResultList();
+		List<Computer> computers = session.createQuery("from com.nway.spring.jdbc.performance.entity.Computer").list();
 
-//		session.close();
-		entityManager.close();
+		session.close();
 		
 		return computers;
 	}
 
 	@Override
-	public Monitor getMonitor(int id) {
+	public Monitor getMonitorById(int id) {
 
-//		Session session = sessionFactory.openSession();
+		Session session = sessionFactory.openSession();
 		
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-
-//		Monitor mouse = (Monitor) session.get(Monitor.class, id);
-		Monitor mouse = entityManager.find(Monitor.class, id);
-
-//		session.close();
+		Monitor mouse = (Monitor) session.get(Monitor.class, id);
 		
-		entityManager.close();
-
+		session.close();
+		
 		return mouse;
 	}
 
 	@Override
-	public List<Monitor> listMonitor(int num) {
+	public List<Monitor> listMonitor() {
 
-//		Session session = sessionFactory.openSession();
+		Session session = sessionFactory.openSession();
 		
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-
-//		Query query = session.createQuery("from Monitor");
+		Query query = session.createQuery("from Monitor");
 		
-		TypedQuery<Monitor> query = entityManager.createQuery("from Monitor", Monitor.class);
-
 		@SuppressWarnings("unchecked")
-		List<Monitor> monitor = query.getResultList();
+		List<Monitor> monitor = query.list();
 
-//		session.close();
+		session.close();
 		
-		entityManager.close();
-
 		return monitor;
 	}
 
+    @Transactional(transactionManager = "hibernateTxManager", readOnly = false)
 	public void initDB() {
 
 		Session session = sessionFactory.openSession();
 
 		Transaction transaction = session.beginTransaction();
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 
 			Computer computer = new Computer();
 

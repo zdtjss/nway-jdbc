@@ -2,6 +2,8 @@ package com.nway.spring.jdbc.performance;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
+
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 
@@ -14,13 +16,14 @@ public interface Performance {
 	 *            对象ID
 	 * @return 
 	 */
-	public Computer getComputer(int id);
-
+	public Computer getComputerById(int id);
+	
 	/**
 	 * 有关联对象集
 	 * 
 	 * @return
 	 */
+	@Query("select c from Computer c")
 	public List<Computer> listComputer();
 
 	/**
@@ -29,7 +32,7 @@ public interface Performance {
 	 * @param id 对象ID
 	 * @return
 	 */
-	public Monitor getMonitor(int id);
+	public Monitor getMonitorById(int id);
 
 	/**
 	 * 无关联对象集
@@ -37,5 +40,6 @@ public interface Performance {
 	 * @param num
 	 * @return
 	 */
-	public List<Monitor> listMonitor(int num);
+	@Query("select m from Monitor m")
+	public List<Monitor> listMonitor();
 }

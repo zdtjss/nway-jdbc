@@ -13,15 +13,15 @@ import com.nway.spring.jdbc.performance.entity.Mainframe;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.entity.Mouse;
 
-@Transactional
 @Service("nwayPerformance")
+@Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class NwayPerformance implements Performance {
 
 	@Autowired
 	private SqlExecutor sqlExecutor;
 
 	@Override
-	public Computer getComputer(int id) {
+	public Computer getComputerById(int id) {
 
 		String computerSql = "select * from t_computer where id = ?";
 		String mainframeSql = "select * from t_mainframe where id = ?";
@@ -62,15 +62,15 @@ public class NwayPerformance implements Performance {
 	}
 
 	@Override
-	public Monitor getMonitor(int id) {
+	public Monitor getMonitorById(int id) {
 
 		return sqlExecutor.queryForBean("select * from t_monitor where id = ?", Monitor.class, id);
 	}
 
 	@Override
-	public List<Monitor> listMonitor(int num) {
+	public List<Monitor> listMonitor() {
 
-		return sqlExecutor.queryForBeanList("select * from t_monitor where rownum < ?", Monitor.class, num);
+		return sqlExecutor.queryForBeanList("select * from t_monitor", Monitor.class);
 	}
 	
 	public String queryComputerJson(int id) {

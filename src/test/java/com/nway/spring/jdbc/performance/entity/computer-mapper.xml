@@ -19,7 +19,7 @@
 	</select>
 
 	<select id="listMonitor" resultType="Monitor">
-		select * from t_monitor where rownum &lt; #{rownum}
+		select * from t_monitor
 	</select>
 
 	<sql id="computer">
@@ -64,7 +64,11 @@
 		mouse.production_date mouse_production_date,
 		mouse.type mouse_type,
 		mouse.wireless mouse_wireless,
-		cs.software_id
+		s.id software_id,
+		s.name software_name,
+		s.file_size software_size,
+		s.vender software_vender,
+		s.version software_version
 		FROM
 		t_computer c
 		inner JOIN
@@ -77,6 +81,8 @@
 		t_mouse mouse ON c.mouse_id = mouse.id
 		inner join
 		t_computer_software cs on cs.T_COMPUTER_ID = c.id 
+		inner join 
+		t_software s on cs.software_id = s.id
 	</sql>
 
 	<resultMap id="computerMap" type="Computer">

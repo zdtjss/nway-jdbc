@@ -23,8 +23,8 @@ import com.nway.spring.jdbc.performance.entity.Mainframe;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.entity.Mouse;
 
-@Transactional
 @Service("springJdbcPerformance")
+@Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class SpringJdbcPerformance implements Performance {
 
 	@Autowired
@@ -34,7 +34,7 @@ public class SpringJdbcPerformance implements Performance {
 	private SqlSessionTemplate sqlSession;
 
 	@Override
-	public Computer getComputer(int id) {
+	public Computer getComputerById(int id) {
 
 		String computerSql = "select * from t_computer where id = ?";
 		String mainframeSql = "select * from t_mainframe where id = ?";
@@ -76,8 +76,8 @@ public class SpringJdbcPerformance implements Performance {
 		try {
 			
 			DataSource ds = jdbcTemplate.getDataSource();
-		Connection conn = ds.getConnection();
-		String sql = sqlSession.getConfiguration().getMappedStatement("listComputer").getBoundSql(null).getSql();
+    		Connection conn = DataSourceUtils.getConnection(ds);
+    		String sql = sqlSession.getConfiguration().getMappedStatement("listComputer").getBoundSql(null).getSql();
 		
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();
@@ -150,7 +150,7 @@ public class SpringJdbcPerformance implements Performance {
 			}
 			rs.close();
 			pstmt.close();
-			DataSourceUtils.doCloseConnection(conn, ds);
+			DataSourceUtils.releaseConnection(conn, ds);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -159,15 +159,15 @@ public class SpringJdbcPerformance implements Performance {
 	}
 
 	@Override
-	public Monitor getMonitor(int id) {
+	public Monitor getMonitorById(int id) {
 
 		return jdbcTemplate.query("select * from t_monitor where id=?", BeanPropertyRowMapper.newInstance(Monitor.class), id).get(0);
 	}
 
 	@Override
-	public List<Monitor> listMonitor(int num) {
+	public List<Monitor> listMonitor() {
 
-		return jdbcTemplate.query("select * from t_monitor where rownum < ?", BeanPropertyRowMapper.newInstance(Monitor.class), num);
+		return jdbcTemplate.query("select * from t_monitor", BeanPropertyRowMapper.newInstance(Monitor.class));
 	}
 	
 }

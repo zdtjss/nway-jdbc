@@ -2,21 +2,23 @@ package com.nway.spring.jdbc.performance;
 
 import java.util.List;
 
-import org.mybatis.spring.SqlSessionTemplate;
+import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 
 @Service("myBatisPerformance")
+@Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class MyBatisPerformance implements Performance {
 
 	@Autowired
-	private SqlSessionTemplate sqlSession;
+	private SqlSession sqlSession;
 	
 	@Override
-	public Computer getComputer(int id) {
+	public Computer getComputerById(int id) {
 		
 		return sqlSession.selectOne("selectComputer", id);
 	}
@@ -28,15 +30,20 @@ public class MyBatisPerformance implements Performance {
 	}
 
 	@Override
-	public Monitor getMonitor(int id) {
+	public Monitor getMonitorById(int id) {
 		sqlSession.getConfiguration().getDatabaseId();
 		return sqlSession.selectOne("selectMonitor", id);
 	}
 
 	@Override
-	public List<Monitor> listMonitor(int num) {
+	public List<Monitor> listMonitor() {
 		
-		return sqlSession.selectList("listMonitor", num);
+		return sqlSession.selectList("listMonitor");
+	}
+	
+	public int queryAllNum(String[] itemTypes) {
+	    
+	    return sqlSession.selectOne("queryAllNum", itemTypes);
 	}
 
 }
