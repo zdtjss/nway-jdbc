@@ -1,19 +1,10 @@
 package com.nway.spring.jdbc.performance;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.DataSource;
-
-import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +13,7 @@ import com.nway.spring.jdbc.performance.entity.Keyboard;
 import com.nway.spring.jdbc.performance.entity.Mainframe;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.entity.Mouse;
+import com.nway.spring.jdbc.performance.entity.Software;
 
 @Service("springJdbcPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
@@ -30,9 +22,6 @@ public class SpringJdbcPerformance implements Performance {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
-	@Autowired
-	private SqlSessionTemplate sqlSession;
-
 	@Override
 	public Computer getComputerById(int id) {
 
@@ -41,6 +30,7 @@ public class SpringJdbcPerformance implements Performance {
 		String monitorSql = "select * from t_monitor where id = ?";
 		String mouseSql = "select * from t_mouse where id = ?";
 		String keyboardSql = "select * from t_keyboard where id = ?";
+	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
 		Computer computer = jdbcTemplate.query(computerSql, new BeanPropertyRowMapper<Computer>(Computer.class), id).get(0);
 
@@ -48,18 +38,20 @@ public class SpringJdbcPerformance implements Performance {
 		computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
 		computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
 		computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
-
+		computer.setSoftware(jdbcTemplate.query(softwareSql, BeanPropertyRowMapper.newInstance(Software.class), computer.getId()));
+		
 		return computer;
 	}
 
 	@Override
 	public List<Computer> listComputer() {
 
-		/*String computerSql = "select * from t_computer";
+		String computerSql = "select * from t_computer";
 		String mainframeSql = "select * from t_mainframe where id = ?";
 		String monitorSql = "select * from t_monitor where id = ?";
 		String mouseSql = "select * from t_mouse where id = ?";
 		String keyboardSql = "select * from t_keyboard where id = ?";
+	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
 		List<Computer> computers = jdbcTemplate.query(computerSql, BeanPropertyRowMapper.newInstance(Computer.class));
 
@@ -69,9 +61,10 @@ public class SpringJdbcPerformance implements Performance {
 			computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
 			computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
 			computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
-		}*/
+			computer.setSoftware(jdbcTemplate.query(softwareSql, BeanPropertyRowMapper.newInstance(Software.class), computer.getId()));
+		}
 		
-		List<Computer> computers = new ArrayList<>();
+		/*List<Computer> computers = new ArrayList<>();
 		
 		try {
 			
@@ -153,7 +146,7 @@ public class SpringJdbcPerformance implements Performance {
 			DataSourceUtils.releaseConnection(conn, ds);
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		return computers;
 	}

@@ -39,8 +39,13 @@
 		<property name="dataSource" ref="dataSource" />
 		<property name="packagesToScan">
 			<list>
-				<value>com.nway.spring.jdbc.performance.entity</value>
+				<value>com.nway.spring.jdbc</value>
 			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.hbm2ddl.auto=update
+			</value>
 		</property>
 	</bean>
 
@@ -72,7 +77,7 @@
 		</property>
 		<property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity" />
 		<property name="mapperLocations"
-			value="classpath*:com/nway/spring/jdbc/performance/entity/*-mapper.xml" />
+			value="classpath*:com/nway/spring/jdbc/performance/mapper/*-mapper.xml" />
 		<property name="databaseIdProvider">
 			<bean class="org.apache.ibatis.mapping.VendorDatabaseIdProvider">
 				<property name="properties">
@@ -84,6 +89,11 @@
 		</property>
 	</bean>
 
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.nway.spring.jdbc.performance.mapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
@@ -105,12 +115,9 @@
 				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" /> 
 					<property name="url" value="jdbc:mysql://localhost:3306/test?cacheResultSetMetadata=true&amp;metadataCacheSize=1" 
 					/> -->
-				<!-- <property name="driverClassName" value="oracle.jdbc.OracleDriver" 
-					/> <property name="url" value="jdbc:oracle:thin:@192.168.3.217:1521:orcl" 
-					/> -->
 
-				<property name="initialSize" value="5" />
-				<property name="maxActive" value="15" />
+				<property name="initialSize" value="50" />
+				<property name="maxActive" value="150" />
 			</bean>
 		</constructor-arg>
 	</bean>

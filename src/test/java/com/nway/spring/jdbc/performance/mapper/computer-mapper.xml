@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nway.spring.jdbc.performance.entity.ComputerMapper">
+<mapper namespace="com.nway.spring.jdbc.performance.mapper.ComputerMapper">
 
-	<select id="selectComputer" resultMap="computerMap">
+	<select id="getComputerById" resultMap="computerMap">
 		<include refid="computer"/> AND c.id = #{id}
 	</select>
 
@@ -11,7 +11,7 @@
 		<include refid="computer"/>
 	</select>
 
-	<select id="selectMonitor" resultType="Monitor">
+	<select id="getMonitorById" resultType="Monitor">
 		<if test="_databaseId == 'oracle'">
 			select * from t_monitor
 			where id = #{id}
@@ -80,7 +80,7 @@
 		inner JOIN
 		t_mouse mouse ON c.mouse_id = mouse.id
 		inner join
-		t_computer_software cs on cs.T_COMPUTER_ID = c.id 
+		t_computer_software cs on cs.COMPUTER_ID = c.id 
 		inner join 
 		t_software s on cs.software_id = s.id
 	</sql>
@@ -148,7 +148,7 @@
 	</resultMap>
 	
 	<select id="software" resultType="Software">
-		select * from t_software s,t_computer_software cs where s.id = cs.software_id and cs.T_COMPUTER_ID = #{id}
+		select * from t_software s,t_computer_software cs where s.id = cs.software_id and cs.COMPUTER_ID = #{id}
 	</select>
 
 </mapper>

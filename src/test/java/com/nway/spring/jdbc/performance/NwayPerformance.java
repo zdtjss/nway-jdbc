@@ -12,6 +12,7 @@ import com.nway.spring.jdbc.performance.entity.Keyboard;
 import com.nway.spring.jdbc.performance.entity.Mainframe;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.entity.Mouse;
+import com.nway.spring.jdbc.performance.entity.Software;
 
 @Service("nwayPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
@@ -28,6 +29,7 @@ public class NwayPerformance implements Performance {
 		String monitorSql = "select * from t_monitor where id = ?";
 		String mouseSql = "select * from t_mouse where id = ?";
 		String keyboardSql = "select * from t_keyboard where id = ?";
+		String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
 		Computer computer = sqlExecutor.queryForBean(computerSql, Computer.class, id);
 
@@ -35,7 +37,8 @@ public class NwayPerformance implements Performance {
 		computer.setMonitor(sqlExecutor.queryForBean(monitorSql, Monitor.class, computer.getMonitorId()));
 		computer.setMouse(sqlExecutor.queryForBean(mouseSql, Mouse.class, computer.getMouseId()));
 		computer.setKeyboard(sqlExecutor.queryForBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
-
+		computer.setSoftware(sqlExecutor.queryForBeanList(softwareSql, Software.class, computer.getId()));
+		
 		return computer;
 	}
 
@@ -47,6 +50,8 @@ public class NwayPerformance implements Performance {
 		String monitorSql = "select * from t_monitor where id = ?";
 		String mouseSql = "select * from t_mouse where id = ?";
 		String keyboardSql = "select * from t_keyboard where id = ?";
+	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
+
 
 		List<Computer> computers = sqlExecutor.queryForBeanList(computerSql, Computer.class);
 
@@ -56,6 +61,7 @@ public class NwayPerformance implements Performance {
 			computer.setMonitor(sqlExecutor.queryForBean(monitorSql, Monitor.class, computer.getMonitorId()));
 			computer.setMouse(sqlExecutor.queryForBean(mouseSql, Mouse.class, computer.getMouseId()));
 			computer.setKeyboard(sqlExecutor.queryForBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
+			computer.setSoftware(sqlExecutor.queryForBeanList(softwareSql, Software.class, computer.getId()));
 		}
 
 		return computers;

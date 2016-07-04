@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.performance.repositories.MonitorRepository;
+import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
 
 public class PerformanceTest extends BaseTest {
 
@@ -29,7 +29,7 @@ public class PerformanceTest extends BaseTest {
 	private Performance jpaPerformance;
 	
 	@Autowired
-	private MonitorRepository monitorRepository;
+	private SpringDataJpaPerformance springDataJpaPerformance;
 	
 	@Autowired
 	@Qualifier("myBatisPerformance")
@@ -42,13 +42,15 @@ public class PerformanceTest extends BaseTest {
 
 		for (int i = 0; i < 1; i++) {
 
-			/*nwayPerformance.getMonitor(id);
+			nwayPerformance.getMonitorById(id);
 
-			hibernatePerformance.getMonitor(id);
+			hibernatePerformance.getMonitorById(id);
 			
-			jpaPerformance.getMonitor(id);
+			jpaPerformance.getMonitorById(id);
+			
+			springDataJpaPerformance.getMonitorById(id);
 
-			springJdbcPerformance.getMonitor(id);*/
+			springJdbcPerformance.getMonitorById(id);
 			
 			myBatisPerformance.getMonitorById(id);
 
@@ -59,22 +61,20 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testListMonitor() {
 
-		int num = 10;
-
 		for (int i = 0; i < 30; i++) {
 
 			nwayPerformance.listMonitor();
 
-			hibernatePerformance.listMonitor();
+			/*hibernatePerformance.listMonitor();
 			
 			jpaPerformance.listMonitor();
 			
-			monitorRepository.listMonitor();
+			springDataJpaPerformance.listMonitor();
 
 			springJdbcPerformance.listMonitor();
 			
 			myBatisPerformance.listMonitor();
-
+*/
 			System.out.println();
 		}
 	}
@@ -91,6 +91,8 @@ public class PerformanceTest extends BaseTest {
 			hibernatePerformance.getComputerById(id);
 			
 			jpaPerformance.getComputerById(id);
+			
+			springDataJpaPerformance.getComputerById(id);
 
 			springJdbcPerformance.getComputerById(id);
 			
@@ -109,11 +111,13 @@ public class PerformanceTest extends BaseTest {
 		
 		for (int i = 0; i < 10; i++) {
 
-//			nwayPerformance.listComputer();
+			nwayPerformance.listComputer();
 
 			cs = hibernatePerformance.listComputer();
 			
 			cs = jpaPerformance.listComputer();
+			
+			cs = springDataJpaPerformance.listComputer();
 
 //			System.out.println(cs.get(0));
 			

@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
+import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
 
 public class SyncPerformanceTest extends BaseTest {
 
@@ -36,6 +35,9 @@ public class SyncPerformanceTest extends BaseTest {
 	private Performance jpaPerformance;
 	
 	@Autowired
+	private SpringDataJpaPerformance springDataJpaPerformance;
+	
+	@Autowired
 	@Qualifier("myBatisPerformance")
 	private Performance myBatisPerformance;
 
@@ -49,11 +51,13 @@ public class SyncPerformanceTest extends BaseTest {
 		ExecutorService spring = Executors.newFixedThreadPool(times);
 		ExecutorService hibernate = Executors.newFixedThreadPool(times);
 		ExecutorService jpa = Executors.newFixedThreadPool(times);
+		ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
 
 		Collection<Callable<Monitor>> nwayTask = new ArrayList<Callable<Monitor>>(times);
 		Collection<Callable<Monitor>> springTask = new ArrayList<Callable<Monitor>>(times);
 		Collection<Callable<Monitor>> hibernateTask = new ArrayList<Callable<Monitor>>(times);
 		Collection<Callable<Monitor>> jpaTask = new ArrayList<Callable<Monitor>>(times);
+		Collection<Callable<Monitor>> springDataJpaTask = new ArrayList<Callable<Monitor>>(times);
 
 		for (int i = 0; i < times; i++) {
 
@@ -92,6 +96,15 @@ public class SyncPerformanceTest extends BaseTest {
 			        return jpaPerformance.getMonitorById(id);
 			    }
 			});
+			
+			springDataJpaTask.add(new Callable<Monitor>() {
+			    
+			    @Override
+			    public Monitor call() throws Exception {
+			        
+			        return springDataJpaPerformance.getMonitorById(id);
+			    }
+			});
 		}
 
 		long begin = System.currentTimeMillis();
@@ -99,11 +112,13 @@ public class SyncPerformanceTest extends BaseTest {
 		nwayPerformance.getMonitorById(id);
 		nway.invokeAll(nwayTask);
 		
-//		spring.invokeAll(springTask);
+		spring.invokeAll(springTask);
 		
-//		hibernate.invokeAll(hibernateTask);
+		hibernate.invokeAll(hibernateTask);
 		
-//		jpa.invokeAll(hibernateTask);
+		jpa.invokeAll(hibernateTask);
+		
+		springDataJpa.invokeAll(springDataJpaTask);
 		
 		System.out.println(System.currentTimeMillis() - begin);
 	}
@@ -111,19 +126,20 @@ public class SyncPerformanceTest extends BaseTest {
 	@Test
 	public void testListMonitor() throws InterruptedException {
 
-		int times = 10;
-		final int num = 10;
+		int times = 30;
 
 		ExecutorService nway = Executors.newFixedThreadPool(times);
 		ExecutorService spring = Executors.newFixedThreadPool(times);
 		ExecutorService hibernate = Executors.newFixedThreadPool(times);
 		ExecutorService jpa = Executors.newFixedThreadPool(times);
+		ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
 		ExecutorService mybatis = Executors.newFixedThreadPool(times);
 
 		Collection<Callable<List<Monitor>>> nwayTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> springTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> hibernateTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> jpaTask = new ArrayList<Callable<List<Monitor>>>(times);
+		Collection<Callable<List<Monitor>>> springDataJpaTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> mybatisTask = new ArrayList<Callable<List<Monitor>>>(times);
 
 		for (int i = 0; i < times; i++) {
@@ -164,6 +180,15 @@ public class SyncPerformanceTest extends BaseTest {
 			    }
 			});
 			
+			springDataJpaTask.add(new Callable<List<Monitor>>() {
+			    
+			    @Override
+			    public List<Monitor> call() throws Exception {
+			        
+			        return springDataJpaPerformance.listMonitor();
+			    }
+			});
+			
 			mybatisTask.add(new Callable<List<Monitor>>() {
 			    
 			    @Override
@@ -174,19 +199,46 @@ public class SyncPerformanceTest extends BaseTest {
 			});
 		}
 
-		long begin = System.currentTimeMillis();
+		nwayPerformance.listMonitor();
+		/*springJdbcPerformance.listMonitor();
+		hibernatePerformance.listMonitor();
+		jpaPerformance.listMonitor();
+		springDataJpaPerformance.listMonitor();
+		myBatisPerformance.listMonitor();*/
 		
-//		nway.invokeAll(nwayTask);
+		long begin = System.nanoTime();
 		
+		nway.invokeAll(nwayTask);
+		
+		System.out.println("nway = "+(System.nanoTime() - begin));
+		nwayPerformance.listMonitor();
+		
+		/*begin = System.nanoTime();
 		spring.invokeAll(springTask);
+		System.out.println("spring = "+(System.nanoTime() - begin));
+		springJdbcPerformance.listMonitor();
 		
+		begin = System.nanoTime();
 		hibernate.invokeAll(hibernateTask);
+		System.out.println("hibernate = "+(System.nanoTime() - begin));
+		hibernatePerformance.listMonitor();
 		
-		jpa.invokeAll(hibernateTask);
+		begin = System.nanoTime();
+		jpa.invokeAll(jpaTask);
+		System.out.println("jpa = "+(System.nanoTime() - begin));
+		jpaPerformance.listMonitor();
 		
+		begin = System.nanoTime();
+		springDataJpa.invokeAll(springDataJpaTask);
+		System.out.println("springDataJpa = "+(System.nanoTime() - begin));
+		springDataJpaPerformance.listMonitor();
+		
+		begin = System.nanoTime();
 		mybatis.invokeAll(mybatisTask);
+		System.out.println("springDataJpa = "+(System.nanoTime() - begin));
+		myBatisPerformance.listMonitor();*/
 		
-		System.out.println(System.currentTimeMillis() - begin);
+		System.out.println(System.nanoTime() - begin);
 	}
 
 	@Test
@@ -200,12 +252,14 @@ public class SyncPerformanceTest extends BaseTest {
 		ExecutorService spring = Executors.newFixedThreadPool(nThread);
 		ExecutorService hibernate = Executors.newFixedThreadPool(nThread);
 		ExecutorService jpa = Executors.newFixedThreadPool(nThread);
+		ExecutorService springDataJpa = Executors.newFixedThreadPool(nThread);
 		ExecutorService mybatis = Executors.newFixedThreadPool(nThread);
 
 		Collection<Callable<Computer>> nwayTask = new ArrayList<Callable<Computer>>(times);
 		Collection<Callable<Computer>> springTask = new ArrayList<Callable<Computer>>(times);
 		Collection<Callable<Computer>> hibernateTask = new ArrayList<Callable<Computer>>(times);
 		Collection<Callable<Computer>> jpaTask = new ArrayList<Callable<Computer>>(times);
+		Collection<Callable<Computer>> springDataJpaTask = new ArrayList<Callable<Computer>>(times);
 		Collection<Callable<Computer>> mybatisTask = new ArrayList<Callable<Computer>>(times);
 
 		for (int i = 0; i < times; i++) {
@@ -246,6 +300,15 @@ public class SyncPerformanceTest extends BaseTest {
 			    }
 			});
 			
+			springDataJpaTask.add(new Callable<Computer>() {
+			    
+			    @Override
+			    public Computer call() throws Exception {
+			        
+			        return springDataJpaPerformance.getComputerById(id);
+			    }
+			});
+			
 			mybatisTask.add(new Callable<Computer>() {
 				
 				@Override
@@ -262,16 +325,18 @@ public class SyncPerformanceTest extends BaseTest {
 
 		long begin = System.currentTimeMillis();
 		
-//		nwayPerformance.getComputer(id);
-//		nway.invokeAll(nwayTask);
+		nwayPerformance.getComputerById(id);
+		nway.invokeAll(nwayTask);
 		
-//		spring.invokeAll(springTask);
+		spring.invokeAll(springTask);
 		
 		hibernate.invokeAll(hibernateTask);
 		
 		jpa.invokeAll(hibernateTask);
 		
-//		mybatis.invokeAll(mybatisTask);
+		springDataJpa.invokeAll(springDataJpaTask);
+		
+		mybatis.invokeAll(mybatisTask);
 		
 		System.out.println(System.currentTimeMillis() - begin);
 	}
@@ -286,12 +351,14 @@ public class SyncPerformanceTest extends BaseTest {
 		ExecutorService spring = Executors.newFixedThreadPool(nThread);
 		ExecutorService hibernate = Executors.newFixedThreadPool(nThread);
 		ExecutorService jpa = Executors.newFixedThreadPool(nThread);
+		ExecutorService springDataJpa = Executors.newFixedThreadPool(nThread);
 		ExecutorService mybatis = Executors.newFixedThreadPool(nThread);
 
 		Collection<Callable<List<Computer>>> nwayTask = new ArrayList<Callable<List<Computer>>>(times);
 		Collection<Callable<List<Computer>>> springTask = new ArrayList<Callable<List<Computer>>>(times);
 		Collection<Callable<List<Computer>>> hibernateTask = new ArrayList<Callable<List<Computer>>>(times);
 		Collection<Callable<List<Computer>>> jpaTask = new ArrayList<Callable<List<Computer>>>(times);
+		Collection<Callable<List<Computer>>> springDataJpaTask = new ArrayList<Callable<List<Computer>>>(times);
 		Collection<Callable<List<Computer>>> mybatisTask = new ArrayList<Callable<List<Computer>>>(times);
 
 		for (int i = 0; i < times; i++) {
@@ -332,6 +399,15 @@ public class SyncPerformanceTest extends BaseTest {
 			    }
 			});
 			
+			springDataJpaTask.add(new Callable<List<Computer>>() {
+			    
+			    @Override
+			    public List<Computer> call() throws Exception {
+			        
+			        return springDataJpaPerformance.listComputer();
+			    }
+			});
+			
 			mybatisTask.add(new Callable<List<Computer>>() {
 				
 				@Override
@@ -342,7 +418,7 @@ public class SyncPerformanceTest extends BaseTest {
 			});
 		}
 		
-//		nwayPerformance.listComputer();
+		nwayPerformance.listComputer();
 		
 		myBatisPerformance.listComputer();
 		
@@ -350,9 +426,9 @@ public class SyncPerformanceTest extends BaseTest {
 		
 		long begin = System.currentTimeMillis();
 		
-//		nwayPerformance.listComputer();
-//		nway.invokeAll(nwayTask);
-//		nwayPerformance.listComputer();
+		nwayPerformance.listComputer();
+		nway.invokeAll(nwayTask);
+		nwayPerformance.listComputer();
 		
 		spring.invokeAll(springTask);
 		springJdbcPerformance.listComputer();
@@ -360,7 +436,10 @@ public class SyncPerformanceTest extends BaseTest {
 		hibernate.invokeAll(hibernateTask);
 		hibernatePerformance.listComputer();
 		
-		jpa.invokeAll(hibernateTask);
+		jpa.invokeAll(jpaTask);
+		jpaPerformance.listComputer();
+		
+		springDataJpa.invokeAll(springDataJpaTask);
 		jpaPerformance.listComputer();
 		
 		mybatis.invokeAll(mybatisTask);
