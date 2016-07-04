@@ -88,5 +88,10 @@ public class NwayPerformance implements Performance {
 		
 		return sqlExecutor.queryForJson("select * from t_computer", Computer.class);
 	}
+	
+	public String queryMonitorListJson() {
+	    
+	    return sqlExecutor.queryForJson("select * from t_monitor", Monitor.class);
+	}
 
 }

@@ -68,44 +68,44 @@ public class SqlExecutor extends JdbcTemplate {
 
 	public <T> T queryForBean(String sql, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, new BeanHandler<T>(type));
+		return super.query(sql, new BeanHandler<T>(type, sql));
 	}
 	
 	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new BeanHandler<T>(type), args);
+		return super.query(sql, new BeanHandler<T>(type, sql), args);
 	}
 
 	public <T> T queryForBean(String sql, Object[] args, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, args, new BeanHandler<T>(type));
+		return super.query(sql, args, new BeanHandler<T>(type, sql));
 	}
 
 	public <T> T queryForBean(String sql, Object[] args, int[] argTypes, Class<T> type)
 			throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new BeanHandler<T>(type));
+		return super.query(sql, args, argTypes, new BeanHandler<T>(type, sql));
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, new BeanListHandler<T>(type));
+		return super.query(sql, new BeanListHandler<T>(type, sql));
 	}
 	
 	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new BeanListHandler<T>(type), args);
+		return super.query(sql, new BeanListHandler<T>(type, sql), args);
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Object[] args, Class<T> type) throws DataAccessException {
 
-		return super.query(sql, args, new BeanListHandler<T>(type));
+		return super.query(sql, args, new BeanListHandler<T>(type, sql));
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Object[] args, int[] argTypes, Class<T> type)
 			throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new BeanListHandler<T>(type));
+		return super.query(sql, args, argTypes, new BeanListHandler<T>(type, sql));
 	}
 	
 	public String queryForJson(String sql, Class<?> type) throws DataAccessException {

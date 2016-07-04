@@ -37,12 +37,15 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      * The Class of beans produced by this handler.
      */
     private final Class<T> type;
+    
+    private String cacheKey;
 
     private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
 
-    public BeanHandler(Class<T> type) {
+    public BeanHandler(Class<T> type, String cacheKey) {
         
         this.type = type;
+        this.cacheKey = cacheKey;
     }
 
     /**
@@ -60,7 +63,7 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
 	public T extractData(ResultSet rs) throws DataAccessException {
 
 		try {
-			return rs.next() ? beanProcessor.toBean(rs, type) : null;
+			return rs.next() ? beanProcessor.toBean(rs, type, cacheKey) : null;
 		} catch (SQLException e) {
 			throw new DynamicObjectException("创建动态对象失败 [ " + this.type + " ]", e);
 		}

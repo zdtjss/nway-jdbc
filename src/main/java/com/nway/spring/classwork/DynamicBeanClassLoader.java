@@ -64,7 +64,11 @@ public class DynamicBeanClassLoader extends ClassLoader {
 			write(classContent, fileName + ".class");
 		}
 		
-		return super.defineClass(name, classContent, 0, classContent.length);
+		Class<?> classz = super.defineClass(name, classContent, 0, classContent.length);
+		
+		resolveClass(classz);
+		
+		return classz;
 	}
 
 	private void write(byte[] b, String filePath) throws IOException {

@@ -28,9 +28,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -62,7 +62,7 @@ import com.nway.spring.jdbc.annotation.Column;
  */
 class AsmBeanProcessor implements BeanProcessor {
 
-	private static final Map<String, DbBeanFactory> DBBEANFACTORY_CACHE = new ConcurrentHashMap<String, DbBeanFactory>();
+	private static final Map<String, DbBeanFactory> DBBEANFACTORY_CACHE = new HashMap<String, DbBeanFactory>(10000);
 
     /**
      * Special array value used by <code>mapColumnsToProperties</code> that indicates there is no
@@ -108,7 +108,7 @@ class AsmBeanProcessor implements BeanProcessor {
      * @throws SQLException if a database access error occurs
      * @return the newly created List of beans
      */
-    public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+    public <T> List<T> toBeanList(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
         if (!rs.next()) {
         	
@@ -117,7 +117,7 @@ class AsmBeanProcessor implements BeanProcessor {
         
         final List<T> results = new ArrayList<T>();
 
-        String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
+        //String cacheKey = //DynamicClassUtils.makeCacheKey(rs, type.getName());
 		
         do {
         	
@@ -148,7 +148,7 @@ class AsmBeanProcessor implements BeanProcessor {
     	return toBean(rs, type, null);
     }
 
-	private <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
+	public <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
 
 		if (cacheKey == null) {

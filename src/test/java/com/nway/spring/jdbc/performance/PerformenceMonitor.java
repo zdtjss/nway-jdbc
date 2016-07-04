@@ -12,11 +12,11 @@ public class PerformenceMonitor {
 	@Around("execution(* com.nway.spring.jdbc.performance.*Performance.*(..))")
 	public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
 
-		long begin = System.nanoTime();
+		long begin = System.currentTimeMillis();
 
 		Object retVal = pjp.proceed();
 
-		System.out.println(String.format("%d     %s     %s", System.nanoTime() - begin,
+		System.out.println(String.format("%d     %s     %s", System.currentTimeMillis() - begin,
 				 pjp.getSignature().toShortString(), Thread.currentThread().getName()));
 
 		return retVal;

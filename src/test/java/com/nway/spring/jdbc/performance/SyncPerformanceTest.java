@@ -40,6 +40,10 @@ public class SyncPerformanceTest extends BaseTest {
 	@Autowired
 	@Qualifier("myBatisPerformance")
 	private Performance myBatisPerformance;
+	
+	@Autowired
+    @Qualifier("jdbcPerformance")
+    private Performance jdbcPerformance;
 
 	@Test
 	public void testGetMonitor() throws InterruptedException {
@@ -134,6 +138,7 @@ public class SyncPerformanceTest extends BaseTest {
 		ExecutorService jpa = Executors.newFixedThreadPool(times);
 		ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
 		ExecutorService mybatis = Executors.newFixedThreadPool(times);
+		ExecutorService jdbc = Executors.newFixedThreadPool(times);
 
 		Collection<Callable<List<Monitor>>> nwayTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> springTask = new ArrayList<Callable<List<Monitor>>>(times);
@@ -141,6 +146,7 @@ public class SyncPerformanceTest extends BaseTest {
 		Collection<Callable<List<Monitor>>> jpaTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> springDataJpaTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> mybatisTask = new ArrayList<Callable<List<Monitor>>>(times);
+		Collection<Callable<List<Monitor>>> jdbcTask = new ArrayList<Callable<List<Monitor>>>(times);
 
 		for (int i = 0; i < times; i++) {
 
@@ -197,48 +203,59 @@ public class SyncPerformanceTest extends BaseTest {
 			        return myBatisPerformance.listMonitor();
 			    }
 			});
+			
+			jdbcTask.add(new Callable<List<Monitor>>() {
+			    
+			    @Override
+			    public List<Monitor> call() throws Exception {
+			        
+			        return jdbcPerformance.listMonitor();
+			    }
+			});
 		}
 
 		nwayPerformance.listMonitor();
-		/*springJdbcPerformance.listMonitor();
+		springJdbcPerformance.listMonitor();
 		hibernatePerformance.listMonitor();
 		jpaPerformance.listMonitor();
 		springDataJpaPerformance.listMonitor();
-		myBatisPerformance.listMonitor();*/
+		myBatisPerformance.listMonitor();
 		
-		long begin = System.nanoTime();
+		long begin = System.currentTimeMillis();
 		
-		nway.invokeAll(nwayTask);
-		
-		System.out.println("nway = "+(System.nanoTime() - begin));
-		nwayPerformance.listMonitor();
-		
-		/*begin = System.nanoTime();
 		spring.invokeAll(springTask);
-		System.out.println("spring = "+(System.nanoTime() - begin));
+		System.out.println("spring = "+(System.currentTimeMillis() - begin));
 		springJdbcPerformance.listMonitor();
 		
-		begin = System.nanoTime();
+		begin = System.currentTimeMillis();
 		hibernate.invokeAll(hibernateTask);
-		System.out.println("hibernate = "+(System.nanoTime() - begin));
+		System.out.println("hibernate = "+(System.currentTimeMillis() - begin));
 		hibernatePerformance.listMonitor();
 		
-		begin = System.nanoTime();
+		begin = System.currentTimeMillis();
 		jpa.invokeAll(jpaTask);
-		System.out.println("jpa = "+(System.nanoTime() - begin));
+		System.out.println("jpa = "+(System.currentTimeMillis() - begin));
 		jpaPerformance.listMonitor();
 		
-		begin = System.nanoTime();
+		begin = System.currentTimeMillis();
 		springDataJpa.invokeAll(springDataJpaTask);
-		System.out.println("springDataJpa = "+(System.nanoTime() - begin));
+		System.out.println("springDataJpa = "+(System.currentTimeMillis() - begin));
 		springDataJpaPerformance.listMonitor();
 		
-		begin = System.nanoTime();
-		mybatis.invokeAll(mybatisTask);
-		System.out.println("springDataJpa = "+(System.nanoTime() - begin));
-		myBatisPerformance.listMonitor();*/
+		begin = System.currentTimeMillis();
+		jdbc.invokeAll(jdbcTask);
+		System.out.println("jdbc = "+(System.currentTimeMillis() - begin));
+		jdbcPerformance.listMonitor();
 		
-		System.out.println(System.nanoTime() - begin);
+		begin = System.currentTimeMillis();
+		nway.invokeAll(nwayTask);
+        System.out.println("nway = "+(System.currentTimeMillis() - begin));
+        nwayPerformance.listMonitor();
+        
+        begin = System.currentTimeMillis();
+        mybatis.invokeAll(mybatisTask);
+        System.out.println("mybatis = "+(System.currentTimeMillis() - begin));
+        myBatisPerformance.listMonitor();
 	}
 
 	@Test
