@@ -62,7 +62,7 @@ class JsonProcessor extends JsonBuilder
 
 	public String buildJson(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException {
 
-		return buildJson(rs, type);
+		return buildJson(rs, type, null);
 	}
     
 	private String buildJson(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
@@ -512,7 +512,7 @@ class JsonProcessor extends JsonBuilder
 			}
 			else 
 			{
-				json.append('\"').append(rs.getObject(index).toString()).append('\"');
+				json.append('\"').append((String) rs.getObject(index)).append('\"');
 				ojbectValue(mv, internalProcessorName, propName, index, baseLineNumber);
 			}
 			
