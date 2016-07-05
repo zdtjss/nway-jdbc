@@ -14,7 +14,7 @@ Nway-JDBC基于Spring JDBC，扩展自Spring的JdbcTemplate，完全兼容Spring
   <li>queryForMapListPagination返回值getTotalCount() == 0；</li>
   <li>queryForJson返回"{}"</li>
   <li>queryForJsonList返回"[]"</li>
-  <li>testJsonPagination返回对象中totalCount == 0</li>
+  <li>queryForJsonPagination返回{"totalCount":0,"pageCount":0,"page":XX,"pageSize":XX}</li>
  </ul>
 
 第三方依赖：
