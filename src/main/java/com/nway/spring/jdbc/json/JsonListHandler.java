@@ -31,10 +31,12 @@ public final class JsonListHandler implements ResultSetExtractor<String>
 	private static final JsonProcessor JSON_PROCESSOR = new JsonProcessor();
 
 	private final Class<?> type;
+	private String cacheKey;
 	
-	public JsonListHandler(Class<?> type) {
+	public JsonListHandler(Class<?> type, String cacheKey) {
 		
 		this.type = type;
+		this.cacheKey = cacheKey;
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public final class JsonListHandler implements ResultSetExtractor<String>
 	{
 		try
 		{
-			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type) : "[]";
+			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type, cacheKey) : "[]";
 		}
 		catch (Exception e)
 		{

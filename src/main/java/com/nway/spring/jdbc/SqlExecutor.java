@@ -27,7 +27,6 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
@@ -110,42 +109,42 @@ public class SqlExecutor extends JdbcTemplate {
 	
 	public String queryForJson(String sql, Class<?> type) throws DataAccessException {
 
-		return super.query(sql, new JsonHandler(type));
+		return super.query(sql, new JsonHandler(type, sql));
 	}
 	
 	public String queryForJson(String sql, Class<?> type,Object... args) throws DataAccessException {
 		
-		return super.query(sql, new JsonHandler(type), args);
+		return super.query(sql, new JsonHandler(type, sql), args);
 	}
 	
 	public String queryForJson(String sql,Object[] args, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonHandler(type));
+		return super.query(sql, args, new JsonHandler(type, sql));
 	}
 	
 	public String queryForJson(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 
-		return super.query(sql, args, argTypes, new JsonHandler(type));
+		return super.query(sql, args, argTypes, new JsonHandler(type, sql));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type));
+		return super.query(sql, new JsonListHandler(type, sql));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type), args);
+		return super.query(sql, new JsonListHandler(type, sql), args);
 	}
 	
 	public String queryForJsonList(String sql,Object[] args, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonListHandler(type));
+		return super.query(sql, args, new JsonListHandler(type, sql));
 	}
 	
 	public String queryForJsonList(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 		
-		return super.query(sql, args, argTypes, new JsonListHandler(type));
+		return super.query(sql, args, argTypes, new JsonListHandler(type, sql));
 	}
 	
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page,
@@ -356,25 +355,16 @@ public class SqlExecutor extends JdbcTemplate {
 
 	private void initPaginationSupport() {
 
-		Connection conn = null;
-
 		String databaseProductName = null;
 
-		try {
+		try (Connection conn = getDataSource().getConnection()) {
 			
-			conn = DataSourceUtils.getConnection(getDataSource());
-
 			databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
-
 		} 
 		catch (SQLException e) {
 			
 			throw new CannotGetJdbcConnectionException("∑√Œ  ˝æ›ø‚ ß∞‹", e);
 		} 
-		finally {
-			
-			DataSourceUtils.releaseConnection(conn, getDataSource());
-		}
 
 		if (databaseProductName.contains("ORACLE")) {
 			

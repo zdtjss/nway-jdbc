@@ -14,9 +14,11 @@ public class JsonHandler implements ResultSetExtractor<String>
 	private static final JsonProcessor JSON_PROCESSOR = new JsonProcessor();
 
 	private final Class<?> type;
+	private String cacheKey;
 	
-	public JsonHandler(Class<?> type) {
+	public JsonHandler(Class<?> type, String cacheKey) {
 		this.type = type;
+		this.cacheKey = cacheKey;
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public class JsonHandler implements ResultSetExtractor<String>
 		
 		try {
 
-			return rs.next() ? JSON_PROCESSOR.buildJson(rs, type) : "{}";
+			return rs.next() ? JSON_PROCESSOR.buildJson(rs, type, cacheKey) : "{}";
 		} 
 		catch (Exception e) {
 			

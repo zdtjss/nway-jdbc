@@ -3,13 +3,14 @@ package com.nway.spring.jdbc.json;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -56,21 +57,16 @@ class JsonProcessor extends JsonBuilder
 	private static final boolean HAS_JAVASSIST = ClassUtils.isPresent("javassist.ClassPool", ClassUtils.getDefaultClassLoader());
 	
 	/**
-     * 缓存动态生成的 DbBeanFactory，这里的cache是静态的，意味着无论BeanProcessor被new多少次，cache都是同一个
+     * 缓存动态生成的 DbBeanFactory，这里的cache是静态的，意味着无论BeanProcessor被new多少次，cache都是同一个,为了减少容器扩容时带来的性能问题，指定了一个相当大的初始大小
      */
-    private static final Map<String, JsonBuilder> JSON_BUILDER_CACHE = new ConcurrentHashMap<String, JsonBuilder>();
-
-	public String buildJson(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException {
-
-		return buildJson(rs, type, null);
-	}
+    private static final Map<String, JsonBuilder> JSON_BUILDER_CACHE = new HashMap<String, JsonBuilder>(50000);
     
-	private String buildJson(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
+	public String buildJson(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
 	
-		if (cacheKey == null) {
+		/*if (cacheKey == null) {
 
 			cacheKey = DynamicClassUtils.makeCacheKey(rs,  type.getName());
-		} 
+		} */
 
 		/*
 		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
@@ -94,11 +90,11 @@ class JsonProcessor extends JsonBuilder
 //		}
 	}
 	
-	public String toJsonList(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException {
+	public String toJsonList(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
 	
 		StringBuilder json = new StringBuilder("[");
 
-		String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
+//		String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		
 		do {
 			
@@ -345,8 +341,17 @@ class JsonProcessor extends JsonBuilder
 			}
 			else 
 			{
-				json.append('\"').append(rs.getObject(index).toString()).append('\"');
-				handlerScript.append(".append($1.getObject(").append(index).append(").toString()).append('\"').append(',');");
+			    Object objValue = rs.getObject(index);
+                
+                if (objValue != null) {
+                    
+                    json.append('\"').append(objValue.toString()).append('\"');
+                }
+                else {
+                    json.append("null");
+                }
+
+                handlerScript.append(".append($1.getObject(").append(index).append(").toString()).append('\"').append(',');");
 			}
 			
 			json.append(',');
@@ -510,9 +515,21 @@ class JsonProcessor extends JsonBuilder
 				dateValue(rs.getTime(index), "HH:mm:ss", json);
 				dateValue( mv, internalProcessorName, propName, index, PROPERTY_TYPE_TIME, baseLineNumber);
 			}
+			else if(Blob.class.isAssignableFrom(propType)) {
+			    
+			}
 			else 
 			{
-				json.append('\"').append((String) rs.getObject(index)).append('\"');
+			    Object objValue = rs.getObject(index);
+			    
+                if (objValue != null) {
+                    
+                    json.append('\"').append(objValue.toString()).append('\"');
+                }
+                else {
+                    json.append("null");
+                }
+				
 				ojbectValue(mv, internalProcessorName, propName, index, baseLineNumber);
 			}
 			
@@ -1015,6 +1032,6 @@ class JsonProcessor extends JsonBuilder
 	@Override
 	public String buildJson(ResultSet rs) throws SQLException {
 		
-		throw new UnsupportedClassVersionError("本实现不支持此方法");
+		throw new UnsupportedOperationException("本实现不支持此方法");
 	}
 }
