@@ -43,6 +43,10 @@ public class PerformanceTest extends BaseTest {
 	@Autowired
 	@Qualifier("jdbcPerformance")
 	private Performance jdbcPerformance;
+	
+	@Autowired
+	@Qualifier("scriptPerformance")
+	private Performance scriptPerformance;
 
 	@Test
 	public void testGetMonitor() {
@@ -74,7 +78,7 @@ public class PerformanceTest extends BaseTest {
 
 			nwayPerformance.listMonitor();
 			
-			jdbcPerformance.listMonitor();
+			/*jdbcPerformance.listMonitor();
 
 			hibernatePerformance.listMonitor();
 			
@@ -82,9 +86,11 @@ public class PerformanceTest extends BaseTest {
 			
 			springDataJpaPerformance.listMonitor();
 
-			springJdbcPerformance.listMonitor();
+			springJdbcPerformance.listMonitor();*/
 			
 			myBatisPerformance.listMonitor();
+			
+			scriptPerformance.listMonitor();
 
 			System.out.println();
 		}

@@ -44,6 +44,10 @@ public class SyncPerformanceTest extends BaseTest {
 	@Autowired
     @Qualifier("jdbcPerformance")
     private Performance jdbcPerformance;
+	
+	@Autowired
+    @Qualifier("scriptPerformance")
+    private Performance scriptPerformance;
 
 	@Test
 	public void testGetMonitor() throws InterruptedException {
@@ -139,6 +143,7 @@ public class SyncPerformanceTest extends BaseTest {
 		ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
 		ExecutorService mybatis = Executors.newFixedThreadPool(times);
 		ExecutorService jdbc = Executors.newFixedThreadPool(times);
+		ExecutorService script = Executors.newFixedThreadPool(times);
 
 		Collection<Callable<List<Monitor>>> nwayTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> springTask = new ArrayList<Callable<List<Monitor>>>(times);
@@ -147,6 +152,7 @@ public class SyncPerformanceTest extends BaseTest {
 		Collection<Callable<List<Monitor>>> springDataJpaTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> mybatisTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> jdbcTask = new ArrayList<Callable<List<Monitor>>>(times);
+		Collection<Callable<List<Monitor>>> scriptTask = new ArrayList<Callable<List<Monitor>>>(times);
 
 		for (int i = 0; i < times; i++) {
 
@@ -212,6 +218,15 @@ public class SyncPerformanceTest extends BaseTest {
 			        return jdbcPerformance.listMonitor();
 			    }
 			});
+			
+			scriptTask.add(new Callable<List<Monitor>>() {
+			    
+			    @Override
+			    public List<Monitor> call() throws Exception {
+			        
+			        return scriptPerformance.listMonitor();
+			    }
+			});
 		}
 
 		nwayPerformance.listMonitor();
@@ -220,6 +235,7 @@ public class SyncPerformanceTest extends BaseTest {
 		jpaPerformance.listMonitor();
 		springDataJpaPerformance.listMonitor();
 		myBatisPerformance.listMonitor();
+		scriptPerformance.listMonitor();
 		
 		long begin = System.currentTimeMillis();
 		
@@ -256,6 +272,11 @@ public class SyncPerformanceTest extends BaseTest {
         mybatis.invokeAll(mybatisTask);
         System.out.println("mybatis = "+(System.currentTimeMillis() - begin));
         myBatisPerformance.listMonitor();
+        
+        begin = System.currentTimeMillis();
+        script.invokeAll(scriptTask);
+        System.out.println("script = "+(System.currentTimeMillis() - begin));
+        scriptPerformance.listMonitor();
 	}
 
 	@Test

@@ -31,7 +31,9 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.json.JsonHandler;
+import com.nway.spring.jdbc.json.JsonHandlerNRC;
 import com.nway.spring.jdbc.json.JsonListHandler;
+import com.nway.spring.jdbc.json.JsonListHandlerNRC;
 
 /**
  * ע�⣺
@@ -117,34 +119,59 @@ public class SqlExecutor extends JdbcTemplate {
 		return super.query(sql, new JsonHandler(type, sql), args);
 	}
 	
-	public String queryForJson(String sql,Object[] args, Class<?> type) throws DataAccessException {
+	public String queryForJson(String sql,Object[] args) throws DataAccessException {
 		
-		return super.query(sql, args, new JsonHandler(type, sql));
+		return super.query(sql, args, new JsonHandlerNRC(sql));
 	}
 	
+	public String queryForJson(String sql,Object[] args, Class<?> type) throws DataAccessException {
+	    
+	    return super.query(sql, args, new JsonHandler(type, sql));
+	}
+	
+	public String queryForJson(String sql, Object[] args, int[] argTypes) throws DataAccessException {
+        
+        return super.query(sql, args, argTypes, new JsonHandlerNRC(sql));
+    }
+
 	public String queryForJson(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 
 		return super.query(sql, args, argTypes, new JsonHandler(type, sql));
 	}
 	
-	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
+	public String queryForJsonList(String sql) throws DataAccessException {
 		
-		return super.query(sql, new JsonListHandler(type, sql));
+		return super.query(sql, new JsonListHandlerNRC(sql));
+	}
+	
+	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
+	    
+	    return super.query(sql, new JsonListHandler(type, sql));
+	}
+	
+	public String queryForJsonList(String sql, Object... args) throws DataAccessException {
+		
+		return super.query(sql, new JsonListHandlerNRC( sql), args);
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
-		
-		return super.query(sql, new JsonListHandler(type, sql), args);
+	    
+	    return super.query(sql, new JsonListHandler(type, sql), args);
 	}
 	
-	public String queryForJsonList(String sql,Object[] args, Class<?> type) throws DataAccessException {
-		
-		return super.query(sql, args, new JsonListHandler(type, sql));
+	public String queryForJsonList(String sql, Object[] args, Class<?> type) throws DataAccessException {
+	    
+	    return super.query(sql, args, new JsonListHandler(type, sql));
+	}
+	
+	public String queryForJsonList(String sql, Object[] args, int[] argTypes) throws DataAccessException {
+	    
+	    return super.query(sql, args, argTypes, new JsonListHandlerNRC(sql));
 	}
 	
 	public String queryForJsonList(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
-		
-		return super.query(sql, args, argTypes, new JsonListHandler(type, sql));
+	    
+	    return super.query(sql, args, argTypes, new JsonListHandler(type, sql));
 	}
 	
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page,
@@ -228,12 +255,24 @@ public class SqlExecutor extends JdbcTemplate {
 		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
 
-	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize, Class<?> beanClass)
+	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize)
 			throws DataAccessException {
 		
-		return queryForJsonPagination(sql, params, null, page, pageSize, beanClass);
+		return queryForJsonPagination(sql, params, null, page, pageSize, null);
 	}
 	
+	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize, Class<?> beanClass)
+	        throws DataAccessException {
+	    
+	    return queryForJsonPagination(sql, params, null, page, pageSize, beanClass);
+	}
+    
+    public String queryForJsonPagination(String sql, Object[] params, int[] argTypes, int page, int pageSize)
+            throws DataAccessException {
+        
+        return queryForJsonPagination(sql, params, argTypes, page, pageSize, null);
+    }
+    
 	public String queryForJsonPagination(String sql, Object[] params, int[] argTypes, int page, int pageSize,
 			Class<?> beanClass) throws DataAccessException {
 		
@@ -252,11 +291,24 @@ public class SqlExecutor extends JdbcTemplate {
 
 			if (argTypes == null)
 			{
-				json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, beanClass)).append(',');
+			    if(beanClass == null) {
+			        
+			        json.append("\"pageData\":").append(queryForJsonList(paginationSql, params)).append(',');
+			    }
+			    else {
+			        
+			        json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, beanClass)).append(',');
+			    }
 			}
 			else {
-				
-				json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, argTypes, beanClass)).append(',');
+			    if(beanClass == null) {
+			        
+			        json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, argTypes)).append(',');
+			    }
+			    else {
+			        
+			        json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, argTypes, beanClass)).append(',');
+			    }
 			}
 			
 			pageCount = (totalCount / pageSize);

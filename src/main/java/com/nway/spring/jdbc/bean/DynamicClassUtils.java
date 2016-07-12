@@ -34,4 +34,9 @@ public class DynamicClassUtils {
 
 		return DYNAMIC_BEAN_PACKAGE + type.getSimpleName() + System.nanoTime();
 	}
+	
+	public static String getProcessorName() {
+	    
+	    return DYNAMIC_BEAN_PACKAGE +"NoneRequireClass"+ System.nanoTime();
+	}
 }

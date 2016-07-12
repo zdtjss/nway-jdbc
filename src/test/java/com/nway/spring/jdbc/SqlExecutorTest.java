@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.hibernate.Hibernate;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,6 +29,9 @@ public class SqlExecutorTest extends BaseTest
 {
 	@Autowired
 	private SqlExecutor sqlExecutor;
+	
+	@Autowired
+    private SessionFactory sessionFactory;
 	
 	@Test
 	public void testQueryForBean()
@@ -118,7 +121,7 @@ public class SqlExecutorTest extends BaseTest
 	@Test
 	public void testJsonList() {
 		
-		String sql = "select * from t_nway where rownum < 10";
+		String sql = "select * from t_nway";
 
 		String json = sqlExecutor.queryForJsonList(sql, ExampleEntity.class);
 
@@ -126,13 +129,33 @@ public class SqlExecutorTest extends BaseTest
 	}
 	
 	@Test
-	public void testJsonPagination()
+	public void testJsonListNRC() {
+	    
+	    String sql = "select * from t_nway";
+	    
+	    String json = sqlExecutor.queryForJsonList(sql);
+	    
+	    System.out.println(json);
+	}
+	
+	@Test
+	public void testJsonPaginationNRC()
 	{
-		String sql = "select * from t_nway order by c_p_int";
+		String sql = "select * from t_nway order by p_int";
 
-		String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5, ExampleEntity.class);
+		String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5);
 
 		System.out.println(json);
+	}
+	
+	@Test
+	public void testJsonPagination()
+	{
+	    String sql = "select * from t_nway order by p_int";
+	    
+	    String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5, ExampleEntity.class);
+	    
+	    System.out.println(json);
 	}
 	
 	@Test
@@ -170,32 +193,15 @@ public class SqlExecutorTest extends BaseTest
 	@Test
 	public void initTable() throws SQLException {
 
-		SessionFactory sessionFactory = null;
-		
-		try {
-
-			Configuration cfg = new Configuration().configure();
-
-			// Create the SessionFactory from hibernate.cfg.xml
-			sessionFactory = cfg.buildSessionFactory(
-					new StandardServiceRegistryBuilder().applySettings(cfg.getProperties()).build());
-		} catch (Throwable ex) {
-			// Make sure you log the exception, as it might be swallowed
-			System.err.println("Initial SessionFactory creation failed." + ex);
-			throw new ExceptionInInitializerError(ex);
-		}
-		
-		Session session = sessionFactory.openSession();
-		
-		Transaction transaction = session.beginTransaction();
-		
-		for (int i = 0; i < 100; i++) {
+	    Session session = sessionFactory.openSession();
+	    
+	    Transaction transaction = session.beginTransaction();
+	    
+		for (int i = 0; i < 10; i++) {
 			
 			ExampleEntity example = new ExampleEntity();
 
-			DecimalFormat numberFormat = new DecimalFormat("0000000000.00");
-
-			example.setId((int) (Math.random() * 10) % 2);
+			DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
 
 			example.setpBoolean(1 == ((Math.random() * 10) % 2));
 
@@ -235,9 +241,9 @@ public class SqlExecutorTest extends BaseTest
 			
 			example.setTimestamp(new Timestamp(System.currentTimeMillis()));
 			
-			example.setClob(Hibernate.getLobCreator(session).createClob("nway"));
+			example.setClob(new SerialClob("nway".toCharArray()));
 			
-			example.setBlob(Hibernate.getLobCreator(session).createBlob("nway".getBytes()));
+			example.setBlob(new SerialBlob("nway".getBytes()));
 			
 //			example.setInputStream(Hibernate.getLobCreator(session).createBlob("nway".getBytes()).getBinaryStream());
 		

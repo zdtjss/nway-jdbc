@@ -107,4 +107,5 @@ public abstract class JsonBuilder
 			json.append(value);
 		}
 	}
+	
 }

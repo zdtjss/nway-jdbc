@@ -3,11 +3,11 @@ package com.nway.spring.jdbc.json;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +90,35 @@ class JsonProcessor extends JsonBuilder
 //		}
 	}
 	
+	public String buildJson(ResultSet rs, String cacheKey) throws SQLException {
+	    
+	    /*if (cacheKey == null) {
+
+			cacheKey = DynamicClassUtils.makeCacheKey(rs,  type.getName());
+		} */
+	    
+	    /*
+	     * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
+	     * 如果不做线程同步，只有当存在某一查询一开始就大量并发访问时，才会在前几次查询中重复定义动态相同的DbBeanFactory
+	     * 以type对象作为同步锁，降低线程同步对系统整体吞吐量的影响
+	     */
+//		synchronized (type) {
+	    
+	    if (HAS_ASM) {
+	        
+	        return buildJsonByAsm(rs, cacheKey);
+	    } 
+	    else if (HAS_JAVASSIST) {
+	        
+	        return buildJsonByJavassist(rs, cacheKey);
+	    } 
+	    else {
+	        
+	        return buildJsonWithJdk(rs);
+	    }
+//		}
+	}
+	
 	public String toJsonList(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
 	
 		StringBuilder json = new StringBuilder("[");
@@ -108,6 +137,26 @@ class JsonProcessor extends JsonBuilder
 		}
 
 		return json.append(']').toString();
+	}
+	
+	public String toJsonList(ResultSet rs, String cacheKey) throws SQLException, IntrospectionException {
+	    
+	    StringBuilder json = new StringBuilder("[");
+	    
+//		String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
+	    
+	    do {
+	        
+	        json.append(buildJson(rs, cacheKey)).append(',');
+	    }
+	    while (rs.next());
+	    
+	    if (json.length() > 1) {
+	        
+	        json = json.deleteCharAt(json.length() - 1);
+	    }
+	    
+	    return json.append(']').toString();
 	}
 	
 	private String buildJsonWithJdk(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException
@@ -188,6 +237,116 @@ class JsonProcessor extends JsonBuilder
 		return json.append('}').toString();
 	}
 	
+	private String buildJsonWithJdk(ResultSet rs) throws SQLException {
+	    
+	    ResultSetMetaData rsmd = rs.getMetaData();
+	    
+	    int[] types = new int[rsmd.getColumnCount()];
+        int[] precision = new int[types.length];
+        int[] scale = new int[types.length];
+        String[] columns = new String[types.length];
+        
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            
+            precision[i - 1] = rsmd.getPrecision(i);
+            
+            scale[i - 1] = rsmd.getScale(i);
+            
+            types[i - 1] = rsmd.getColumnType(i);
+            
+            columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
+        }
+        
+	    StringBuilder json = new StringBuilder("{");
+	    
+	    for (int index = 1; index <= columns.length; index++) {
+            
+	        json.append('\"').append(columns[index - 1]).append("\":");
+	        
+	        if (types[index - 1] == Types.LONGNVARCHAR || types[index - 1] == Types.LONGVARCHAR
+                    || types[index - 1] == Types.NCHAR || types[index - 1] == Types.NCLOB
+                    || types[index - 1] == Types.NVARCHAR || types[index - 1] == Types.VARCHAR
+                    || types[index - 1] == Types.CHAR || types[index - 1] == Types.CLOB)
+            {
+                stringValue(rs.getString(index), json);
+            }
+            else if (types[index - 1] == Types.BOOLEAN || types[index - 1] == Types.BIT)
+            {
+                booleanValue(rs.getBoolean(index), rs.wasNull(), json);
+            }
+            else if (types[index - 1] == Types.DISTINCT || types[index - 1] == Types.INTEGER
+                    || types[index - 1] == Types.SMALLINT || types[index - 1] == Types.TINYINT)
+            {
+                integerValue(rs.getInt(index), rs.wasNull(), json);
+            }
+            else if (types[index - 1] == Types.BIGINT)
+            {
+                longValue(rs.getLong(index), rs.wasNull(), json);
+            }
+            else if (types[index - 1] == Types.NUMERIC) {
+                
+                if(precision[index - 1] <= 10) {
+                    
+                    if(scale[index - 1] == 0) {
+                        
+                        integerValue(rs.getInt(index), rs.wasNull(), json);
+                    }
+                    else {
+                        
+                        floatValue(rs.getFloat(index), rs.wasNull(), json);
+                    }
+                }
+                else if (precision[index - 1] > 10) {
+                    
+                    if(scale[index - 1] == 0) {
+                        
+                        longValue(rs.getLong(index), rs.wasNull(), json);
+                    }
+                    else {
+                        
+                        doubleValue(rs.getDouble(index), rs.wasNull(), json);
+                    }
+                }
+            }
+            else if (types[index - 1] == Types.FLOAT)
+            {
+                floatValue(rs.getFloat(index), rs.wasNull(), json);
+            }
+            else if (types[index - 1] == Types.DOUBLE)
+            {
+                doubleValue(rs.getDouble(index), rs.wasNull(), json);
+            }
+            else if (types[index - 1] == Types.DATE)
+            {
+                dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
+            }
+            else if (types[index - 1] == Types.TIMESTAMP)
+            {
+                dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
+            }
+            else if (types[index - 1] == Types.TIME)
+            {
+                dateValue(rs.getTime(index), "HH:mm:ss", json);
+            }
+            else if(types[index - 1] == Types.BLOB) {
+                
+            }
+	        else 
+	        {
+	            json.append('\"').append(rs.getObject(index)).append('\"');
+	        }
+	        
+	        json.append(',');
+	    }
+	    
+	    if (json.length() > 1)
+	    {
+	        json = json.deleteCharAt(json.length() - 1);
+	    }
+	    
+	    return json.append('}').toString();
+	}
+	
 	private String buildJsonByJavassist(ResultSet rs, Class<?> type, String key) throws SQLException, IntrospectionException {
 		
 		JsonBuilder jsonBuilder = JSON_BUILDER_CACHE.get(key);
@@ -219,14 +378,58 @@ class JsonProcessor extends JsonBuilder
 		
 		return sb[0].toString();
 	}
+	
+	private String buildJsonByJavassist(ResultSet rs, String key) throws SQLException {
+	    
+	    JsonBuilder jsonBuilder = JSON_BUILDER_CACHE.get(key);
+	    
+	    if (jsonBuilder != null) {
+	        
+	        return jsonBuilder.buildJson(rs);
+	    }
+	    
+	    StringBuilder[] sb = processByJavasist(rs);
+	    
+	    try {
+	        
+	        ClassPool classPool = ClassPoolCreator.getClassPool();
+	        
+	        CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getProcessorName());
+	        CtClass superClass = classPool.get("com.nway.spring.jdbc.json.JsonBuilder");
+	        
+	        ctHandler.setSuperclass(superClass);
+	        
+	        ctHandler.addMethod(CtNewMethod.make(sb[1].toString(), ctHandler));
+	        
+	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().newInstance());
+	        
+	    } catch (Exception e) {
+	        
+	        throw new DynamicObjectException("使用javassist创建用于获取JSON数据的基础类失败失败", e);
+	    }
+	    
+	    return sb[0].toString();
+	}
 
-	private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQLException, IntrospectionException{
+	private StringBuilder[] processByJavasist(ResultSet rs) throws SQLException {
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		
-		PropertyDescriptor[] props = Introspector.getBeanInfo(type).getPropertyDescriptors();
-		
-		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
+		int[] types = new int[rsmd.getColumnCount()];
+        int[] precision = new int[types.length];
+        int[] scale = new int[types.length];
+        String[] columns = new String[types.length];
+        
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            
+            precision[i - 1] = rsmd.getPrecision(i);
+            
+            scale[i - 1] = rsmd.getScale(i);
+            
+            types[i - 1] = rsmd.getColumnType(i);
+            
+            columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
+        }
 		
 		StringBuilder json = new StringBuilder("{");
 
@@ -234,111 +437,108 @@ class JsonProcessor extends JsonBuilder
 
 		handlerScript.append("StringBuilder json = new StringBuilder(\"{\");");
 
-		for (int index = 1; index < columnToProperty.length; index++)
-		{
-			if (columnToProperty[index] == PROPERTY_NOT_FOUND) {
-				
-				continue;
-			}
-			
-			PropertyDescriptor prop = props[columnToProperty[index]];
-			String propName = prop.getName();
-			Class<?> propType = prop.getPropertyType();
+		for (int index = 1; index <= columns.length; index++) {
+            
+            String propName = columns[index - 1];
 			
 			json.append('\"').append(propName).append("\":");
 			
 			handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\")");
 
-			if (String.class.equals(propType) || Clob.class.equals(propType))
+			if (types[index - 1] == Types.LONGNVARCHAR || types[index - 1] == Types.LONGVARCHAR
+                    || types[index - 1] == Types.NCHAR || types[index - 1] == Types.NCLOB
+                    || types[index - 1] == Types.NVARCHAR || types[index - 1] == Types.VARCHAR
+                    || types[index - 1] == Types.CHAR || types[index - 1] == Types.CLOB)
 			{
 				stringValue(rs.getString(index), json);
 				
 				handlerScript.append(";stringValue($1.getString(").append(index).append("),json);json.append(',');");
 			}
-			else if (boolean.class.equals(propType))
-			{
-				json.append(rs.getBoolean(index));
-				
-				handlerScript.append(".append($1.getBoolean(").append(index).append(")).append(',');");
-			}
-			else if (Boolean.class.equals(propType))
+			else if (types[index - 1] == Types.DISTINCT || types[index - 1] == Types.INTEGER
+                    || types[index - 1] == Types.SMALLINT || types[index - 1] == Types.TINYINT)
+            {
+                integerValue(rs.getInt(index), rs.wasNull(), json);
+                
+                handlerScript.append(";integerValue($1.getInt(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (types[index - 1] == Types.BIGINT)
+            {
+                longValue(rs.getLong(index), rs.wasNull(), json);
+                
+                handlerScript.append(";longValue($1.getLong(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (types[index - 1] == Types.NUMERIC) {
+                
+                if(precision[index - 1] <= 10) {
+                    
+                    if(scale[index - 1] == 0) {
+                        
+                        integerValue(rs.getInt(index), rs.wasNull(), json);
+                        
+                        handlerScript.append(";integerValue($1.getInt(").append(index).append("),$1.wasNull(),json);json.append(',');");
+                    }
+                    else {
+                        
+                        floatValue(rs.getFloat(index), rs.wasNull(), json);
+                        
+                        handlerScript.append(";floatValue($1.getFloat(").append(index).append("),$1.wasNull(),json);json.append(',');");
+                    }
+                }
+                else if (precision[index - 1] > 10) {
+                    
+                    if(scale[index - 1] == 0) {
+                        
+                        longValue(rs.getLong(index), rs.wasNull(), json);
+                        
+                        handlerScript.append(";longValue($1.getLong(").append(index).append("),$1.wasNull(),json);json.append(',');");
+                    }
+                    else {
+                        
+                        doubleValue(rs.getDouble(index), rs.wasNull(), json);
+                        
+                        handlerScript.append(";doubleValue($1.getDouble(").append(index).append("),$1.wasNull(),json);json.append(',');");
+                    }
+                }
+            }
+			else if (types[index - 1] == Types.BOOLEAN || types[index - 1] == Types.BIT)
 			{
 				booleanValue(rs.getBoolean(index), rs.wasNull(), json);
 				
 				handlerScript.append(";booleanValue($1.getBoolean(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
-			else if (int.class.equals(propType))
-			{
-				json.append(rs.getInt(index));
-				
-				handlerScript.append(".append($1.getInt(").append(index).append(")).append(',');");
-			}
-			else if (Integer.class.equals(propType))
-			{
-				integerValue(rs.getInt(index), rs.wasNull(), json);
-				
-				handlerScript.append(";integerValue($1.getInt(").append(index).append("),$1.wasNull(),json);json.append(',');");
-			}
-			else if (long.class.equals(propType))
-			{
-				json.append(rs.getLong(index));
-
-				handlerScript.append(".append($1.getLong(").append(index).append(")).append(',');");
-			}
-			else if (Long.class.equals(propType))
-			{
-				longValue(rs.getLong(index), rs.wasNull(), json);
-				
-				handlerScript.append(";longValue($1.getLong(").append(index).append("),$1.wasNull(),json);json.append(',');");
-			}
-			else if (float.class.equals(propType))
-			{
-				json.append(rs.getFloat(index));
-				
-				handlerScript.append(".append($1.getFloat(").append(index).append(")).append(',');");
-			}
-			else if (Float.class.equals(propType))
+			else if (types[index - 1] == Types.FLOAT)
 			{
 				floatValue(rs.getFloat(index), rs.wasNull(), json);
 				
 				handlerScript.append(";floatValue($1.getFloat(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
-			else if (double.class.equals(propType))
-			{
-				json.append(rs.getDouble(index));
-				
-				handlerScript.append(".append($1.getDouble(").append(index).append(")).append(',');");
-			}
-			else if (Double.class.equals(propType))
+			else if (types[index - 1] == Types.DOUBLE)
 			{
 				doubleValue(rs.getDouble(index), rs.wasNull(), json);
 				
 				handlerScript.append(";doubleValue($1.getDouble(").append(index).append("),$1.wasNull(),json);json.append(',');");
 			}
-			else if (java.util.Date.class.equals(propType))
+			else if (types[index - 1] == Types.DATE)
 			{
 				dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
 				
 				handlerScript.append(";dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd HH:mm:ss\",json);json.append(',');");
 			}
-			else if (java.sql.Timestamp.class.equals(propType))
+			else if (types[index - 1] == Types.TIMESTAMP)
 			{
 				dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
 				
 				handlerScript.append(";dateValue($1.getTimestamp(").append(index).append("),\"yyyy-MM-dd HH:mm:ss.SSS\",json);json.append(',');");
 			}
-			else if (java.sql.Date.class.equals(propType))
-			{
-				dateValue(rs.getDate(index), "yyyy-MM-dd", json);
-				
-				handlerScript.append(";dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd\",json);json.append(',');");
-			}
-			else if (java.sql.Time.class.equals(propType))
+			else if (types[index - 1] == Types.TIME)
 			{
 				dateValue(rs.getTime(index), "HH:mm:ss", json);
 				
 				handlerScript.append(";dateValue($1.getTime(").append(index).append("),\"HH:mm:ss\",json);json.append(',');");
 			}
+			else if(types[index - 1] == Types.BLOB) {
+                
+            }
 			else 
 			{
 			    Object objValue = rs.getObject(index);
@@ -369,6 +569,155 @@ class JsonProcessor extends JsonBuilder
 		return new StringBuilder[] { json, handlerScript };
 	}
 	
+private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQLException, IntrospectionException{
+        
+        ResultSetMetaData rsmd = rs.getMetaData();
+        
+        PropertyDescriptor[] props = Introspector.getBeanInfo(type).getPropertyDescriptors();
+        
+        int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
+        
+        StringBuilder json = new StringBuilder("{");
+
+        StringBuilder handlerScript = new StringBuilder("String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
+
+        handlerScript.append("StringBuilder json = new StringBuilder(\"{\");");
+
+        for (int index = 1; index < columnToProperty.length; index++)
+        {
+            if (columnToProperty[index] == PROPERTY_NOT_FOUND) {
+                
+                continue;
+            }
+            
+            PropertyDescriptor prop = props[columnToProperty[index]];
+            String propName = prop.getName();
+            Class<?> propType = prop.getPropertyType();
+            
+            json.append('\"').append(propName).append("\":");
+            
+            handlerScript.append("json.append(\"\\\"").append(propName).append("\\\":\")");
+
+            if (String.class.equals(propType) || Clob.class.equals(propType))
+            {
+                stringValue(rs.getString(index), json);
+                
+                handlerScript.append(";stringValue($1.getString(").append(index).append("),json);json.append(',');");
+            }
+            else if (boolean.class.equals(propType))
+            {
+                json.append(rs.getBoolean(index));
+                
+                handlerScript.append(".append($1.getBoolean(").append(index).append(")).append(',');");
+            }
+            else if (Boolean.class.equals(propType))
+            {
+                booleanValue(rs.getBoolean(index), rs.wasNull(), json);
+                
+                handlerScript.append(";booleanValue($1.getBoolean(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (int.class.equals(propType))
+            {
+                json.append(rs.getInt(index));
+                
+                handlerScript.append(".append($1.getInt(").append(index).append(")).append(',');");
+            }
+            else if (Integer.class.equals(propType))
+            {
+                integerValue(rs.getInt(index), rs.wasNull(), json);
+                
+                handlerScript.append(";integerValue($1.getInt(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (long.class.equals(propType))
+            {
+                json.append(rs.getLong(index));
+
+                handlerScript.append(".append($1.getLong(").append(index).append(")).append(',');");
+            }
+            else if (Long.class.equals(propType))
+            {
+                longValue(rs.getLong(index), rs.wasNull(), json);
+                
+                handlerScript.append(";longValue($1.getLong(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (float.class.equals(propType))
+            {
+                json.append(rs.getFloat(index));
+                
+                handlerScript.append(".append($1.getFloat(").append(index).append(")).append(',');");
+            }
+            else if (Float.class.equals(propType))
+            {
+                floatValue(rs.getFloat(index), rs.wasNull(), json);
+                
+                handlerScript.append(";floatValue($1.getFloat(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (double.class.equals(propType))
+            {
+                json.append(rs.getDouble(index));
+                
+                handlerScript.append(".append($1.getDouble(").append(index).append(")).append(',');");
+            }
+            else if (Double.class.equals(propType))
+            {
+                doubleValue(rs.getDouble(index), rs.wasNull(), json);
+                
+                handlerScript.append(";doubleValue($1.getDouble(").append(index).append("),$1.wasNull(),json);json.append(',');");
+            }
+            else if (java.util.Date.class.equals(propType))
+            {
+                dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
+                
+                handlerScript.append(";dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd HH:mm:ss\",json);json.append(',');");
+            }
+            else if (java.sql.Timestamp.class.equals(propType))
+            {
+                dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
+                
+                handlerScript.append(";dateValue($1.getTimestamp(").append(index).append("),\"yyyy-MM-dd HH:mm:ss.SSS\",json);json.append(',');");
+            }
+            else if (java.sql.Date.class.equals(propType))
+            {
+                dateValue(rs.getDate(index), "yyyy-MM-dd", json);
+                
+                handlerScript.append(";dateValue($1.getDate(").append(index).append("),\"yyyy-MM-dd\",json);json.append(',');");
+            }
+            else if (java.sql.Time.class.equals(propType))
+            {
+                dateValue(rs.getTime(index), "HH:mm:ss", json);
+                
+                handlerScript.append(";dateValue($1.getTime(").append(index).append("),\"HH:mm:ss\",json);json.append(',');");
+            }
+            else 
+            {
+                Object objValue = rs.getObject(index);
+                
+                if (objValue != null) {
+                    
+                    json.append('\"').append(objValue.toString()).append('\"');
+                }
+                else {
+                    json.append("null");
+                }
+
+                handlerScript.append(".append($1.getObject(").append(index).append(").toString()).append('\"').append(',');");
+            }
+            
+            json.append(',');
+        }
+        
+        if (json.length() > 1)
+        {
+            json = json.deleteCharAt(json.length() - 1);
+            
+            handlerScript = handlerScript.append("if(json.length()>1){json = json.deleteCharAt(json.length() - 1);}json.append('}');return json.toString();}");
+        }
+        
+        json.append('}');
+        
+        return new StringBuilder[] { json, handlerScript };
+    }
+
 	private String buildJsonByAsm(ResultSet rs, Class<?> type, String key) throws SQLException, IntrospectionException {
 		
 		JsonBuilder jsonBuilder = JSON_BUILDER_CACHE.get(key);
@@ -398,6 +747,37 @@ class JsonProcessor extends JsonBuilder
         }
 		
 		return json;
+	}
+	
+	private String buildJsonByAsm(ResultSet rs, String key) throws SQLException {
+	    
+	    JsonBuilder jsonBuilder = JSON_BUILDER_CACHE.get(key);
+	    
+	    if (jsonBuilder != null) {
+	        
+	        return jsonBuilder.buildJson(rs);
+	    }
+	    
+	    ClassWriter cw = new ClassWriter(0);
+	    
+	    String processorName = DynamicClassUtils.getProcessorName();
+	    
+	    String json = processByAsm(cw, processorName, rs);
+	    
+	    try {
+	        
+	        DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
+	        
+	        Class<?> processor = beanClassLoader.defineClass(processorName, cw.toByteArray());
+	        
+	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) processor.newInstance());
+	        
+	    } catch (Exception e) {
+	        
+	        throw new DynamicObjectException("使用ASM创建用于获取JSON数据的基础类失败", e);
+	    }
+	    
+	    return json;
 	}
 
 	private String processByAsm(ClassWriter cw, String processorName, ResultSet rs,Class<?> type) throws SQLException, IntrospectionException{
@@ -515,9 +895,6 @@ class JsonProcessor extends JsonBuilder
 				dateValue(rs.getTime(index), "HH:mm:ss", json);
 				dateValue( mv, internalProcessorName, propName, index, PROPERTY_TYPE_TIME, baseLineNumber);
 			}
-			else if(Blob.class.isAssignableFrom(propType)) {
-			    
-			}
 			else 
 			{
 			    Object objValue = rs.getObject(index);
@@ -549,6 +926,162 @@ class JsonProcessor extends JsonBuilder
 		cw.visitEnd();
 		
 		return json.toString();
+	}
+	
+	private String processByAsm(ClassWriter cw, String processorName, ResultSet rs) throws SQLException {
+	    
+	    ResultSetMetaData rsmd = rs.getMetaData();
+	    
+	    int[] types = new int[rsmd.getColumnCount()];
+	    int[] precision = new int[types.length];
+	    int[] scale = new int[types.length];
+	    String[] columns = new String[types.length];
+        
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            
+            precision[i - 1] = rsmd.getPrecision(i);
+            
+            scale[i - 1] = rsmd.getScale(i);
+            
+            types[i - 1] = rsmd.getColumnType(i);
+            
+            columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
+        }
+	    
+	    String internalProcessorName = processorName.replace('.', '/');
+	    
+	    StringBuilder json = new StringBuilder("{");
+	    
+	    Object[] initParam = initBuilder(cw, internalProcessorName);
+	    
+	    MethodVisitor mv = (MethodVisitor) initParam[0];
+	    
+	    for (int index = 1; index <= columns.length; index++) {
+	        
+	        String propName = columns[index - 1];
+	        
+	        int baseLineNumber = DYNAMIC_CLASS_ORIGIN_LINE_NUMBER + index * DYNAMIC_CLASS_LINE_NUMBER_STEP;
+	        
+	        json.append('\"').append(propName).append("\":");
+	        
+            if (types[index - 1] == Types.LONGNVARCHAR || types[index - 1] == Types.LONGVARCHAR
+                    || types[index - 1] == Types.NCHAR || types[index - 1] == Types.NCLOB
+                    || types[index - 1] == Types.NVARCHAR || types[index - 1] == Types.VARCHAR
+                    || types[index - 1] == Types.CHAR || types[index - 1] == Types.CLOB)
+            {
+                stringValue(rs.getString(index), json);
+                stringValue(mv, internalProcessorName, propName, index, baseLineNumber);
+            }
+            else if (types[index - 1] == Types.DISTINCT || types[index - 1] == Types.INTEGER
+                    || types[index - 1] == Types.SMALLINT || types[index - 1] == Types.TINYINT)
+            {
+                integerValue(rs.getInt(index), rs.wasNull(), json);
+                
+                integerValue(mv, internalProcessorName, propName, index, baseLineNumber);
+            }
+            else if (types[index - 1] == Types.BIGINT)
+            {
+                longValue(rs.getLong(index), rs.wasNull(), json);
+                
+                longValue(mv, internalProcessorName, propName, index, baseLineNumber);
+            }
+            else if (types[index - 1] == Types.NUMERIC) {
+                
+                if(precision[index - 1] <= 10) {
+                    
+                    if(scale[index - 1] == 0) {
+                        
+                        integerValue(rs.getInt(index), rs.wasNull(), json);
+                        
+                        integerValue(mv, internalProcessorName, propName, index, baseLineNumber);
+                    }
+                    else {
+                        
+                        floatValue(rs.getFloat(index), rs.wasNull(), json);
+                        
+                        floatValue(mv, internalProcessorName, propName, index, baseLineNumber);
+                    }
+                }
+                else if (precision[index - 1] > 10) {
+                    
+                    if(scale[index - 1] == 0) {
+                        
+                        longValue(rs.getLong(index), rs.wasNull(), json);
+                        
+                        longValue(mv, internalProcessorName, propName, index, baseLineNumber);
+                    }
+                    else {
+                        
+                        doubleValue(rs.getDouble(index), rs.wasNull(), json);
+                        
+                        doubleValue(mv, internalProcessorName, propName, index, baseLineNumber);
+                    }
+                }
+            }
+            else if (types[index - 1] == Types.DATE)
+            {
+                dateValue(rs.getDate(index), "yyyy-MM-dd HH:mm:ss", json);
+                dateValue( mv, internalProcessorName, propName, index, PROPERTY_TYPE_DATE, baseLineNumber);
+            }
+            else if (types[index - 1] == Types.TIMESTAMP)
+            {
+                dateValue(rs.getTimestamp(index), "yyyy-MM-dd HH:mm:ss.SSS", json);
+                dateValue( mv, internalProcessorName, propName, index, PROPERTY_TYPE_TIMESTAMP, baseLineNumber);
+            }
+            else if (types[index - 1] == Types.TIME)
+            {
+                dateValue(rs.getTime(index), "HH:mm:ss", json);
+                dateValue( mv, internalProcessorName, propName, index, PROPERTY_TYPE_TIME, baseLineNumber);
+            }
+	        else if (types[index - 1] == Types.BOOLEAN || types[index - 1] == Types.BIT)
+	        {
+	            booleanValue(rs.getBoolean(index), rs.wasNull(), json);
+	            
+	            booleanValue(mv,internalProcessorName, propName, index, baseLineNumber);
+	        }
+	        else if (types[index - 1] == Types.FLOAT)
+	        {
+	            floatValue(rs.getFloat(index), rs.wasNull(), json);
+	            
+	            floatValue(mv, internalProcessorName, propName, index, baseLineNumber);
+	        }
+	        else if (types[index - 1] == Types.DOUBLE || types[index - 1] == Types.REAL)
+	        {
+	            doubleValue(rs.getDouble(index), rs.wasNull(), json);
+	            
+	            doubleValue(mv, internalProcessorName, propName, index, baseLineNumber);
+	        }
+	        else 
+	        {
+	            Object objValue = rs.getObject(index);
+	            
+	            if (objValue != null) {
+	                
+	                json.append('\"').append(objValue.toString()).append('\"');
+	            }
+	            else {
+	                json.append("null");
+	            }
+	            
+	            ojbectValue(mv, internalProcessorName, propName, index, baseLineNumber);
+	        }
+	        
+	        json.append(',');
+	    }
+	    
+	    if (json.length() > 1)
+	    {
+	        json = json.deleteCharAt(json.length() - 1);
+	        
+	    }
+	    
+	    json.append('}');
+	    
+	    finishBuilder(mv, internalProcessorName, (Label)initParam[1], (Label)initParam[2], DYNAMIC_CLASS_ORIGIN_LINE_NUMBER + columns.length * DYNAMIC_CLASS_LINE_NUMBER_STEP );
+	    
+	    cw.visitEnd();
+	    
+	    return json.toString();
 	}
 
 	/**
