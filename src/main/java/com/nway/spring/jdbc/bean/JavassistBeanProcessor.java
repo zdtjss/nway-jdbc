@@ -211,7 +211,7 @@ class JavassistBeanProcessor implements BeanProcessor {
 
     		classPool.appendClassPath(new LoaderClassPath(ClassUtils.getDefaultClassLoader()));
 
-            CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getProcessorName(mappedClass));
+            CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getBeanProcessorName(mappedClass));
             ctHandler.setSuperclass(classPool.get("com.nway.spring.jdbc.bean.DbBeanFactory"));
             
             CtMethod mapRow = CtNewMethod

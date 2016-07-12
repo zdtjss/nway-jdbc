@@ -17,7 +17,7 @@ public abstract class JsonBuilder
 {
 	protected static final String JSON_NULL = "null";
 
-	protected JsonBuilder(){
+	protected JsonBuilder() {
 	}
 	
 	protected abstract String buildJson(ResultSet rs) throws SQLException;

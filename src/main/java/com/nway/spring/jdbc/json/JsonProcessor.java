@@ -328,9 +328,6 @@ class JsonProcessor extends JsonBuilder
             {
                 dateValue(rs.getTime(index), "HH:mm:ss", json);
             }
-            else if(types[index - 1] == Types.BLOB) {
-                
-            }
 	        else 
 	        {
 	            json.append('\"').append(rs.getObject(index)).append('\"');
@@ -362,7 +359,7 @@ class JsonProcessor extends JsonBuilder
 
             ClassPool classPool = ClassPoolCreator.getClassPool();
             
-            CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getProcessorName(type));
+            CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getJSONProcessorName(type));
             CtClass superClass = classPool.get("com.nway.spring.jdbc.json.JsonBuilder");
             
             ctHandler.setSuperclass(superClass);
@@ -394,13 +391,15 @@ class JsonProcessor extends JsonBuilder
 	        
 	        ClassPool classPool = ClassPoolCreator.getClassPool();
 	        
-	        CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getProcessorName());
+	        CtClass ctHandler = classPool.makeClass(DynamicClassUtils.getJSONProcessorName());
 	        CtClass superClass = classPool.get("com.nway.spring.jdbc.json.JsonBuilder");
 	        
 	        ctHandler.setSuperclass(superClass);
 	        
 	        ctHandler.addMethod(CtNewMethod.make(sb[1].toString(), ctHandler));
 	        
+//	           FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
+
 	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().newInstance());
 	        
 	    } catch (Exception e) {
@@ -410,7 +409,7 @@ class JsonProcessor extends JsonBuilder
 	    
 	    return sb[0].toString();
 	}
-
+    
 	private StringBuilder[] processByJavasist(ResultSet rs) throws SQLException {
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -433,7 +432,7 @@ class JsonProcessor extends JsonBuilder
 		
 		StringBuilder json = new StringBuilder("{");
 
-		StringBuilder handlerScript = new StringBuilder("String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
+		StringBuilder handlerScript = new StringBuilder("protected String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
 
 		handlerScript.append("StringBuilder json = new StringBuilder(\"{\");");
 
@@ -536,9 +535,6 @@ class JsonProcessor extends JsonBuilder
 				
 				handlerScript.append(";dateValue($1.getTime(").append(index).append("),\"HH:mm:ss\",json);json.append(',');");
 			}
-			else if(types[index - 1] == Types.BLOB) {
-                
-            }
 			else 
 			{
 			    Object objValue = rs.getObject(index);
@@ -579,7 +575,7 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
         
         StringBuilder json = new StringBuilder("{");
 
-        StringBuilder handlerScript = new StringBuilder("String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
+        StringBuilder handlerScript = new StringBuilder("protected String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
 
         handlerScript.append("StringBuilder json = new StringBuilder(\"{\");");
 
@@ -729,7 +725,7 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 		
 		ClassWriter cw = new ClassWriter(0);
 		
-		String processorName = DynamicClassUtils.getProcessorName(type);
+		String processorName = DynamicClassUtils.getJSONProcessorName(type);
 		
 		String json = processByAsm( cw, processorName, rs, type);
 		
@@ -760,7 +756,7 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 	    
 	    ClassWriter cw = new ClassWriter(0);
 	    
-	    String processorName = DynamicClassUtils.getProcessorName();
+	    String processorName = DynamicClassUtils.getJSONProcessorName();
 	    
 	    String json = processByAsm(cw, processorName, rs);
 	    

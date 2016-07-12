@@ -7,6 +7,8 @@ import java.sql.SQLException;
 public class DynamicClassUtils {
 
 	private static final String DYNAMIC_BEAN_PACKAGE = "com.nway.spring.jdbc.bean.";
+	
+	private static final String DYNAMIC_JSONBEAN_PACKAGE = "com.nway.spring.jdbc.json.";
 
 	/**
 	 * 获取查询的所有列名，而非列的别名
@@ -30,13 +32,23 @@ public class DynamicClassUtils {
 		return columnNames.toString() + className;
 	}
 
-	public static String getProcessorName(Class<?> type) {
+	public static String getBeanProcessorName(Class<?> type) {
 
 		return DYNAMIC_BEAN_PACKAGE + type.getSimpleName() + System.nanoTime();
 	}
 	
-	public static String getProcessorName() {
+	public static String getBeanProcessorName() {
 	    
-	    return DYNAMIC_BEAN_PACKAGE +"NoneRequireClass"+ System.nanoTime();
+	    return DYNAMIC_JSONBEAN_PACKAGE + "NoneRequiredClass" + System.nanoTime();
+	}
+	
+	public static String getJSONProcessorName(Class<?> type) {
+	    
+	    return DYNAMIC_JSONBEAN_PACKAGE + type.getSimpleName() + System.nanoTime();
+	}
+	
+	public static String getJSONProcessorName() {
+	    
+	    return DYNAMIC_JSONBEAN_PACKAGE + "NoneRequiredClass" + System.nanoTime();
 	}
 }

@@ -203,7 +203,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
         String beanName = mappedClass.getName().replace('.', '/');
         
-        String processorName = DynamicClassUtils.getProcessorName(mappedClass);
+        String processorName = DynamicClassUtils.getBeanProcessorName(mappedClass);
         
         String internalProcessorName = processorName.replace('.', '/');
 
