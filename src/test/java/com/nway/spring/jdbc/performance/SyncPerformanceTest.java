@@ -18,36 +18,36 @@ import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
 
 public class SyncPerformanceTest extends BaseTest {
 
-	@Autowired
-	@Qualifier("nwayPerformance")
-	private Performance nwayPerformance;
+    @Autowired
+    @Qualifier("nwayPerformance")
+    private NwayPerformance nwayPerformance;
 
-	@Autowired
-	@Qualifier("springJdbcPerformance")
-	private Performance springJdbcPerformance;
+    @Autowired
+    @Qualifier("springJdbcPerformance")
+    private SpringJdbcPerformance springJdbcPerformance;
 
-	@Autowired
-	@Qualifier("hibernatePerformance")
-	private Performance hibernatePerformance;
-	
-	@Autowired
-	@Qualifier("hibernateJpaPerformance")
-	private Performance jpaPerformance;
-	
-	@Autowired
-	private SpringDataJpaPerformance springDataJpaPerformance;
-	
-	@Autowired
-	@Qualifier("myBatisPerformance")
-	private Performance myBatisPerformance;
-	
-	@Autowired
+    @Autowired
+    @Qualifier("hibernatePerformance")
+    private HibernatePerformance hibernatePerformance;
+    
+    @Autowired
+    @Qualifier("hibernateJpaPerformance")
+    private HibernateJpaPerformance jpaPerformance;
+    
+    @Autowired
+    private SpringDataJpaPerformance springDataJpaPerformance;
+    
+    @Autowired
+    @Qualifier("myBatisPerformance")
+    private MyBatisPerformance myBatisPerformance;
+    
+    @Autowired
     @Qualifier("jdbcPerformance")
-    private Performance jdbcPerformance;
-	
-	@Autowired
-    @Qualifier("scriptPerformance")
-    private Performance scriptPerformance;
+    private JdbcPerformance jdbcPerformance;
+    
+    @Autowired
+    @Qualifier("scriptSolutionPerformance")
+    private ScriptSolutionPerformance scriptPerformance;
 
 	@Test
 	public void testGetMonitor() throws InterruptedException {
@@ -277,6 +277,150 @@ public class SyncPerformanceTest extends BaseTest {
         script.invokeAll(scriptTask);
         System.out.println("script = "+(System.currentTimeMillis() - begin));
         scriptPerformance.listMonitor();
+	}
+	
+	@Test
+	public void testQueryMonitorJsonList() throws InterruptedException {
+	    
+	    int times = 30;
+	    
+	    ExecutorService nway = Executors.newFixedThreadPool(times);
+	    ExecutorService spring = Executors.newFixedThreadPool(times);
+	    ExecutorService hibernate = Executors.newFixedThreadPool(times);
+	    ExecutorService jpa = Executors.newFixedThreadPool(times);
+	    ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
+	    ExecutorService mybatis = Executors.newFixedThreadPool(times);
+	    ExecutorService jdbc = Executors.newFixedThreadPool(times);
+	    ExecutorService script = Executors.newFixedThreadPool(times);
+	    
+	    Collection<Callable<String>> nwayTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> springTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> hibernateTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> jpaTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> springDataJpaTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> mybatisTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> jdbcTask = new ArrayList<Callable<String>>(times);
+	    Collection<Callable<String>> scriptTask = new ArrayList<Callable<String>>(times);
+	    
+	    for (int i = 0; i < times; i++) {
+	        
+	        nwayTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return nwayPerformance.queryMonitorJsonList();
+	            }
+	        });
+	        
+	        springTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return springJdbcPerformance.queryMonitorJsonList();
+	            }
+	        });
+	        
+	        /*hibernateTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return hibernatePerformance.listMonitor();
+	            }
+	        });*/
+	        
+	        /*jpaTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return jpaPerformance.listMonitor();
+	            }
+	        });*/
+	        
+	        /*springDataJpaTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return springDataJpaPerformance.listMonitor();
+	            }
+	        });*/
+	        
+	        mybatisTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return myBatisPerformance.queryMonitorJsonList();
+	            }
+	        });
+	        
+	        jdbcTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return jdbcPerformance.queryMonitorJsonList();
+	            }
+	        });
+	        
+	        scriptTask.add(new Callable<String>() {
+	            
+	            @Override
+	            public String call() throws Exception {
+	                
+	                return scriptPerformance.queryMonitorJsonList();
+	            }
+	        });
+	    }
+	    
+	    springJdbcPerformance.queryMonitorJsonList();
+	    myBatisPerformance.queryMonitorJsonList();
+	    scriptPerformance.queryMonitorJsonList();
+	    
+	    long begin = System.currentTimeMillis();
+	    
+	    spring.invokeAll(springTask);
+	    System.out.println("spring = "+(System.currentTimeMillis() - begin));
+	    springJdbcPerformance.queryMonitorJsonList();
+	    
+	    /*begin = System.currentTimeMillis();
+	    hibernate.invokeAll(hibernateTask);
+	    System.out.println("hibernate = "+(System.currentTimeMillis() - begin));
+	    hibernatePerformance.listMonitor();*/
+	    
+	   /* begin = System.currentTimeMillis();
+	    jpa.invokeAll(jpaTask);
+	    System.out.println("jpa = "+(System.currentTimeMillis() - begin));
+	    jpaPerformance.listMonitor();*/
+	    
+	   /* begin = System.currentTimeMillis();
+	    springDataJpa.invokeAll(springDataJpaTask);
+	    System.out.println("springDataJpa = "+(System.currentTimeMillis() - begin));
+	    springDataJpaPerformance.listMonitor();*/
+	    
+	    begin = System.currentTimeMillis();
+	    jdbc.invokeAll(jdbcTask);
+	    System.out.println("jdbc = "+(System.currentTimeMillis() - begin));
+	    jdbcPerformance.queryMonitorJsonList();
+	    
+	    begin = System.currentTimeMillis();
+	    mybatis.invokeAll(mybatisTask);
+	    System.out.println("mybatis = "+(System.currentTimeMillis() - begin));
+	    myBatisPerformance.queryMonitorJsonList();
+	    
+	    begin = System.currentTimeMillis();
+	    script.invokeAll(scriptTask);
+	    System.out.println("script = "+(System.currentTimeMillis() - begin));
+	    scriptPerformance.queryMonitorJsonList();
+	    
+	    begin = System.currentTimeMillis();
+	    nway.invokeAll(nwayTask);
+	    System.out.println("nway = "+(System.currentTimeMillis() - begin));
+	    nwayPerformance.queryMonitorJsonList();
 	}
 
 	@Test

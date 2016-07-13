@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.Gson;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Keyboard;
 import com.nway.spring.jdbc.performance.entity.Mainframe;
@@ -17,8 +18,10 @@ import com.nway.spring.jdbc.performance.entity.Software;
 
 @Service("springJdbcPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
-public class SpringJdbcPerformance implements Performance {
+public class SpringJdbcPerformance implements Performance , JsonQueryPerformance {
 
+    private Gson gson = new Gson();
+    
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
@@ -162,5 +165,11 @@ public class SpringJdbcPerformance implements Performance {
 
 		return jdbcTemplate.query("select * from t_monitor", BeanPropertyRowMapper.newInstance(Monitor.class));
 	}
+
+    @Override
+    public String queryMonitorJsonList()
+    {
+        return gson.toJson(listMonitor());
+    }
 	
 }

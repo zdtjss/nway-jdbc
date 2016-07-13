@@ -3,6 +3,7 @@ package com.nway.spring.jdbc.json;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.FileOutputStream;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -18,6 +19,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.FileCopyUtils;
 
 import com.nway.spring.classwork.DynamicBeanClassLoader;
 import com.nway.spring.classwork.DynamicObjectException;
@@ -121,13 +123,16 @@ class JsonProcessor extends JsonBuilder
 	
 	public String toJsonList(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
 	
-		StringBuilder json = new StringBuilder("[");
+		StringBuilder json = new StringBuilder(1000);
+		
+		json.append("[");
 
 //		String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		
 		do {
-			
+//			long begin = System.currentTimeMillis();
 			json.append(buildJson(rs, type, cacheKey)).append(',');
+//			System.out.println("buildJson = "+(System.currentTimeMillis() - begin));
 		}
 		while (rs.next());
 
@@ -141,16 +146,19 @@ class JsonProcessor extends JsonBuilder
 	
 	public String toJsonList(ResultSet rs, String cacheKey) throws SQLException, IntrospectionException {
 	    
-	    StringBuilder json = new StringBuilder("[");
+	    StringBuilder json = new StringBuilder(1000);
+	    
+	    json.append("[");
 	    
 //		String cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
-	    
+//	    long begin = System.currentTimeMillis();
 	    do {
 	        
 	        json.append(buildJson(rs, cacheKey)).append(',');
+	        
 	    }
 	    while (rs.next());
-	    
+//	    System.out.println("buildJson = "+Thread.currentThread()+" "+(System.currentTimeMillis() - begin) +"\n");
 	    if (json.length() > 1) {
 	        
 	        json = json.deleteCharAt(json.length() - 1);
@@ -398,7 +406,7 @@ class JsonProcessor extends JsonBuilder
 	        
 	        ctHandler.addMethod(CtNewMethod.make(sb[1].toString(), ctHandler));
 	        
-//	           FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
+	           FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
 
 	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().newInstance());
 	        
@@ -430,11 +438,13 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
 		
-		StringBuilder json = new StringBuilder("{");
+		StringBuilder json = new StringBuilder(100);
+		
+		json.append("{");
 
 		StringBuilder handlerScript = new StringBuilder("protected String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
 
-		handlerScript.append("StringBuilder json = new StringBuilder(\"{\");");
+		handlerScript.append("StringBuilder json = new StringBuilder(100);json.append(\"{\");");
 
 		for (int index = 1; index <= columns.length; index++) {
             
@@ -547,7 +557,7 @@ class JsonProcessor extends JsonBuilder
                     json.append("null");
                 }
 
-                handlerScript.append(".append($1.getObject(").append(index).append(").toString()).append('\"').append(',');");
+                handlerScript.append(".append($1.getObject(").append(index).append(")).append('\"').append(',');");
 			}
 			
 			json.append(',');
@@ -565,7 +575,7 @@ class JsonProcessor extends JsonBuilder
 		return new StringBuilder[] { json, handlerScript };
 	}
 	
-private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQLException, IntrospectionException{
+private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException{
         
         ResultSetMetaData rsmd = rs.getMetaData();
         
@@ -573,11 +583,13 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
         
         int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
         
-        StringBuilder json = new StringBuilder("{");
+        StringBuilder json = new StringBuilder(100);
+        
+        json.append("{");
 
         StringBuilder handlerScript = new StringBuilder("protected String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
 
-        handlerScript.append("StringBuilder json = new StringBuilder(\"{\");");
+        handlerScript.append("StringBuilder json = new StringBuilder(100);json.append(\"{\")");
 
         for (int index = 1; index < columnToProperty.length; index++)
         {
@@ -747,11 +759,15 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 	
 	private String buildJsonByAsm(ResultSet rs, String key) throws SQLException {
 	    
+	   
 	    JsonBuilder jsonBuilder = JSON_BUILDER_CACHE.get(key);
 	    
 	    if (jsonBuilder != null) {
 	        
-	        return jsonBuilder.buildJson(rs);
+//	        long begin = System.nanoTime();
+	        String json = jsonBuilder.buildJson(rs);
+//	        System.out.println("jsonBuilder.buildJson = "+Thread.currentThread()+" "+(System.nanoTime() - begin)+"\n");
+	        return json;
 	    }
 	    
 	    ClassWriter cw = new ClassWriter(0);
@@ -786,7 +802,9 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 		
         String internalProcessorName = processorName.replace('.', '/');
 		
-		StringBuilder json = new StringBuilder("{");
+		StringBuilder json = new StringBuilder(100);
+		
+		json.append("{");
 		
 		Object[] initParam = initBuilder(cw, internalProcessorName);
 		
@@ -946,7 +964,9 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 	    
 	    String internalProcessorName = processorName.replace('.', '/');
 	    
-	    StringBuilder json = new StringBuilder("{");
+	    StringBuilder json = new StringBuilder(100);
+	    
+	    json.append("{");
 	    
 	    Object[] initParam = initBuilder(cw, internalProcessorName);
 	    
@@ -1119,12 +1139,16 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 			mv.visitLineNumber(10, l0);
 			mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
 			mv.visitInsn(Opcodes.DUP);
-			mv.visitLdcInsn("{");
-			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(Ljava/lang/String;)V", false);
+			mv.visitIntInsn(Opcodes.BIPUSH, 100);
+			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(I)V", false);
 			mv.visitVarInsn(Opcodes.ASTORE, 2);
 			Label l1 = new Label();
 			mv.visitLabel(l1);
-			mv.visitLineNumber(12, l1);
+			mv.visitLineNumber(11, l1);
+			mv.visitVarInsn(Opcodes.ALOAD, 2);
+			mv.visitLdcInsn("{");
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			mv.visitInsn(Opcodes.POP);
 			
 			returnVal[1] = l0;
 			returnVal[2] = l1;
@@ -1559,8 +1583,8 @@ private StringBuilder[] processByJavasist(ResultSet rs,Class<?> type) throws SQL
 	}
 
 	@Override
-	public String buildJson(ResultSet rs) throws SQLException {
-		
-		throw new UnsupportedOperationException("本实现不支持此方法");
-	}
+    protected String buildJson(ResultSet paramResultSet) throws SQLException
+    {
+        throw new UnsupportedOperationException("本类不提供此实现");
+    }
 }

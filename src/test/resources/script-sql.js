@@ -1,5 +1,5 @@
 
-function listMonitor(inParam, sql, sqlParam) {
+function listMonitor(inParam, jdbcSql) {
 	
-	sql.append("select * from t_monitor");
+	jdbcSql.appendSql("select * from t_monitor");
 }

@@ -19,34 +19,34 @@ public class PerformanceTest extends BaseTest {
 
 	@Autowired
 	@Qualifier("nwayPerformance")
-	private Performance nwayPerformance;
+	private NwayPerformance nwayPerformance;
 
 	@Autowired
 	@Qualifier("springJdbcPerformance")
-	private Performance springJdbcPerformance;
+	private SpringJdbcPerformance springJdbcPerformance;
 
 	@Autowired
 	@Qualifier("hibernatePerformance")
-	private Performance hibernatePerformance;
+	private HibernatePerformance hibernatePerformance;
 	
 	@Autowired
     @Qualifier("hibernateJpaPerformance")
-	private Performance jpaPerformance;
+	private HibernateJpaPerformance jpaPerformance;
 	
 	@Autowired
 	private SpringDataJpaPerformance springDataJpaPerformance;
 	
 	@Autowired
 	@Qualifier("myBatisPerformance")
-	private Performance myBatisPerformance;
+	private MyBatisPerformance myBatisPerformance;
 	
 	@Autowired
 	@Qualifier("jdbcPerformance")
-	private Performance jdbcPerformance;
+	private JdbcPerformance jdbcPerformance;
 	
 	@Autowired
-	@Qualifier("scriptPerformance")
-	private Performance scriptPerformance;
+	@Qualifier("scriptSolutionPerformance")
+	private ScriptSolutionPerformance scriptPerformance;
 
 	@Test
 	public void testGetMonitor() {
@@ -78,7 +78,7 @@ public class PerformanceTest extends BaseTest {
 
 			nwayPerformance.listMonitor();
 			
-			/*jdbcPerformance.listMonitor();
+			jdbcPerformance.listMonitor();
 
 			hibernatePerformance.listMonitor();
 			
@@ -86,7 +86,7 @@ public class PerformanceTest extends BaseTest {
 			
 			springDataJpaPerformance.listMonitor();
 
-			springJdbcPerformance.listMonitor();*/
+			springJdbcPerformance.listMonitor();
 			
 			myBatisPerformance.listMonitor();
 			
@@ -94,6 +94,31 @@ public class PerformanceTest extends BaseTest {
 
 			System.out.println();
 		}
+	}
+	
+	@Test
+	public void testQueryMonitorJsonList() {
+	    
+	    for (int i = 0; i < 300; i++) {
+	        
+	        jdbcPerformance.queryMonitorJsonList();
+
+	        /*hibernatePerformance.listMonitor();
+			
+			jpaPerformance.listMonitor();
+			
+			springDataJpaPerformance.listMonitor();*/
+
+	        springJdbcPerformance.queryMonitorJsonList();
+	        
+			myBatisPerformance.queryMonitorJsonList();
+	        
+	        scriptPerformance.queryMonitorJsonList();
+	        
+	        nwayPerformance.queryMonitorJsonList();
+	        
+	        System.out.println();
+	    }
 	}
 
 	@Test

@@ -1,9 +1,9 @@
 package com.nway.spring.jdbc.performance;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +12,16 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+import com.nway.spring.jdbc.json.JsonBuilder;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 
 @Service("jdbcPerformance")
-public class JdbcPerformance implements Performance
-{
+public class JdbcPerformance extends JsonBuilder implements Performance, JsonQueryPerformance {
+
+    private Gson gson = new Gson();
+    
     @Autowired
     private DataSource dataSource;
     
@@ -44,10 +48,12 @@ public class JdbcPerformance implements Performance
     {
         List<Monitor> monitors = new ArrayList<>();
         
-        try (Connection con = dataSource.getConnection();
-                Statement stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery("select * from t_monitor"))
+        try (Connection con = dataSource.getConnection();)
         {
+            con.setReadOnly(true);
+            PreparedStatement stmt = con.prepareStatement("select * from t_monitor");
+            ResultSet rs = stmt.executeQuery();
+                    
             while(rs.next()) {
                 
                 monitors.add(createMonitor(rs));
@@ -75,5 +81,59 @@ public class JdbcPerformance implements Performance
         monitor.setType(rs.getInt(8));
         
         return monitor;
+    }
+    
+    @Override
+    public String queryMonitorJsonList()
+    {
+        StringBuilder json = new StringBuilder(1000);
+        
+        try (Connection con = dataSource.getConnection();)
+        {
+            con.setReadOnly(true);
+            PreparedStatement stmt = con.prepareStatement("select * from t_monitor");
+            ResultSet rs = stmt.executeQuery();
+                    
+            while(rs.next()) {
+                
+                json.append(buildJson(rs));
+            }
+            rs.close();
+            stmt.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return json.toString();
+    }
+    
+    protected String buildJson(ResultSet rs) throws SQLException
+    {
+        StringBuilder json = new StringBuilder(100);
+        json.append("{");
+        json.append(",\"id\":");
+        integerValue(rs.getInt(1), rs.wasNull(), json);
+        json.append(",\"brand\":");
+        stringValue(rs.getString(2), json);
+        json.append(",\"max_resolution\":");
+        stringValue(rs.getString(3), json);
+        json.append(",\"model\":");
+        stringValue(rs.getString(4), json);
+        json.append(",\"photo\":");
+        json.append('"').append(rs.getObject(5)).append('"');
+        json.append(",\"price\":");
+        doubleValue(rs.getDouble(6), rs.wasNull(), json);
+        json.append(",\"production_date\":");
+        dateValue(rs.getTimestamp(7), "yyyy-MM-dd HH:mm:ss.SSS", json);
+        json.append(",\"type\":");
+        integerValue(rs.getInt(8), rs.wasNull(), json);
+        if (json.length() > 1)
+        {
+            json = json.deleteCharAt(1);
+        }
+        json.append('}');
+        return json.toString();
     }
 }
