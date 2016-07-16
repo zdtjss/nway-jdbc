@@ -123,7 +123,7 @@ class JsonProcessor extends JsonBuilder
 	
 	public String toJsonList(ResultSet rs, Class<?> type, String cacheKey) throws SQLException, IntrospectionException {
 	
-		StringBuilder json = new StringBuilder(1000);
+		StringBuilder json = new StringBuilder(5000);
 		
 		json.append("[");
 
@@ -146,7 +146,7 @@ class JsonProcessor extends JsonBuilder
 	
 	public String toJsonList(ResultSet rs, String cacheKey) throws SQLException, IntrospectionException {
 	    
-	    StringBuilder json = new StringBuilder(1000);
+	    StringBuilder json = new StringBuilder(5000);
 	    
 	    json.append("[");
 	    
@@ -175,7 +175,9 @@ class JsonProcessor extends JsonBuilder
 
 		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
 
-		StringBuilder json = new StringBuilder("{");
+		StringBuilder json = new StringBuilder(500);
+		
+		json.append("{");
 
 		for (int index = 1; index < columnToProperty.length; index++)
 		{
@@ -265,7 +267,9 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
         
-	    StringBuilder json = new StringBuilder("{");
+	    StringBuilder json = new StringBuilder(500);
+	    
+	    json.append("{");
 	    
 	    for (int index = 1; index <= columns.length; index++) {
             
@@ -438,13 +442,13 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
 		
-		StringBuilder json = new StringBuilder(100);
+		StringBuilder json = new StringBuilder(500);
 		
 		json.append("{");
 
 		StringBuilder handlerScript = new StringBuilder("protected String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
 
-		handlerScript.append("StringBuilder json = new StringBuilder(100);json.append(\"{\");");
+		handlerScript.append("StringBuilder json = new StringBuilder(500);json.append(\"{\");");
 
 		for (int index = 1; index <= columns.length; index++) {
             
@@ -583,13 +587,13 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
         
         int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
         
-        StringBuilder json = new StringBuilder(100);
+        StringBuilder json = new StringBuilder(500);
         
         json.append("{");
 
         StringBuilder handlerScript = new StringBuilder("protected String buildJson(java.sql.ResultSet rs) throws java.sql.SQLException{");
 
-        handlerScript.append("StringBuilder json = new StringBuilder(100);json.append(\"{\")");
+        handlerScript.append("StringBuilder json = new StringBuilder(500);json.append(\"{\")");
 
         for (int index = 1; index < columnToProperty.length; index++)
         {
@@ -802,7 +806,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 		
         String internalProcessorName = processorName.replace('.', '/');
 		
-		StringBuilder json = new StringBuilder(100);
+		StringBuilder json = new StringBuilder(500);
 		
 		json.append("{");
 		
@@ -964,7 +968,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 	    
 	    String internalProcessorName = processorName.replace('.', '/');
 	    
-	    StringBuilder json = new StringBuilder(100);
+	    StringBuilder json = new StringBuilder(500);
 	    
 	    json.append("{");
 	    
@@ -1139,7 +1143,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 			mv.visitLineNumber(10, l0);
 			mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
 			mv.visitInsn(Opcodes.DUP);
-			mv.visitIntInsn(Opcodes.BIPUSH, 100);
+			mv.visitIntInsn(Opcodes.BIPUSH, 500);
 			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(I)V", false);
 			mv.visitVarInsn(Opcodes.ASTORE, 2);
 			Label l1 = new Label();
