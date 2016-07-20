@@ -135,15 +135,16 @@ public class SyncPerformanceTest extends BaseTest {
 	public void testListMonitor() throws InterruptedException {
 
 		int times = 30;
+		int threadn = 10;
 
-		ExecutorService nway = Executors.newFixedThreadPool(times);
-		ExecutorService spring = Executors.newFixedThreadPool(times);
-		ExecutorService hibernate = Executors.newFixedThreadPool(times);
-		ExecutorService jpa = Executors.newFixedThreadPool(times);
-		ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
-		ExecutorService mybatis = Executors.newFixedThreadPool(times);
-		ExecutorService jdbc = Executors.newFixedThreadPool(times);
-		ExecutorService script = Executors.newFixedThreadPool(times);
+		ExecutorService nway = Executors.newFixedThreadPool(threadn);
+		ExecutorService spring = Executors.newFixedThreadPool(threadn);
+		ExecutorService hibernate = Executors.newFixedThreadPool(threadn);
+		ExecutorService jpa = Executors.newFixedThreadPool(threadn);
+		ExecutorService springDataJpa = Executors.newFixedThreadPool(threadn);
+		ExecutorService mybatis = Executors.newFixedThreadPool(threadn);
+		ExecutorService jdbc = Executors.newFixedThreadPool(threadn);
+		ExecutorService script = Executors.newFixedThreadPool(threadn);
 
 		Collection<Callable<List<Monitor>>> nwayTask = new ArrayList<Callable<List<Monitor>>>(times);
 		Collection<Callable<List<Monitor>>> springTask = new ArrayList<Callable<List<Monitor>>>(times);
@@ -283,15 +284,16 @@ public class SyncPerformanceTest extends BaseTest {
 	public void testQueryMonitorJsonList() throws InterruptedException {
 	    
 	    int times = 30;
+	    int threadn = 10;
 	    
-	    ExecutorService nway = Executors.newFixedThreadPool(times);
-	    ExecutorService spring = Executors.newFixedThreadPool(times);
-	    ExecutorService hibernate = Executors.newFixedThreadPool(times);
-	    ExecutorService jpa = Executors.newFixedThreadPool(times);
-	    ExecutorService springDataJpa = Executors.newFixedThreadPool(times);
-	    ExecutorService mybatis = Executors.newFixedThreadPool(times);
-	    ExecutorService jdbc = Executors.newFixedThreadPool(times);
-	    ExecutorService script = Executors.newFixedThreadPool(times);
+	    ExecutorService nway = Executors.newFixedThreadPool(threadn);
+	    ExecutorService spring = Executors.newFixedThreadPool(threadn);
+	    ExecutorService hibernate = Executors.newFixedThreadPool(threadn);
+	    ExecutorService jpa = Executors.newFixedThreadPool(threadn);
+	    ExecutorService springDataJpa = Executors.newFixedThreadPool(threadn);
+	    ExecutorService mybatis = Executors.newFixedThreadPool(threadn);
+	    ExecutorService jdbc = Executors.newFixedThreadPool(threadn);
+	    ExecutorService script = Executors.newFixedThreadPool(threadn);
 	    
 	    Collection<Callable<String>> nwayTask = new ArrayList<Callable<String>>(times);
 	    Collection<Callable<String>> springTask = new ArrayList<Callable<String>>(times);
