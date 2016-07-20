@@ -747,7 +747,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 		
 		try {
 
-			DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
+			DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(),"E:\\workspace\\nway-jdbc\\asm");
 
 			Class<?> processor = beanClassLoader.defineClass(processorName, cw.toByteArray());
 
@@ -1143,7 +1143,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 			mv.visitLineNumber(10, l0);
 			mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
 			mv.visitInsn(Opcodes.DUP);
-			mv.visitIntInsn(Opcodes.BIPUSH, 500);
+			mv.visitIntInsn(Opcodes.SIPUSH, 500);
 			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(I)V", false);
 			mv.visitVarInsn(Opcodes.ASTORE, 2);
 			Label l1 = new Label();
