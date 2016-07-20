@@ -747,7 +747,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 		
 		try {
 
-			DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(),"E:\\workspace\\nway-jdbc\\asm");
+			DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
 
 			Class<?> processor = beanClassLoader.defineClass(processorName, cw.toByteArray());
 
