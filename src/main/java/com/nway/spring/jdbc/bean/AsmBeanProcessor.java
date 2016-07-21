@@ -220,7 +220,6 @@ class AsmBeanProcessor implements BeanProcessor {
                 continue;
             }
 
-            Object value = null;
             desc = props[columnToProperty[i]];
             Class<?> propType = desc.getPropertyType();
 
@@ -234,7 +233,7 @@ class AsmBeanProcessor implements BeanProcessor {
             }
 
             // Éú³É rs.getXXX
-            value = processColumn(rs, i, propType, desc.getWriteMethod().getName(), internalProcessorName, beanName, cw, mv);
+            Object value = processColumn(rs, i, propType, desc.getWriteMethod().getName(), internalProcessorName, beanName, mv);
 
             this.callSetter(bean, desc, value);
         }
@@ -290,7 +289,7 @@ class AsmBeanProcessor implements BeanProcessor {
         } 
         catch (Exception e) {
 
-            throw new SQLException("Cannot set " + prop.getName() + ": " + e.toString());
+            throw new SQLException("Cannot set " + prop.getName() + ": " + e.toString(), e);
         }
     }
 
@@ -312,11 +311,11 @@ class AsmBeanProcessor implements BeanProcessor {
         } 
         catch (InstantiationException e) {
 
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString());
+            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
         } 
         catch (IllegalAccessException e) {
 
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString());
+            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
         }
     }
 
@@ -374,7 +373,7 @@ class AsmBeanProcessor implements BeanProcessor {
     }
 
 	private Object processColumn(ResultSet rs, int index, Class<?> propType, String writer, String processorName,
-			String beanName, ClassWriter cw, MethodVisitor mv) throws SQLException {
+			String beanName, MethodVisitor mv) throws SQLException {
 
 		if (propType.equals(String.class))
 		{
@@ -440,11 +439,6 @@ class AsmBeanProcessor implements BeanProcessor {
 		{
 			visitMethodWrap(mv, index,  beanName, PROPERTY_TYPE_FLOAT,  writer, processorName);
 			return JdbcUtils.getResultSetValue(rs, index, Float.class);
-		}
-		else if (propType.equals(Time.class))
-		{
-			visitMethod(mv, index, beanName, "Ljava/sql/Time;", "getTime", writer);
-			return rs.getTime(index);
 		}
 		else if (propType.equals(Boolean.TYPE))
 		{

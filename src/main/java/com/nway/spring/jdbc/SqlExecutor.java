@@ -311,7 +311,7 @@ public class SqlExecutor extends JdbcTemplate {
 			    }
 			}
 			
-			pageCount = (totalCount / pageSize);
+			pageCount = totalCount / pageSize;
 			
 			if (totalCount % pageSize > 0) {
 				
@@ -389,7 +389,7 @@ public class SqlExecutor extends JdbcTemplate {
 			countSql.delete(countSql.lastIndexOf(" ORDER "), countSql.length());
 		}
 		
-		int firstFromIndex = firstFromIndex(sql.toString(), 0);
+		int firstFromIndex = firstFromIndex(sql, 0);
 		
 		String selectedColumns = countSql.substring(0, firstFromIndex + 1);
 		
@@ -435,18 +435,15 @@ public class SqlExecutor extends JdbcTemplate {
 	
 	private int queryCount(String countSql, Object[] params, int[] argTypes) {
 
-		int rowCount = 0;
-		
 		if (argTypes == null) {
 			
-			rowCount = query(countSql, params, new IntegerResultSetExtractor(countSql));
+			return query(countSql, params, new IntegerResultSetExtractor(countSql));
 		} 
 		else {
 			
-			rowCount = query(countSql, params, argTypes, new IntegerResultSetExtractor(countSql));
+			return query(countSql, params, argTypes, new IntegerResultSetExtractor(countSql));
 		}
 
-		return rowCount;
 	}
 
 

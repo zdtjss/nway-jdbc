@@ -67,7 +67,7 @@ public class JndiConnectionProvider implements ConnectionProvider, Configurable,
 			Context initCtx = new InitialContext();
 			this.dataSource = (DataSource) initCtx.lookup((String) configurationValues.get(AvailableSettings.DATASOURCE));
 		} catch (NamingException e) {
-			throw new HibernateException("Unable to lookup Datasource");
+			throw new HibernateException("Unable to lookup Datasource", e);
 		}
 
 		if (this.dataSource == null) {

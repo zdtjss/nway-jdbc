@@ -263,7 +263,7 @@ class JavassistBeanProcessor implements BeanProcessor {
         } 
         catch (Exception e) {
 
-            throw new SQLException("Cannot set " + prop.getName() + ": " + e.toString());
+            throw new SQLException("Cannot set " + prop.getName() + ": " + e.toString(), e);
         }
     }
 
@@ -285,11 +285,11 @@ class JavassistBeanProcessor implements BeanProcessor {
         } 
         catch (InstantiationException e) {
 
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString());
+            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
         } 
         catch (IllegalAccessException e) {
 
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString());
+            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
         }
     }
 

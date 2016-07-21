@@ -10,9 +10,9 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
 import com.nway.spring.jdbc.json.JsonBuilder;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
@@ -20,8 +20,6 @@ import com.nway.spring.jdbc.performance.entity.Monitor;
 @Service("jdbcPerformance")
 public class JdbcPerformance extends JsonBuilder implements Performance, JsonQueryPerformance {
 
-    private Gson gson = new Gson();
-    
     @Autowired
     private DataSource dataSource;
     
@@ -48,11 +46,14 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
     {
         List<Monitor> monitors = new ArrayList<>();
         
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        
         try (Connection con = dataSource.getConnection();)
         {
             con.setReadOnly(true);
-            PreparedStatement stmt = con.prepareStatement("select * from t_monitor");
-            ResultSet rs = stmt.executeQuery();
+            stmt = con.prepareStatement("select * from t_monitor");
+            rs = stmt.executeQuery();
                     
             while(rs.next()) {
                 
@@ -62,6 +63,11 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
         catch (SQLException e)
         {
             e.printStackTrace();
+        }
+        finally
+        {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(stmt);
         }
         
         return monitors;
@@ -88,22 +94,28 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
     {
         StringBuilder json = new StringBuilder(1000);
         
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        
         try (Connection con = dataSource.getConnection();)
         {
             con.setReadOnly(true);
-            PreparedStatement stmt = con.prepareStatement("select * from t_monitor");
-            ResultSet rs = stmt.executeQuery();
+            stmt = con.prepareStatement("select * from t_monitor");
+            rs = stmt.executeQuery();
                     
             while(rs.next()) {
                 
                 json.append(buildJson(rs));
             }
-            rs.close();
-            stmt.close();
         }
         catch (SQLException e)
         {
             e.printStackTrace();
+        }
+        finally
+        {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(stmt);
         }
         
         return json.toString();
