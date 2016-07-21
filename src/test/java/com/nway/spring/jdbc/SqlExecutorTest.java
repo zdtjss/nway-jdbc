@@ -1,9 +1,11 @@
 package com.nway.spring.jdbc;
 
+import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,15 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.CallableStatementCallback;
+
+import com.nway.spring.jdbc.bean.BeanListHandler;
+import com.nway.spring.jdbc.json.JsonListHandler;
+import com.nway.spring.jdbc.performance.entity.Monitor;
+
+import oracle.jdbc.OracleCallableStatement;
+import oracle.jdbc.OracleTypes;
 
 /**
  * 初始化测试表 可以执行initTable()方法
@@ -135,6 +146,8 @@ public class SqlExecutorTest extends BaseTest
 	    
 	    String json = sqlExecutor.queryForJsonList(sql);
 	    
+	    System.out.println(sqlExecutor.queryForJsonList(sql));
+	    
 	    System.out.println(json);
 	}
 	
@@ -156,6 +169,59 @@ public class SqlExecutorTest extends BaseTest
 	    String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5, ExampleEntity.class);
 	    
 	    System.out.println(json);
+	}
+	
+	@Test
+	public void testCallForBeanList() {
+	    
+	    List<Monitor> monitors = sqlExecutor.execute("{? = call list_monitor2(?)}", new CallableStatementCallback<List<Monitor>>()
+        {
+            @Override
+            public List<Monitor> doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException
+            {
+
+                OracleCallableStatement ocs = (OracleCallableStatement) cs;
+                
+                ocs.setInt(2, 102);
+                
+                ocs.registerOutParameter(1, OracleTypes.CURSOR);
+                
+                ocs.execute();
+                
+                BeanListHandler<Monitor> blh = new BeanListHandler<Monitor>(Monitor.class, "list_monitor2");
+                
+                return blh.extractData(ocs.getCursor(1));
+            }
+        });
+	    
+	    System.out.println(Arrays.toString(monitors.toArray()));
+	}
+	
+	@Test
+	public void testCallForJsonList() {
+	    
+	    String monitors = sqlExecutor.execute("{? = call list_monitor2(?)}", new CallableStatementCallback<String>()
+	    {
+	        @Override
+	        public String doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException
+	        {
+	            
+	            OracleCallableStatement ocs = (OracleCallableStatement) cs;
+	            
+	            ocs.setInt(2, 102);
+	            
+	            ocs.registerOutParameter(1, OracleTypes.CURSOR);
+	            
+	            ocs.execute();
+	            
+	            // 返回无对应Java类的json 使用JsonListHandlerNRC
+	            JsonListHandler blh = new JsonListHandler(Monitor.class, "list_monitor2");
+	            
+	            return blh.extractData(ocs.getCursor(1));
+	        }
+	    });
+	    
+	    System.out.println(monitors);
 	}
 	
 	@Test
