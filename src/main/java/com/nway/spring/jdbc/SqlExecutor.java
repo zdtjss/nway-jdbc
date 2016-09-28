@@ -278,16 +278,14 @@ public class SqlExecutor extends JdbcTemplate {
 		
 		StringBuilder json = new StringBuilder("{");
 		
-		String upperCaseSql = sql.toUpperCase();
-
-		String countSql = buildPaginationCountSql(upperCaseSql);
+		String countSql = buildPaginationCountSql(sql);
 
 		int pageCount = 0;
 		int totalCount = queryCount(countSql, params, argTypes);
 
 		if (totalCount != 0) {
 
-			String paginationSql = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
+			String paginationSql = paginationSupport.buildPaginationSql(sql, page, pageSize);
 
 			if (argTypes == null)
 			{
@@ -377,25 +375,30 @@ public class SqlExecutor extends JdbcTemplate {
 	/**
 	 *
 	 * @param sql
-	 *            ¥Û–¥SQL
+	 *            ‘≠SQL
 	 * @return
 	 */
 	private String buildPaginationCountSql(String sql) {
 		
 		StringBuilder countSql = new StringBuilder(sql);
+		StringBuilder upperSql = new StringBuilder(sql.toUpperCase());
 
-		if (SQL_ORDER_BY_PATTERN.matcher(countSql).matches()) {
+		if (SQL_ORDER_BY_PATTERN.matcher(upperSql).matches()) {
 			
-			countSql.delete(countSql.lastIndexOf(" ORDER "), countSql.length());
+			upperSql.delete(upperSql.lastIndexOf(" ORDER "), upperSql.length());
+			
+			countSql.delete(upperSql.lastIndexOf(" ORDER "), upperSql.length());
 		}
 		
-		int firstFromIndex = firstFromIndex(sql, 0);
+		int firstFromIndex = firstFromIndex(upperSql.toString(), 0);
 		
-		String selectedColumns = countSql.substring(0, firstFromIndex + 1);
+		String selectedColumns = upperSql.substring(0, firstFromIndex + 1);
 		
 		if (selectedColumns.indexOf(" DISTINCT ") == -1 && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
 
-			countSql = countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1)");
+			upperSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1)");
+			
+			countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1)");
 		} 
 		else {
 
