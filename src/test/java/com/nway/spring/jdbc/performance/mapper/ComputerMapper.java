@@ -5,7 +5,7 @@ import java.util.List;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 
-public interface ComputerMapper
+public interface ComputerMapper extends GenericMapper
 {
     /**
      * 有关联单个对象

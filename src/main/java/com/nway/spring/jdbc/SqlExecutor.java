@@ -392,7 +392,7 @@ public class SqlExecutor extends JdbcTemplate {
 		
 		int firstFromIndex = firstFromIndex(upperSql.toString(), 0);
 		
-		String selectedColumns = upperSql.substring(0, firstFromIndex + 1);
+		String selectedColumns = upperSql.substring(0, firstFromIndex);
 		
 		if (selectedColumns.indexOf(" DISTINCT ") == -1 && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
 
@@ -498,11 +498,12 @@ public class SqlExecutor extends JdbcTemplate {
 
 		int fromIndex = sql.indexOf("FROM", startIndex);
 
-		int previousChar = sql.charAt(fromIndex - 1);
-		
-		int nextChar = sql.charAt(fromIndex + 4);
+		char previousChar = sql.charAt(fromIndex - 1);
 
-		if (!(previousChar == ' ' || previousChar == '*') && !(nextChar == ' ' && nextChar == '(')) {
+		char nextChar = sql.charAt(fromIndex + 4);
+
+		if (!(previousChar == ' ' || previousChar == '*' || previousChar == '\t' || previousChar == '\n')
+				&& !(nextChar == ' ' || nextChar == '(' || nextChar == '\t' || nextChar == '\n')) {
 
 			fromIndex = firstFromIndex(sql, fromIndex + 4);
 		}

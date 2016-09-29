@@ -6,6 +6,10 @@
 	<select id="getComputerById" resultMap="computerMap">
 		<include refid="computer"/> AND c.id = #{id}
 	</select>
+	
+	<select id="getById" resultMap="computerMap">
+		<include refid="computer"/> AND c.id = #{id}
+	</select>
 
 	<select id="listComputer" resultMap="computerMap">
 		<include refid="computer"/>

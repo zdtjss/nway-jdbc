@@ -124,19 +124,19 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testGetComputer() {
 
-		final int id = 1;
+		final int id = 11;
 
 		for (int i = 0; i < 10; i++) {
 
-			nwayPerformance.getComputerById(id);
+//			nwayPerformance.getComputerById(id);
 
-			hibernatePerformance.getComputerById(id);
+//			hibernatePerformance.getComputerById(id);
 			
-			jpaPerformance.getComputerById(id);
+//			jpaPerformance.getComputerById(id);
 			
-			springDataJpaPerformance.getComputerById(id);
+//			springDataJpaPerformance.getComputerById(id);
 
-			springJdbcPerformance.getComputerById(id);
+//			springJdbcPerformance.getComputerById(id);
 			
 		    Computer computer = myBatisPerformance.getComputerById(id);
 		    

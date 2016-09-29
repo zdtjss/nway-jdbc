@@ -27,8 +27,8 @@ import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.json.JsonListHandler;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 
-import oracle.jdbc.OracleCallableStatement;
-import oracle.jdbc.OracleTypes;
+//import oracle.jdbc.OracleCallableStatement;
+//import oracle.jdbc.OracleTypes;
 
 /**
  * 初始化测试表 可以执行initTable()方法
@@ -171,7 +171,7 @@ public class SqlExecutorTest extends BaseTest
 	    System.out.println(json);
 	}
 	
-	@Test
+	/*@Test
 	public void testCallForBeanList() {
 	    
 	    List<Monitor> monitors = sqlExecutor.execute("{? = call list_monitor2(?)}", new CallableStatementCallback<List<Monitor>>()
@@ -222,7 +222,7 @@ public class SqlExecutorTest extends BaseTest
 	    });
 	    
 	    System.out.println(monitors);
-	}
+	}*/
 	
 	@Test
 	public void testUpdate() {
