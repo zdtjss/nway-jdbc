@@ -55,7 +55,7 @@ import com.nway.spring.jdbc.annotation.Column;
  * This class is thread-safe.
  * </p>
  *
- * »ùÓÚapache-dbutils£¬Õë¶Ô¶¯Ì¬beanÉú³É,ĞŞ¸ÄÁË´ó²¿·Ö·½·¨µÄÊµÏÖ
+ * åŸºäºapache-dbutilsï¼Œé’ˆå¯¹åŠ¨æ€beanç”Ÿæˆ,ä¿®æ”¹äº†å¤§éƒ¨åˆ†æ–¹æ³•çš„å®ç°
  * <p>
  *
  * @since DbUtils 1.1
@@ -129,17 +129,17 @@ class AsmBeanProcessor implements BeanProcessor {
     }
     
     /**
-     * Éú³É¶¯Ì¬bean£¬²¢½«Êı¾İºÍbeanºÏ²¢
+     * ç”ŸæˆåŠ¨æ€beanï¼Œå¹¶å°†æ•°æ®å’Œbeanåˆå¹¶
      * <p>
      *
-     * <b>Ä¬ÈÏÓÅÏÈÊ¹ÓÃASMÉú³É¶¯Ì¬bean£¬Èç¹ûĞèÒªÒÔjavassist·½Ê½Éú³É¶¯Ì¬bean£¬Çë½«±¾ÊµÏÖÇĞ»»Îª{@link
+     * <b>é»˜è®¤ä¼˜å…ˆä½¿ç”¨ASMç”ŸæˆåŠ¨æ€beanï¼Œå¦‚æœéœ€è¦ä»¥javassistæ–¹å¼ç”ŸæˆåŠ¨æ€beanï¼Œè¯·å°†æœ¬å®ç°åˆ‡æ¢ä¸º{@link
      * this#createBeanByJavassist(ResultSet, Class, String)}</b>
      *
      * @param <T>
      * @param rs {@link ResultSet}
-     * @param type beanÀàĞÍ
-     * @param querying sql²éÑ¯ĞÅÏ¢
-     * @return °üº¬Êı¾İµÄbean
+     * @param type beanç±»å‹
+     * @param querying sqlæŸ¥è¯¢ä¿¡æ¯
+     * @return åŒ…å«æ•°æ®çš„bean
      *
      * @throws SQLException
      */
@@ -150,6 +150,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
 	public <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
+		System.out.println("å†²çªæäº¤æµ‹è¯•");
 
 		if (cacheKey == null) {
 
@@ -157,9 +158,9 @@ class AsmBeanProcessor implements BeanProcessor {
 		} 
 
 		/*
-		 * Í¬²½¿ÉÒÔÌá¸ßµ¥´ÎÏìÓ¦Ğ§ÂÊ£¬µ«»á½µµÍÏµÍ³ÕûÌåÍÌÍÂÁ¿¡£
-		 * Èç¹û²»×öÏß³ÌÍ¬²½£¬Ö»ÓĞµ±´æÔÚÄ³Ò»²éÑ¯Ò»¿ªÊ¼¾Í´óÁ¿²¢·¢·ÃÎÊÊ±£¬²Å»áÔÚÇ°¼¸´Î²éÑ¯ÖĞÖØ¸´¶¨Òå¶¯Ì¬ÏàÍ¬µÄDbBeanFactory
-		 * ÒÔtype¶ÔÏó×÷ÎªÍ¬²½Ëø£¬½µµÍÏß³ÌÍ¬²½¶ÔÏµÍ³ÕûÌåÍÌÍÂÁ¿µÄÓ°Ïì
+		 * åŒæ­¥å¯ä»¥æé«˜å•æ¬¡å“åº”æ•ˆç‡ï¼Œä½†ä¼šé™ä½ç³»ç»Ÿæ•´ä½“ååé‡ã€‚
+		 * å¦‚æœä¸åšçº¿ç¨‹åŒæ­¥ï¼Œåªæœ‰å½“å­˜åœ¨æŸä¸€æŸ¥è¯¢ä¸€å¼€å§‹å°±å¤§é‡å¹¶å‘è®¿é—®æ—¶ï¼Œæ‰ä¼šåœ¨å‰å‡ æ¬¡æŸ¥è¯¢ä¸­é‡å¤å®šä¹‰åŠ¨æ€ç›¸åŒçš„DbBeanFactory
+		 * ä»¥typeå¯¹è±¡ä½œä¸ºåŒæ­¥é”ï¼Œé™ä½çº¿ç¨‹åŒæ­¥å¯¹ç³»ç»Ÿæ•´ä½“ååé‡çš„å½±å“
 		 */
 //		synchronized (type) {
 
@@ -183,7 +184,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
         DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(key);
         
-        // Èç¹û»º´æÖĞÓĞÔòÖ±½Ó·µ»Ø
+        // å¦‚æœç¼“å­˜ä¸­æœ‰åˆ™ç›´æ¥è¿”å›
         if (dynamicRse != null) {
 
             return dynamicRse.createBean(rs, mappedClass);
@@ -232,7 +233,7 @@ class AsmBeanProcessor implements BeanProcessor {
                 visitLabel(mv, 11 + i);
             }
 
-            // Éú³É rs.getXXX
+            // ç”Ÿæˆ rs.getXXX
             Object value = processColumn(rs, i, propType, desc.getWriteMethod().getName(), internalProcessorName, beanName, mv);
 
             this.callSetter(bean, desc, value);
@@ -254,7 +255,7 @@ class AsmBeanProcessor implements BeanProcessor {
 	
 	        } catch (Exception e) {
 	
-	            throw new DynamicObjectException("Ê¹ÓÃASM´´½¨ [ " + processorName + " ] Ê§°Ü", e);
+	            throw new DynamicObjectException("ä½¿ç”¨ASMåˆ›å»º [ " + processorName + " ] å¤±è´¥", e);
 	        }
         }
 
@@ -352,7 +353,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
                 if (columnAnnotation == null) {
 
-                    //È¥³ıÁĞÃûÀïµÄÏÂ»®Ïß'_'
+                    //å»é™¤åˆ—åé‡Œçš„ä¸‹åˆ’çº¿'_'
                     if (columnName.replace("_", "").equalsIgnoreCase(props[i].getName())) {
                     	
                         columnToProperty[col] = i;
@@ -646,13 +647,13 @@ class AsmBeanProcessor implements BeanProcessor {
 
     /**
      *
-     * ¶¯Ì¬Àà½Å±¾¿ªÊ¼
+     * åŠ¨æ€ç±»è„šæœ¬å¼€å§‹
      *
      * @param cw
      * @param mv
      * @param processorName com/nway/commons/dbutils/DynamicBeanProcessorImpl
      * @param beanName com/nway/commons/dbutils/test/User
-     * @return [0]:bean±êÇ©£»[1]£ºcreateBean·½·¨¾ä±ú
+     * @return [0]:beanæ ‡ç­¾ï¼›[1]ï¼šcreateBeanæ–¹æ³•å¥æŸ„
      */
     private Object[] prepScript(ClassWriter cw, MethodVisitor mv, String processorName,
             String beanName) {
@@ -702,7 +703,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
     /**
      *
-     * ¶¯Ì¬Àà½Å±¾ÊÕÎ²
+     * åŠ¨æ€ç±»è„šæœ¬æ”¶å°¾
      *
      * @param mv MethodVisitor
      * @param processorName com/nway/commons/dbutils/DynamicBeanProcessorImpl
