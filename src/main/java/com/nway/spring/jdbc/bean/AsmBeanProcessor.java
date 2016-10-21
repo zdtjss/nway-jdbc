@@ -116,14 +116,23 @@ class AsmBeanProcessor implements BeanProcessor {
         }
         
         final List<T> results = new ArrayList<T>();
+        
+        DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(cacheKey);
+        
+		// 如果缓存中有则直接返回
+		if (dynamicRse != null) {
 
-        //String cacheKey = //DynamicClassUtils.makeCacheKey(rs, type.getName());
-		
-        do {
-        	
-            results.add(toBean(rs, type, cacheKey));
-        }
-        while (rs.next());
+			do {
+
+				results.add(dynamicRse.createBean(rs, type));
+			} 
+			while (rs.next());
+
+		} 
+		else {
+
+			results.add(toBean(rs, type, cacheKey));
+		}
 
         return results;
     }
@@ -143,18 +152,15 @@ class AsmBeanProcessor implements BeanProcessor {
      *
      * @throws SQLException
      */
-    public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-    	
-    	return toBean(rs, type, null);
-    }
-
 	public <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
+		DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(cacheKey);
+        
+        // 如果缓存中有则直接返回
+        if (dynamicRse != null) {
 
-		if (cacheKey == null) {
-
-			cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
-		} 
+            return dynamicRse.createBean(rs, type);
+        }
 
 		/*
 		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
@@ -180,14 +186,6 @@ class AsmBeanProcessor implements BeanProcessor {
      * @throws SQLException if a database error occurs.
      */
     private <T> T createBeanByASM(ResultSet rs, Class<T> mappedClass, String key) throws SQLException {
-
-        DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(key);
-        
-        // 如果缓存中有则直接返回
-        if (dynamicRse != null) {
-
-            return dynamicRse.createBean(rs, mappedClass);
-        }
 
         T bean = this.newInstance(mappedClass);
 
