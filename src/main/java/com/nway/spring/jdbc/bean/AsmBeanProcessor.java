@@ -55,7 +55,7 @@ import com.nway.spring.jdbc.annotation.Column;
  * This class is thread-safe.
  * </p>
  *
- * 基于apache-dbutils，针对动态bean生成,修改了大部分方法的实现
+ * 鍩轰簬apache-dbutils锛岄拡瀵瑰姩鎬乥ean鐢熸垚,淇敼浜嗗ぇ閮ㄥ垎鏂规硶鐨勫疄鐜?
  * <p>
  *
  * @since DbUtils 1.1
@@ -116,56 +116,51 @@ class AsmBeanProcessor implements BeanProcessor {
         }
         
         final List<T> results = new ArrayList<T>();
-        
-        DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(cacheKey);
-        
-		// 如果缓存中有则直接返回
-		if (dynamicRse != null) {
 
-			do {
-
-				results.add(dynamicRse.createBean(rs, type));
-			} 
-			while (rs.next());
-
-		} 
-		else {
-
-			results.add(toBean(rs, type, cacheKey));
-		}
+        //String cacheKey = //DynamicClassUtils.makeCacheKey(rs, type.getName());
+		
+        do {
+        	
+            results.add(toBean(rs, type, cacheKey));
+        }
+        while (rs.next());
 
         return results;
     }
     
     /**
-     * 生成动态bean，并将数据和bean合并
+     * 鐢熸垚鍔ㄦ?乥ean锛屽苟灏嗘暟鎹拰bean鍚堝苟
      * <p>
      *
-     * <b>默认优先使用ASM生成动态bean，如果需要以javassist方式生成动态bean，请将本实现切换为{@link
+     * <b>榛樿浼樺厛浣跨敤ASM鐢熸垚鍔ㄦ?乥ean锛屽鏋滈渶瑕佷互javassist鏂瑰紡鐢熸垚鍔ㄦ?乥ean锛岃灏嗘湰瀹炵幇鍒囨崲涓簕@link
      * this#createBeanByJavassist(ResultSet, Class, String)}</b>
      *
      * @param <T>
      * @param rs {@link ResultSet}
-     * @param type bean类型
-     * @param querying sql查询信息
-     * @return 包含数据的bean
+     * @param type bean绫诲瀷
+     * @param querying sql鏌ヨ淇℃伅
+     * @return 鍖呭惈鏁版嵁鐨刡ean
      *
      * @throws SQLException
      */
+    public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+    	
+    	return toBean(rs, type, null);
+    }
+
 	public <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
-		DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(cacheKey);
-        
-        // 如果缓存中有则直接返回
-        if (dynamicRse != null) {
+		System.out.println("鍐茬獊鎻愪氦娴嬭瘯");
 
-            return dynamicRse.createBean(rs, type);
-        }
+		if (cacheKey == null) {
+
+			cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
+		} 
 
 		/*
-		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量。
-		 * 如果不做线程同步，只有当存在某一查询一开始就大量并发访问时，才会在前几次查询中重复定义动态相同的DbBeanFactory
-		 * 以type对象作为同步锁，降低线程同步对系统整体吞吐量的影响
+		 * 鍚屾鍙互鎻愰珮鍗曟鍝嶅簲鏁堢巼锛屼絾浼氶檷浣庣郴缁熸暣浣撳悶鍚愰噺銆?
+		 * 濡傛灉涓嶅仛绾跨▼鍚屾锛屽彧鏈夊綋瀛樺湪鏌愪竴鏌ヨ涓?寮?濮嬪氨澶ч噺骞跺彂璁块棶鏃讹紝鎵嶄細鍦ㄥ墠鍑犳鏌ヨ涓噸澶嶅畾涔夊姩鎬佺浉鍚岀殑DbBeanFactory
+		 * 浠ype瀵硅薄浣滀负鍚屾閿侊紝闄嶄綆绾跨▼鍚屾瀵圭郴缁熸暣浣撳悶鍚愰噺鐨勫奖鍝?
 		 */
 //		synchronized (type) {
 
@@ -186,6 +181,14 @@ class AsmBeanProcessor implements BeanProcessor {
      * @throws SQLException if a database error occurs.
      */
     private <T> T createBeanByASM(ResultSet rs, Class<T> mappedClass, String key) throws SQLException {
+
+        DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(key);
+        
+        // 濡傛灉缂撳瓨涓湁鍒欑洿鎺ヨ繑鍥?
+        if (dynamicRse != null) {
+
+            return dynamicRse.createBean(rs, mappedClass);
+        }
 
         T bean = this.newInstance(mappedClass);
 
@@ -230,7 +233,7 @@ class AsmBeanProcessor implements BeanProcessor {
                 visitLabel(mv, 11 + i);
             }
 
-            // 生成 rs.getXXX
+            // 鐢熸垚 rs.getXXX
             Object value = processColumn(rs, i, propType, desc.getWriteMethod().getName(), internalProcessorName, beanName, mv);
 
             this.callSetter(bean, desc, value);
@@ -252,7 +255,7 @@ class AsmBeanProcessor implements BeanProcessor {
 	
 	        } catch (Exception e) {
 	
-	            throw new DynamicObjectException("使用ASM创建 [ " + processorName + " ] 失败", e);
+	            throw new DynamicObjectException("浣跨敤ASM鍒涘缓 [ " + processorName + " ] 澶辫触", e);
 	        }
         }
 
@@ -350,7 +353,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
                 if (columnAnnotation == null) {
 
-                    //去除列名里的下划线'_'
+                    //鍘婚櫎鍒楀悕閲岀殑涓嬪垝绾?'_'
                     if (columnName.replace("_", "").equalsIgnoreCase(props[i].getName())) {
                     	
                         columnToProperty[col] = i;
@@ -644,13 +647,13 @@ class AsmBeanProcessor implements BeanProcessor {
 
     /**
      *
-     * 动态类脚本开始
+     * 鍔ㄦ?佺被鑴氭湰寮?濮?
      *
      * @param cw
      * @param mv
      * @param processorName com/nway/commons/dbutils/DynamicBeanProcessorImpl
      * @param beanName com/nway/commons/dbutils/test/User
-     * @return [0]:bean标签；[1]：createBean方法句柄
+     * @return [0]:bean鏍囩锛沎1]锛歝reateBean鏂规硶鍙ユ焺
      */
     private Object[] prepScript(ClassWriter cw, MethodVisitor mv, String processorName,
             String beanName) {
@@ -700,7 +703,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
     /**
      *
-     * 动态类脚本收尾
+     * 鍔ㄦ?佺被鑴氭湰鏀跺熬
      *
      * @param mv MethodVisitor
      * @param processorName com/nway/commons/dbutils/DynamicBeanProcessorImpl
