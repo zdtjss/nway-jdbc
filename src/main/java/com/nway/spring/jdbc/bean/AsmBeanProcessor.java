@@ -55,7 +55,7 @@ import com.nway.spring.jdbc.annotation.Column;
  * This class is thread-safe.
  * </p>
  *
- * 基于apache-dbutils，针对动态bean生成,修改了大部分方法的实�?
+ * 基于apache-dbutils，针对动态bean生成,修改了大部分方法的实�?
  * <p>
  *
  * @since DbUtils 1.1
@@ -129,10 +129,10 @@ class AsmBeanProcessor implements BeanProcessor {
     }
     
     /**
-     * 生成动�?�bean，并将数据和bean合并
+     * 生成动�?�bean，并将数据和bean合并
      * <p>
      *
-     * <b>默认优先使用ASM生成动�?�bean，如果需要以javassist方式生成动�?�bean，请将本实现切换为{@link
+     * <b>默认优先使用ASM生成动�?�bean，如果需要以javassist方式生成动�?�bean，请将本实现切换为{@link
      * this#createBeanByJavassist(ResultSet, Class, String)}</b>
      *
      * @param <T>
@@ -150,17 +150,15 @@ class AsmBeanProcessor implements BeanProcessor {
 
 	public <T> T toBean(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
-		System.out.println("冲突提交测试");
-
 		if (cacheKey == null) {
 
 			cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		} 
 
 		/*
-		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量�?
-		 * 如果不做线程同步，只有当存在某一查询�?�?始就大量并发访问时，才会在前几次查询中重复定义动态相同的DbBeanFactory
-		 * 以type对象作为同步锁，降低线程同步对系统整体吞吐量的影�?
+		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量�?
+		 * 如果不做线程同步，只有当存在某一查询�?�?始就大量并发访问时，才会在前几次查询中重复定义动态相同的DbBeanFactory
+		 * 以type对象作为同步锁，降低线程同步对系统整体吞吐量的影�?
 		 */
 //		synchronized (type) {
 
@@ -184,7 +182,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
         DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(key);
         
-        // 如果缓存中有则直接返�?
+        // 如果缓存中有则直接返�?
         if (dynamicRse != null) {
 
             return dynamicRse.createBean(rs, mappedClass);
@@ -353,7 +351,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
                 if (columnAnnotation == null) {
 
-                    //去除列名里的下划�?'_'
+                    //去除列名里的下划�?'_'
                     if (columnName.replace("_", "").equalsIgnoreCase(props[i].getName())) {
                     	
                         columnToProperty[col] = i;
@@ -647,7 +645,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
     /**
      *
-     * 动�?�类脚本�?�?
+     * 动�?�类脚本�?�?
      *
      * @param cw
      * @param mv
@@ -703,7 +701,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
     /**
      *
-     * 动�?�类脚本收尾
+     * 动�?�类脚本收尾
      *
      * @param mv MethodVisitor
      * @param processorName com/nway/commons/dbutils/DynamicBeanProcessorImpl
