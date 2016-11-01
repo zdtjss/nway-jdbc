@@ -113,17 +113,24 @@ class AsmBeanProcessor implements BeanProcessor {
         if (!rs.next()) {
         	
             return Collections.emptyList();
-        }
+          }
         
         final List<T> results = new ArrayList<T>();
 
-        //String cacheKey = //DynamicClassUtils.makeCacheKey(rs, type.getName());
-		
-        do {
-        	
-            results.add(toBean(rs, type, cacheKey));
-        }
-        while (rs.next());
+        DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(cacheKey);
+        
+		  if (dynamicRse != null) {
+			  do {
+				  results.add(dynamicRse.createBean(rs, type));
+			  }
+			  while (rs.next());
+		  } 
+		  else {
+			  do {
+				  results.add(toBean(rs, type, cacheKey));
+			  }
+			  while (rs.next());
+		  }
 
         return results;
     }
@@ -155,6 +162,13 @@ class AsmBeanProcessor implements BeanProcessor {
 			cacheKey = DynamicClassUtils.makeCacheKey(rs, type.getName());
 		} 
 
+		DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(cacheKey);
+        
+		if (dynamicRse != null) {
+
+          return dynamicRse.createBean(rs, type);
+        }
+        
 		/*
 		 * 同步可以提高单次响应效率，但会降低系统整体吞吐量�?
 		 * 如果不做线程同步，只有当存在某一查询�?�?始就大量并发访问时，才会在前几次查询中重复定义动态相同的DbBeanFactory
@@ -179,14 +193,6 @@ class AsmBeanProcessor implements BeanProcessor {
      * @throws SQLException if a database error occurs.
      */
     private <T> T createBeanByASM(ResultSet rs, Class<T> mappedClass, String key) throws SQLException {
-
-        DbBeanFactory dynamicRse = DBBEANFACTORY_CACHE.get(key);
-        
-        // 如果缓存中有则直接返�?
-        if (dynamicRse != null) {
-
-            return dynamicRse.createBean(rs, mappedClass);
-        }
 
         T bean = this.newInstance(mappedClass);
 
