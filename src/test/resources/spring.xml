@@ -18,8 +18,6 @@
 
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 
-	<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/nway" />
-
 	<bean id="jdbcTxManager"
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
@@ -98,20 +96,20 @@
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
 
-	<bean class="org.apache.tomcat.jdbc.pool.DataSource">
+	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource">
 		<constructor-arg>
 			<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
 
 				<property name="username" value="root" />
-				<property name="password" value="wform" />
+				<property name="password" value="nway" />
 
-				<property name="driverClassName" value="org.mariadb.jdbc.Driver" />
+				<!-- <property name="driverClassName" value="org.mariadb.jdbc.Driver" />
 				<property name="url"
-					value="jdbc:mariadb://localhost:3306/wform?cacheResultSetMetadata=true&amp;metadataCacheSize=10" />
+					value="jdbc:mariadb://localhost:3306/wform?cacheResultSetMetadata=true&amp;metadataCacheSize=10" /> -->
 
-				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" /> 
-					<property name="url" value="jdbc:mysql://localhost:3306/test?cacheResultSetMetadata=true&amp;metadataCacheSize=1" 
-					/> -->
+				<property name="driverClassName" value="com.mysql.jdbc.Driver" /> 
+				<property name="url" value="jdbc:mysql://192.168.3.2:3306/test" 
+					/>
 				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" /> 
 					<property name="url" value="jdbc:mysql://localhost:3306/test?cacheResultSetMetadata=true&amp;metadataCacheSize=1" 
 					/> -->

@@ -3,7 +3,6 @@ package com.nway.spring.jdbc.json;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.FileOutputStream;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -19,7 +18,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.FileCopyUtils;
 
 import com.nway.spring.classwork.DynamicBeanClassLoader;
 import com.nway.spring.classwork.DynamicObjectException;
@@ -146,7 +144,7 @@ class JsonProcessor extends JsonBuilder
 	
 	public String toJsonList(ResultSet rs, String cacheKey) throws SQLException, IntrospectionException {
 	    
-	    StringBuilder json = new StringBuilder(5000);
+	    StringBuilder json = new StringBuilder(2048);
 	    
 	    json.append("[");
 	    
@@ -175,7 +173,7 @@ class JsonProcessor extends JsonBuilder
 
 		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
 
-		StringBuilder json = new StringBuilder(500);
+		StringBuilder json = new StringBuilder(512);
 		
 		json.append("{");
 
@@ -267,7 +265,7 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
         
-	    StringBuilder json = new StringBuilder(500);
+	    StringBuilder json = new StringBuilder(512);
 	    
 	    json.append("{");
 	    
@@ -410,7 +408,7 @@ class JsonProcessor extends JsonBuilder
 	        
 	        ctHandler.addMethod(CtNewMethod.make(sb[1].toString(), ctHandler));
 	        
-	           FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
+//            FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
 
 	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().newInstance());
 	        
@@ -442,7 +440,7 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
 		
-		StringBuilder json = new StringBuilder(500);
+		StringBuilder json = new StringBuilder(512);
 		
 		json.append("{");
 
@@ -579,7 +577,7 @@ class JsonProcessor extends JsonBuilder
 		return new StringBuilder[] { json, handlerScript };
 	}
 	
-private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException{
+	private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException{
         
         ResultSetMetaData rsmd = rs.getMetaData();
         
@@ -587,7 +585,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
         
         int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
         
-        StringBuilder json = new StringBuilder(500);
+        StringBuilder json = new StringBuilder(512);
         
         json.append("{");
 
@@ -806,7 +804,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 		
         String internalProcessorName = processorName.replace('.', '/');
 		
-		StringBuilder json = new StringBuilder(500);
+		StringBuilder json = new StringBuilder(512);
 		
 		json.append("{");
 		

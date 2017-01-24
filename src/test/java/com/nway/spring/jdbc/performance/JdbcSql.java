@@ -8,7 +8,7 @@ public class JdbcSql
 {
     private StringBuilder sql = new StringBuilder();
     
-    private List<Object> condition = new ArrayList<>();
+    private List<Object> condition = new ArrayList<Object>();
     
     public StringBuilder getSql()
     {

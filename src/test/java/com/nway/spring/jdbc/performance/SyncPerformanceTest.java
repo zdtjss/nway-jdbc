@@ -15,7 +15,9 @@ import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SyncPerformanceTest extends BaseTest {
 
     @Autowired

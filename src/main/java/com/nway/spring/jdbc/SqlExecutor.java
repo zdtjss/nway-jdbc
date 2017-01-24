@@ -27,6 +27,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
@@ -410,16 +411,27 @@ public class SqlExecutor extends JdbcTemplate {
 
 	private void initPaginationSupport() {
 
+		Connection conn = null;
+		
 		String databaseProductName = null;
 
-		try (Connection conn = getDataSource().getConnection()) {
+		try {
 			
+			conn = getDataSource().getConnection();
+					
 			databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
 		} 
 		catch (SQLException e) {
 			
 			throw new CannotGetJdbcConnectionException("∑√Œ  ˝æ›ø‚ ß∞‹", e);
-		} 
+		}
+		finally {
+			
+			if(conn != null) {
+				
+				DataSourceUtils.releaseConnection(conn, getDataSource());
+			}
+		}
 
 		if (databaseProductName.contains("ORACLE")) {
 			
