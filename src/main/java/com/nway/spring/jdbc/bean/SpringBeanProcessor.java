@@ -327,7 +327,7 @@ public class SpringBeanProcessor implements BeanProcessor {
 		@Override
 		public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 			Assert.state(this.mappedClass != null, "Mapped class was not specified");
-			T mappedObject = BeanUtils.instantiate(this.mappedClass);
+			T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
 			initBeanWrapper(bw);
 

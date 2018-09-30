@@ -85,7 +85,7 @@ public class HibernatePerformance implements Performance {
 
 		Transaction transaction = session.beginTransaction();
 
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 30000; i++) {
 
 			Computer computer = new Computer();
 

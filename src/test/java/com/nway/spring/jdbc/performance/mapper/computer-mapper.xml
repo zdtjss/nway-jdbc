@@ -16,10 +16,7 @@
 	</select>
 
 	<select id="getMonitorById" resultType="Monitor">
-		<if test="_databaseId == 'oracle'">
-			select * from t_monitor
-			where id = #{id}
-		</if>
+		select * from t_monitor where id = #{id}
 	</select>
 
 	<select id="listMonitor" resultType="Monitor">

@@ -134,8 +134,8 @@ public class SyncPerformanceTest extends BaseTest {
 	@Test
 	public void testListMonitor() throws InterruptedException {
 
-		int times = 30;
-		int threadn = 10;
+		int times = 500;
+		int threadn = 100;
 
 		ExecutorService nway = Executors.newFixedThreadPool(threadn);
 		ExecutorService spring = Executors.newFixedThreadPool(threadn);

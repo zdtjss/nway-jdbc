@@ -51,9 +51,9 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testGetMonitor() {
 
-		int id = 32768;
+		int id = 70;
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 
 			nwayPerformance.getMonitorById(id);
 
@@ -99,7 +99,7 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testQueryMonitorJsonList() {
 	    
-	    for (int i = 0; i < 300; i++) {
+	    for (int i = 0; i < 30; i++) {
 	        
 	        jdbcPerformance.queryMonitorJsonList();
 

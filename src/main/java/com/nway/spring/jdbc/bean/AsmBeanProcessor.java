@@ -17,6 +17,7 @@
 package com.nway.spring.jdbc.bean;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -255,7 +256,7 @@ class AsmBeanProcessor implements BeanProcessor {
 	
 				Class<?> processor = beanClassLoader.defineClass(processorName, cw.toByteArray());
 	
-				DBBEANFACTORY_CACHE.put(key, (DbBeanFactory) processor.newInstance());
+				DBBEANFACTORY_CACHE.put(key, (DbBeanFactory) processor.getDeclaredConstructor().newInstance());
 	
 	        } catch (Exception e) {
 	
@@ -308,21 +309,16 @@ class AsmBeanProcessor implements BeanProcessor {
      * @return A newly created object of the Class.
      * @throws SQLException if creation failed.
      */
-    private <T> T newInstance(Class<T> c) throws SQLException {
+	private <T> T newInstance(Class<T> c) throws SQLException {
 
-        try {
-
-            return c.newInstance();
-        } 
-        catch (InstantiationException e) {
-
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
-        } 
-        catch (IllegalAccessException e) {
-
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
-        }
-    }
+		try {
+			return c.getDeclaredConstructor().newInstance();
+		} 
+		catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
+		}
+	}
 
     /**
      * The positions in the returned array represent column numbers. The values stored at each
@@ -664,7 +660,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
         Object[] lab = new Object[2];
 
-		cw.visit(Opcodes.V1_5, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, processorName, null,
+		cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, processorName, null,
 				"com/nway/spring/jdbc/bean/DbBeanFactory", null);
 
 		cw.visitSource(processorName.substring(processorName.lastIndexOf('/') + 1) + ".java", null);

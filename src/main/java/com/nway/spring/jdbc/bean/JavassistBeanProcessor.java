@@ -17,6 +17,7 @@
 package com.nway.spring.jdbc.bean;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Blob;
@@ -230,7 +231,7 @@ class JavassistBeanProcessor implements BeanProcessor {
 
             ctHandler.addMethod(mapRow);
 			
-            DBBEANFACTORY_CACHE.put(key, (DbBeanFactory) ctHandler.toClass().newInstance());
+            DBBEANFACTORY_CACHE.put(key, (DbBeanFactory) ctHandler.toClass().getDeclaredConstructor().newInstance());
 
         } catch (Exception e) {
 
@@ -283,21 +284,16 @@ class JavassistBeanProcessor implements BeanProcessor {
      * @return A newly created object of the Class.
      * @throws SQLException if creation failed.
      */
-    private <T> T newInstance(Class<T> c) throws SQLException {
+	private <T> T newInstance(Class<T> c) throws SQLException {
 
-        try {
-
-            return c.newInstance();
-        } 
-        catch (InstantiationException e) {
-
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
-        } 
-        catch (IllegalAccessException e) {
-
-            throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
-        }
-    }
+		try {
+			return c.getDeclaredConstructor().newInstance();
+		}
+		catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new SQLException("Cannot create " + c.getName() + ": " + e.toString(), e);
+		}
+	}
 
     /**
      * The positions in the returned array represent column numbers. The values stored at each
