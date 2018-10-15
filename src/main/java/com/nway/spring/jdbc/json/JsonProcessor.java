@@ -3,7 +3,6 @@ package com.nway.spring.jdbc.json;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.FileOutputStream;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -19,7 +18,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.FileCopyUtils;
 
 import com.nway.spring.classwork.DynamicBeanClassLoader;
 import com.nway.spring.classwork.DynamicObjectException;
@@ -378,7 +376,7 @@ class JsonProcessor extends JsonBuilder
             
             ctHandler.addMethod(CtNewMethod.make(sb[1].toString(), ctHandler));
 			
-			JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().newInstance());
+			JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().getDeclaredConstructor().newInstance());
 
         } catch (Exception e) {
 
@@ -410,9 +408,9 @@ class JsonProcessor extends JsonBuilder
 	        
 	        ctHandler.addMethod(CtNewMethod.make(sb[1].toString(), ctHandler));
 	        
-	           FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
+	        //  FileCopyUtils.copy(ctHandler.toBytecode(), new FileOutputStream("E:\\workspace\\nway-jdbc\\abc.class"));
 
-	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().newInstance());
+	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) ctHandler.toClass().getDeclaredConstructor().newInstance());
 	        
 	    } catch (Exception e) {
 	        
@@ -751,7 +749,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 
 			Class<?> processor = beanClassLoader.defineClass(processorName, cw.toByteArray());
 
-			JSON_BUILDER_CACHE.put(key, (JsonBuilder) processor.newInstance());
+			JSON_BUILDER_CACHE.put(key, (JsonBuilder) processor.getDeclaredConstructor().newInstance());
 
         } catch (Exception e) {
 
@@ -786,7 +784,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 	        
 	        Class<?> processor = beanClassLoader.defineClass(processorName, cw.toByteArray());
 	        
-	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) processor.newInstance());
+	        JSON_BUILDER_CACHE.put(key, (JsonBuilder) processor.getDeclaredConstructor().newInstance());
 	        
 	    } catch (Exception e) {
 	        
@@ -1118,7 +1116,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 		MethodVisitor mv;
 		Object[] returnVal = new Object[3];
 		
-		cw.visit(Opcodes.V1_5, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, builderName, null, "com/nway/spring/jdbc/json/JsonBuilder", null);
+		cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, builderName, null, "com/nway/spring/jdbc/json/JsonBuilder", null);
 		
 		{
 			mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
