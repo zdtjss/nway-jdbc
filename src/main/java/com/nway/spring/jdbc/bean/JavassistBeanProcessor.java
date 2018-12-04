@@ -65,7 +65,7 @@ import javassist.LoaderClassPath;
  */
 class JavassistBeanProcessor implements BeanProcessor {
 
-	private static final Map<String, DbBeanFactory> DBBEANFACTORY_CACHE = new HashMap<String, DbBeanFactory>();
+	private static final Map<String, DbBeanFactory> DBBEANFACTORY_CACHE = new HashMap<String, DbBeanFactory>(10000);
 
     /**
      * Special array value used by <code>mapColumnsToProperties</code> that indicates there is no

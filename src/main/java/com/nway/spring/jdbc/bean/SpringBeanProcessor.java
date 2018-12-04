@@ -220,6 +220,8 @@ public class SpringBeanProcessor implements BeanProcessor {
 		/**
 		 * Initialize the mapping metadata for the given class.
 		 * 
+		 * 添加了通过注解方式自定义映射表字段和类属性关系的方式
+		 * 
 		 * @param mappedClass
 		 *            the mapped class
 		 */
