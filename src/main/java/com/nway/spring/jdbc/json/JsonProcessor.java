@@ -737,7 +737,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 			return jsonBuilder.buildJson(rs);
 		}
 		
-		ClassWriter cw = new ClassWriter(0);
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		
 		String processorName = DynamicClassUtils.getJSONProcessorName(type);
 		

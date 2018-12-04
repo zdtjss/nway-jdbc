@@ -111,10 +111,10 @@ class AsmBeanProcessor implements BeanProcessor {
      */
     public <T> List<T> toBeanList(ResultSet rs, Class<T> type, String cacheKey) throws SQLException {
 
-        if (!rs.next()) {
-        	
-            return Collections.emptyList();
-          }
+		if (!rs.next()) {
+
+			return Collections.emptyList();
+		}
         
         final List<T> results = new ArrayList<T>();
 
@@ -201,7 +201,7 @@ class AsmBeanProcessor implements BeanProcessor {
 
         MethodVisitor mv = null;
 
-        final ClassWriter cw = new ClassWriter(0);
+        final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 
         PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(mappedClass);
 
