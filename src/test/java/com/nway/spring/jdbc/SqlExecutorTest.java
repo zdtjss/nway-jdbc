@@ -244,7 +244,7 @@ public class SqlExecutorTest extends BaseTest
 		
 		begin = System.currentTimeMillis();
 		
-		List<Object[]> batchArgs = new ArrayList<>();
+		List<Object[]> batchArgs = new ArrayList<Object[]>();
 		
 		for (int i = 10; i < 20; i++) {
 

@@ -44,13 +44,15 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
     @Override
     public List<Monitor> listMonitor()
     {
-        List<Monitor> monitors = new ArrayList<>();
+        List<Monitor> monitors = new ArrayList<Monitor>();
         
+        Connection con = null;
         ResultSet rs = null;
         PreparedStatement stmt = null;
         
-        try (Connection con = dataSource.getConnection();)
+        try
         {
+        	con = dataSource.getConnection();
             con.setReadOnly(true);
             stmt = con.prepareStatement("select * from t_monitor");
             rs = stmt.executeQuery();
@@ -68,6 +70,7 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
         {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeStatement(stmt);
+            JdbcUtils.closeConnection(con);
         }
         
         return monitors;
@@ -94,11 +97,13 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
     {
         StringBuilder json = new StringBuilder(1000);
         
+        Connection con = null;
         ResultSet rs = null;
         PreparedStatement stmt = null;
         
-        try (Connection con = dataSource.getConnection();)
+        try
         {
+        	con = dataSource.getConnection();
             con.setReadOnly(true);
             stmt = con.prepareStatement("select * from t_monitor");
             rs = stmt.executeQuery();
@@ -116,6 +121,7 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
         {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeStatement(stmt);
+            JdbcUtils.closeConnection(con);
         }
         
         return json.toString();

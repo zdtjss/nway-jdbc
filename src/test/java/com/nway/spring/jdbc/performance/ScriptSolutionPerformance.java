@@ -43,7 +43,7 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
         
         if (jdbcSql.getSql().length() != 0)
         {
-            jsonData = sqlExecutor.queryForJsonList(jdbcSql.getSql().toString(), jdbcSql.getCondition().toArray(), Monitor.class);
+            jsonData = sqlExecutor.queryForJsonList(jdbcSql.getSql().toString(), jdbcSql.getCondition().toArray());
         }
         
         return jsonData;
@@ -58,9 +58,13 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
         {
             ((Invocable) engine).invokeFunction(functionName, inParam, jdbcSql);
         }
-        catch (NoSuchMethodException | ScriptException e)
+        catch (NoSuchMethodException e)
         {
             e.printStackTrace();
+        }
+        catch(ScriptException e) {
+        	
+        	e.printStackTrace();
         }
         
         return jdbcSql;

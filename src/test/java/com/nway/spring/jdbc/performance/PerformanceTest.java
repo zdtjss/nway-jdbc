@@ -14,7 +14,9 @@ import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.bean.DbBeanFactory;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PerformanceTest extends BaseTest {
 
 	@Autowired
@@ -30,7 +32,7 @@ public class PerformanceTest extends BaseTest {
 	private HibernatePerformance hibernatePerformance;
 	
 	@Autowired
-    @Qualifier("hibernateJpaPerformance")
+        @Qualifier("hibernateJpaPerformance")
 	private HibernateJpaPerformance jpaPerformance;
 	
 	@Autowired
@@ -99,7 +101,7 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testQueryMonitorJsonList() {
 	    
-	    for (int i = 0; i < 30; i++) {
+	    for (int i = 0; i < 10; i++) {
 	        
 	        jdbcPerformance.queryMonitorJsonList();
 

@@ -144,7 +144,7 @@ class JsonProcessor extends JsonBuilder
 	
 	public String toJsonList(ResultSet rs, String cacheKey) throws SQLException, IntrospectionException {
 	    
-	    StringBuilder json = new StringBuilder(5000);
+	    StringBuilder json = new StringBuilder(2048);
 	    
 	    json.append("[");
 	    
@@ -173,7 +173,7 @@ class JsonProcessor extends JsonBuilder
 
 		int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
 
-		StringBuilder json = new StringBuilder(500);
+		StringBuilder json = new StringBuilder(512);
 		
 		json.append("{");
 
@@ -265,7 +265,7 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
         
-	    StringBuilder json = new StringBuilder(500);
+	    StringBuilder json = new StringBuilder(512);
 	    
 	    json.append("{");
 	    
@@ -440,7 +440,7 @@ class JsonProcessor extends JsonBuilder
             columns[i - 1] = rsmd.getColumnLabel(i).toLowerCase();
         }
 		
-		StringBuilder json = new StringBuilder(500);
+		StringBuilder json = new StringBuilder(512);
 		
 		json.append("{");
 
@@ -577,7 +577,7 @@ class JsonProcessor extends JsonBuilder
 		return new StringBuilder[] { json, handlerScript };
 	}
 	
-private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException{
+	private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQLException, IntrospectionException{
         
         ResultSetMetaData rsmd = rs.getMetaData();
         
@@ -585,7 +585,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
         
         int[] columnToProperty = this.mapColumnsToProperties(rsmd, props);
         
-        StringBuilder json = new StringBuilder(500);
+        StringBuilder json = new StringBuilder(512);
         
         json.append("{");
 
@@ -804,7 +804,7 @@ private StringBuilder[] processByJavasist(ResultSet rs, Class<?> type) throws SQ
 		
         String internalProcessorName = processorName.replace('.', '/');
 		
-		StringBuilder json = new StringBuilder(500);
+		StringBuilder json = new StringBuilder(512);
 		
 		json.append("{");
 		
