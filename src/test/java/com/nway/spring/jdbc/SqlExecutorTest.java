@@ -19,6 +19,10 @@ import org.hibernate.Transaction;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.sql.QueryBuilder;
+import com.nway.spring.jdbc.sql.SqlBuilder;
+
 //import oracle.jdbc.OracleCallableStatement;
 //import oracle.jdbc.OracleTypes;
 
@@ -44,6 +48,22 @@ public class SqlExecutorTest extends BaseTest
 		ExampleEntity usr = sqlExecutor.queryForBean(sql, ExampleEntity.class);
 
 		System.out.println(usr.toString());
+	}
+	
+	@Test
+	public void testQueryForBeanLambda() {
+		
+		Computer computer = new Computer();
+		computer.setBrand("p");
+		
+		QueryBuilder builder = SqlBuilder.query(Computer.class, "brand").like("brand", computer::getBrand).ge("", () -> 1);
+		
+		System.out.println(builder.getSql());
+		System.out.println(builder.getParam());
+		
+		Computer c = sqlExecutor.queryForBean(builder.getSql(), builder.getBeanClass(), builder.getParam().toArray());
+		
+		System.out.println(c);
 	}
 
 	@Test

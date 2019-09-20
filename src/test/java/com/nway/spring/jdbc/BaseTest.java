@@ -33,7 +33,7 @@ public class BaseTest {
 		dataSource = beanFactory.getBean(DataSource.class);
 
 		SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
-		
+
 		builder.bind("java:comp/env/jdbc/nway", dataSource);
 		builder.activate();
 	}

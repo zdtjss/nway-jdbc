@@ -17,10 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
-
-import com.nway.spring.classwork.DynamicObjectException;
 
 /**
  *
@@ -33,26 +30,19 @@ public final class BeanListHandler<T> implements ResultSetExtractor<List<T>> {
 
     private final Class<T> type;
     
-    private String cacheKey;
-    
     /**
      * 考虑本类可能在不同 ClassLoader中使用，这里不应该是静态的 *
      */
     private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
 
-    public BeanListHandler(Class<T> type, String cacheKey) {
+    public BeanListHandler(Class<T> type) {
         this.type = type;
-        this.cacheKey = cacheKey;
     }
 
 	@Override
-	public List<T> extractData(ResultSet rs) throws DataAccessException {
+	public List<T> extractData(ResultSet rs) throws SQLException {
 
-		try {
-			return beanProcessor.toBeanList(rs, type, cacheKey);
-		} catch (SQLException e) {
-			throw new DynamicObjectException("获取列表失败 [ " + this.type + " ]", e);
-		}
+		return beanProcessor.toBeanList(rs, type);
 	}
 
 }

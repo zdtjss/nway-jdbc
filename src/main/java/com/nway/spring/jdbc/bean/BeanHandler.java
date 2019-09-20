@@ -22,8 +22,6 @@ import java.sql.SQLException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-import com.nway.spring.classwork.DynamicObjectException;
-
 /**
  * <code>ResultSetHandler</code> implementation that converts the first <code>ResultSet</code> row
  * into a JavaBean. This class is thread safe.
@@ -38,14 +36,11 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      */
     private final Class<T> type;
     
-    private String cacheKey;
-
     private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
 
-    public BeanHandler(Class<T> type, String cacheKey) {
+    public BeanHandler(Class<T> type) {
         
         this.type = type;
-        this.cacheKey = cacheKey;
     }
 
     /**
@@ -60,13 +55,8 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      * @see org.apache.commons.dbutils2.ResultSetHandler#handle(java.sql.ResultSet)
      */
 	@Override
-	public T extractData(ResultSet rs) throws DataAccessException {
-
-		try {
-			return rs.next() ? beanProcessor.toBean(rs, type, cacheKey) : null;
-		} catch (SQLException e) {
-			throw new DynamicObjectException("创建动态对象失败 [ " + this.type + " ]", e);
-		}
+	public T extractData(ResultSet rs) throws SQLException {
+		return rs.next() ? beanProcessor.toBean(rs, type) : null;
 	}
 
 }
