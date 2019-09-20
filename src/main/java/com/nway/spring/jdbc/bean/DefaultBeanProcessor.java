@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
 
 import com.nway.spring.jdbc.annotation.Column;
 
-public class SpringBeanProcessor implements BeanProcessor {
+public class DefaultBeanProcessor implements BeanProcessor {
 
 	@Override
 	public <T> List<T> toBeanList(ResultSet rs, Class<T> mappedClass, String key) throws SQLException {

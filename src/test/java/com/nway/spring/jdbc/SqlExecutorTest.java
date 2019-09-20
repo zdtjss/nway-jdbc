@@ -1,11 +1,9 @@
 package com.nway.spring.jdbc;
 
-import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +18,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.CallableStatementCallback;
-
-import com.nway.spring.jdbc.bean.BeanListHandler;
-import com.nway.spring.jdbc.json.JsonListHandler;
-import com.nway.spring.jdbc.performance.entity.Monitor;
 
 //import oracle.jdbc.OracleCallableStatement;
 //import oracle.jdbc.OracleTypes;
@@ -137,18 +129,6 @@ public class SqlExecutorTest extends BaseTest
 		String json = sqlExecutor.queryForJsonList(sql, ExampleEntity.class);
 
 		System.out.println(json);
-	}
-	
-	@Test
-	public void testJsonListNRC() {
-	    
-	    String sql = "select * from t_nway";
-	    
-	    String json = sqlExecutor.queryForJsonList(sql);
-	    
-	    System.out.println(sqlExecutor.queryForJsonList(sql));
-	    
-	    System.out.println(json);
 	}
 	
 	@Test

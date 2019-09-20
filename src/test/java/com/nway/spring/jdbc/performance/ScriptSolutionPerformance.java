@@ -36,19 +36,6 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
     @Autowired
     private SqlExecutor sqlExecutor;
     
-    public String queryMonitorJsonList()
-    {
-        String jsonData = "[]";
-        JdbcSql jdbcSql = getJdbcSql("listMonitor", null);
-        
-        if (jdbcSql.getSql().length() != 0)
-        {
-            jsonData = sqlExecutor.queryForJsonList(jdbcSql.getSql().toString(), jdbcSql.getCondition().toArray());
-        }
-        
-        return jsonData;
-    }
-    
     private JdbcSql getJdbcSql(String functionName, Map<String, String> inParam)
     {
         
@@ -121,5 +108,11 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
     {
         return gson.toJson(listMonitor());
     }
+
+	@Override
+	public String queryMonitorJsonList() {
+
+		return null;
+	}
     
 }

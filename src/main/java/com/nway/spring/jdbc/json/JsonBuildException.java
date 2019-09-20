@@ -24,18 +24,15 @@ import org.springframework.dao.DataAccessException;
  *
  * @since 2015-04-02
  */
-public class JsonBuildException extends DataAccessException
-{
+public class JsonBuildException extends DataAccessException {
 
 	private static final long serialVersionUID = -4578530236090467703L;
 
-	public JsonBuildException(String message)
-	{
+	public JsonBuildException(String message) {
 		super(message);
 	}
 
-	public JsonBuildException(String message, Throwable cause)
-	{
+	public JsonBuildException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

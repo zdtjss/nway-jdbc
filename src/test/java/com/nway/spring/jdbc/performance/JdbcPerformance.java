@@ -13,12 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
-import com.nway.spring.jdbc.json.JsonBuilder;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 
 @Service("jdbcPerformance")
-public class JdbcPerformance extends JsonBuilder implements Performance, JsonQueryPerformance {
+public class JdbcPerformance implements Performance, JsonQueryPerformance {
 
     @Autowired
     private DataSource dataSource;
@@ -91,67 +90,11 @@ public class JdbcPerformance extends JsonBuilder implements Performance, JsonQue
         
         return monitor;
     }
+
+	@Override
+	public String queryMonitorJsonList() {
+
+		return null;
+	}
     
-    @Override
-    public String queryMonitorJsonList()
-    {
-        StringBuilder json = new StringBuilder(1000);
-        
-        Connection con = null;
-        ResultSet rs = null;
-        PreparedStatement stmt = null;
-        
-        try
-        {
-        	con = dataSource.getConnection();
-            con.setReadOnly(true);
-            stmt = con.prepareStatement("select * from t_monitor");
-            rs = stmt.executeQuery();
-                    
-            while(rs.next()) {
-                
-                json.append(buildJson(rs));
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            JdbcUtils.closeResultSet(rs);
-            JdbcUtils.closeStatement(stmt);
-            JdbcUtils.closeConnection(con);
-        }
-        
-        return json.toString();
-    }
-    
-    protected String buildJson(ResultSet rs) throws SQLException
-    {
-        StringBuilder json = new StringBuilder(100);
-        json.append("{");
-        json.append(",\"id\":");
-        integerValue(rs.getInt(1), rs.wasNull(), json);
-        json.append(",\"brand\":");
-        stringValue(rs.getString(2), json);
-        json.append(",\"max_resolution\":");
-        stringValue(rs.getString(3), json);
-        json.append(",\"model\":");
-        stringValue(rs.getString(4), json);
-        json.append(",\"photo\":");
-        json.append('"').append(rs.getObject(5)).append('"');
-        json.append(",\"price\":");
-        doubleValue(rs.getDouble(6), rs.wasNull(), json);
-        json.append(",\"production_date\":");
-        dateValue(rs.getTimestamp(7), "yyyy-MM-dd HH:mm:ss.SSS", json);
-        json.append(",\"type\":");
-        integerValue(rs.getInt(8), rs.wasNull(), json);
-        if (json.length() > 1)
-        {
-            json = json.deleteCharAt(1);
-        }
-        json.append('}');
-        return json.toString();
-    }
 }

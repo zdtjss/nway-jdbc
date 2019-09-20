@@ -9,16 +9,14 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * @author zdtjss@163.com
  * @since 2015/04/02
  */
-public class JsonHandler implements ResultSetExtractor<String>
-{
+public class JsonHandler implements ResultSetExtractor<String> {
+	
 	private static final JsonProcessor JSON_PROCESSOR = new JsonProcessor();
 
 	private final Class<?> type;
-	private String cacheKey;
 	
 	public JsonHandler(Class<?> type, String cacheKey) {
 		this.type = type;
-		this.cacheKey = cacheKey;
 	}
 
 	@Override
@@ -26,7 +24,7 @@ public class JsonHandler implements ResultSetExtractor<String>
 		
 		try {
 
-			return rs.next() ? JSON_PROCESSOR.buildJson(rs, type, cacheKey) : "{}";
+			return rs.next() ? JSON_PROCESSOR.buildJson(rs, type) : "{}";
 		} 
 		catch (Exception e) {
 			

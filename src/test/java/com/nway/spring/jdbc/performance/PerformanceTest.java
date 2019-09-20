@@ -1,20 +1,15 @@
 package com.nway.spring.jdbc.performance;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import com.nway.spring.jdbc.BaseTest;
-import com.nway.spring.jdbc.bean.DbBeanFactory;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
-import org.springframework.stereotype.Service;
 
 @Service
 public class PerformanceTest extends BaseTest {
@@ -210,57 +205,4 @@ public class PerformanceTest extends BaseTest {
 		((HibernatePerformance) this.hibernatePerformance).initDB();
 	}
 	
-	@Test
-	public void testHashMap() {
-	    
-	    Map<String, DbBeanFactory> map = new HashMap<String, DbBeanFactory>(10000);
-	    
-	    for(int i = 0 ; i < 10000 ; i++) {
-	        
-	        map.put("select * from t_monitor_"+i, new DbBeanFactory()
-            {
-                @Override
-                protected <T> T createBean(ResultSet rs, Class<T> type) throws SQLException
-                {
-                    return null;
-                }
-            });
-	    }
-	    
-        long begin = System.nanoTime();
-        map.get("select * from t_monitor_1005");
-        System.out.println("t_monitor_1005 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_2005");
-        System.out.println("t_monitor_2005 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_1");
-        System.out.println("t_monitor_1 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_9955");
-        System.out.println("t_monitor_9955 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_9956");
-        System.out.println("t_monitor_9956 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_9956");
-        System.out.println("t_monitor_9956 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005");
-        System.out.println("t_monitor_10051231 = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_1005select * from t_monitor_1005select select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005* from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005");
-        System.out.println("t_monitor_10051!@@ = " + (System.nanoTime() - begin));
-        
-        begin = System.nanoTime();
-        map.get("select * from t_monitor_1005select * from t_monitor_1005select select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005* from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005select * from t_monitor_1005");
-        System.out.println("t_monitor_10051!@@ = " + (System.nanoTime() - begin));
-	}
 }

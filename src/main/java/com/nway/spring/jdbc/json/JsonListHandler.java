@@ -21,33 +21,26 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 /**
  *
  * @author zdtjss@163.com
- * @param <T>
- *            List元素类型
+ * @param <T> List元素类型
  *
  * @since 2014-03-28
  */
-public final class JsonListHandler implements ResultSetExtractor<String>
-{
+public final class JsonListHandler implements ResultSetExtractor<String> {
+	
 	private static final JsonProcessor JSON_PROCESSOR = new JsonProcessor();
 
 	private final Class<?> type;
-	private String cacheKey;
-	
-	public JsonListHandler(Class<?> type, String cacheKey) {
-		
+
+	public JsonListHandler(Class<?> type) {
 		this.type = type;
-		this.cacheKey = cacheKey;
 	}
 
 	@Override
-	public String extractData(ResultSet rs) throws DataAccessException
-	{
-		try
-		{
-			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type, cacheKey) : "[]";
+	public String extractData(ResultSet rs) throws DataAccessException {
+		try {
+			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type) : "[]";
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			throw new JsonBuildException("创建JSON失败 [ " + this.type + " ]", e);
 		}
 	}
