@@ -33,6 +33,7 @@ import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.json.JsonHandler;
 import com.nway.spring.jdbc.json.JsonListHandler;
+import com.nway.spring.jdbc.sql.QueryBuilder;
 
 /**
  * 注意：
@@ -66,6 +67,11 @@ public class SqlExecutor extends JdbcTemplate {
 	 */
 	private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+TOP\\p{Blank}+\\d+\\p{Blank}+.+");
 
+	public <T> T queryForBean(QueryBuilder queryBuilder) throws DataAccessException {
+
+		return queryForBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	}
+	
 	public <T> T queryForBean(String sql, Class<T> type) throws DataAccessException {
 
 		return super.query(sql, new BeanHandler<T>(type));
@@ -74,11 +80,6 @@ public class SqlExecutor extends JdbcTemplate {
 	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
 		return super.query(sql, new BeanHandler<T>(type), args);
-	}
-
-	public <T> T queryForBean(String sql, Object[] args, Class<T> type) throws DataAccessException {
-
-		return super.query(sql, args, new BeanHandler<T>(type));
 	}
 
 	public <T> T queryForBean(String sql, Object[] args, int[] argTypes, Class<T> type)
@@ -92,14 +93,14 @@ public class SqlExecutor extends JdbcTemplate {
 		return super.query(sql, new BeanListHandler<T>(type));
 	}
 	
+	public <T> List<T> queryForBeanList(QueryBuilder queryBuilder) throws DataAccessException {
+		
+		return queryForBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	}
+	
 	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
 		return super.query(sql, new BeanListHandler<T>(type), args);
-	}
-
-	public <T> List<T> queryForBeanList(String sql, Object[] args, Class<T> type) throws DataAccessException {
-
-		return super.query(sql, args, new BeanListHandler<T>(type));
 	}
 
 	public <T> List<T> queryForBeanList(String sql, Object[] args, int[] argTypes, Class<T> type)
@@ -118,19 +119,19 @@ public class SqlExecutor extends JdbcTemplate {
 		return super.query(sql, new JsonHandler(type, sql), args);
 	}
 	
-	public String queryForJson(String sql,Object[] args, Class<?> type) throws DataAccessException {
-	    
-	    return super.query(sql, args, new JsonHandler(type, sql));
-	}
-	
 	public String queryForJson(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 
 		return super.query(sql, args, argTypes, new JsonHandler(type, sql));
 	}
 	
-	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
+	public String queryForJsonList(QueryBuilder queryBuilder) throws DataAccessException {
 	    
-	    return super.query(sql, new JsonListHandler(type));
+	    return queryForJsonList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	}
+	
+	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
+		
+		return super.query(sql, new JsonListHandler(type));
 	}
 	
 	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
@@ -138,14 +139,15 @@ public class SqlExecutor extends JdbcTemplate {
 	    return super.query(sql, new JsonListHandler(type), args);
 	}
 	
-	public String queryForJsonList(String sql, Object[] args, Class<?> type) throws DataAccessException {
-	    
-	    return super.query(sql, args, new JsonListHandler(type));
-	}
-	
 	public String queryForJsonList(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 	    
 	    return super.query(sql, args, argTypes, new JsonListHandler(type));
+	}
+	
+	public <T> Pagination<T> queryForBeanPagination(QueryBuilder queryBuilder, int page, int pageSize)
+			throws DataAccessException {
+
+		return queryForBeanPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize, queryBuilder.getBeanClass());
 	}
 	
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page,
@@ -154,7 +156,7 @@ public class SqlExecutor extends JdbcTemplate {
 		return queryForBeanPagination(sql, params, null, page, pageSize, beanClass);
 	}
 
-	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params,int[] argTypes, int page,
+	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int[] argTypes, int page,
 			int pageSize, Class<T> beanClass) throws DataAccessException {
 
 		List<T> item = Collections.emptyList();
@@ -171,7 +173,7 @@ public class SqlExecutor extends JdbcTemplate {
 
 			if (argTypes == null) {
 				
-				item = queryForBeanList(paginationSql, params, beanClass);
+				item = queryForBeanList(paginationSql, beanClass, params);
 			} 
 			else {
 				
@@ -182,9 +184,15 @@ public class SqlExecutor extends JdbcTemplate {
 		return new Pagination<T>(item, totalCount, page, pageSize);
 	}
 
-	public Pagination<Map<String, Object>> queryForMapListPagination(String sql, Object[] params, int page,
+	public Pagination<Map<String, Object>> queryForMapListPagination(QueryBuilder queryBuilder, int page,
 			int pageSize) throws DataAccessException {
 
+		return queryForMapListPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize);
+	}
+	
+	public Pagination<Map<String, Object>> queryForMapListPagination(String sql, Object[] params, int page,
+			int pageSize) throws DataAccessException {
+		
 		return queryForMapListPagination(sql, params, null, page, pageSize);
 	}
 	
@@ -235,17 +243,17 @@ public class SqlExecutor extends JdbcTemplate {
 		return queryForJsonPagination(sql, params, null, page, pageSize, null);
 	}
 	
-	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize, Class<?> beanClass)
+	public String queryForJsonPagination(QueryBuilder queryBuilder, int page, int pageSize)
 	        throws DataAccessException {
 	    
-	    return queryForJsonPagination(sql, params, null, page, pageSize, beanClass);
+	    return queryForJsonPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize, queryBuilder.getBeanClass());
 	}
-    
-    public String queryForJsonPagination(String sql, Object[] params, int[] argTypes, int page, int pageSize)
-            throws DataAccessException {
-        
-        return queryForJsonPagination(sql, params, argTypes, page, pageSize, null);
-    }
+	
+	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize, Class<?> beanClass)
+			throws DataAccessException {
+		
+		return queryForJsonPagination(sql, params, null, page, pageSize, beanClass);
+	}
     
 	public String queryForJsonPagination(String sql, Object[] params, int[] argTypes, int page, int pageSize,
 			Class<?> beanClass) throws DataAccessException {
@@ -262,7 +270,7 @@ public class SqlExecutor extends JdbcTemplate {
 			String paginationSql = paginationSupport.buildPaginationSql(sql, page, pageSize);
 
 			if (argTypes == null) {
-		        json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, beanClass)).append(',');
+		        json.append("\"pageData\":").append(queryForJsonList(paginationSql, beanClass, params)).append(',');
 			}
 			else {
 		        json.append("\"pageData\":").append(queryForJsonList(paginationSql, params, argTypes, beanClass)).append(',');
@@ -281,53 +289,42 @@ public class SqlExecutor extends JdbcTemplate {
 	}
     
 	public <T> T queryForObject(Class<T> requiredType, String sql, T defaultValue) throws DataAccessException {
-
     	T obj = null;
-
-		try 
-		{
+		try {
 			obj = super.queryForObject(sql, requiredType);
 		}
-		catch (EmptyResultDataAccessException e)
-		{
+		catch (EmptyResultDataAccessException e) {
 			obj = defaultValue;
 		}
-
 		return obj;
 	}
 	
 	public <T> T queryForObject(Class<T> requiredType, String sql, Object[] args, T defaultValue)
 			throws DataAccessException {
-
 		T obj = null;
-
-		try 
-		{
+		try {
 			obj = super.queryForObject(sql, args, requiredType);
 		}
-		catch (EmptyResultDataAccessException e)
-		{
+		catch (EmptyResultDataAccessException e) {
 			obj = defaultValue;
 		}
-
 		return obj;
 	}
 	
 	public <T> T queryForObject(Class<T> requiredType, String sql, Object[] args, int[] argTypes, T defaultValue)
 			throws DataAccessException {
-
 		T obj = null;
-
-		try 
-		{
+		try {
 			obj = super.queryForObject(sql, args, argTypes, requiredType);
 		}
-		catch (EmptyResultDataAccessException e)
-		{
+		catch (EmptyResultDataAccessException e) {
 			obj = defaultValue;
 		}
-
 		return obj;
+	}
+	
+	public int count(QueryBuilder queryBuilder) {
+		return queryForObject(queryBuilder.getSql(), Integer.class, queryBuilder.getParam().toArray());
 	}
 	
 	/**
@@ -373,110 +370,81 @@ public class SqlExecutor extends JdbcTemplate {
 		String databaseProductName = null;
 
 		try {
-			
 			conn = getDataSource().getConnection();
-					
 			databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
 		} 
 		catch (SQLException e) {
-			
 			throw new CannotGetJdbcConnectionException("访问数据库失败", e);
 		}
 		finally {
-			
 			if(conn != null) {
-				
 				DataSourceUtils.releaseConnection(conn, getDataSource());
 			}
 		}
 
 		if (databaseProductName.contains("ORACLE")) {
-			
 			this.paginationSupport = new OraclePaginationSupport();
 		} 
 		else if (databaseProductName.contains("MYSQL")
 				|| databaseProductName.contains("MARIADB")) {
-			
 			this.paginationSupport = new MysqlPaginationSupport();
 		} 
 		else {
-			
 			throw new UnsupportedOperationException("暂不支持本数据库的分页操作，请实现com.nway.spring.jdbc.PaginationSupport接口，通过本类setPaginationSupport方法引入。");
 		}
 	}
 	
 	private int queryCount(String countSql, Object[] params, int[] argTypes) {
-
 		if (argTypes == null) {
-			
 			return query(countSql, params, new IntegerResultSetExtractor(countSql));
 		} 
 		else {
-			
 			return query(countSql, params, argTypes, new IntegerResultSetExtractor(countSql));
 		}
-
 	}
 
 
 	@Override
 	public void afterPropertiesSet() {
-		
 		super.afterPropertiesSet();
-
 		if (getPaginationSupport() == null) {
-			
 			initPaginationSupport();
 		}
 	}
 	
 	public PaginationSupport getPaginationSupport() {
-
 		return paginationSupport;
 	}
 
 	public void setPaginationSupport(PaginationSupport paginationSupport) {
-
 		this.paginationSupport = paginationSupport;
 	}
 
 	private class IntegerResultSetExtractor implements ResultSetExtractor<Integer> {
-		
 		private String sql;
-		
 		IntegerResultSetExtractor(String sql) {
-			
 			this.sql = sql;
 		}
 		
 		@Override
 		public Integer extractData(ResultSet rs) {
-			
 			try {
-				
 				return rs.next() ? rs.getInt(1) : 0;
 			} 
 			catch (SQLException e) {
-				
 				throw new InvalidResultSetAccessException("获取总数据量失败", sql, e);
 			}
 		}
 	}
 
 	private int firstFromIndex(String sql, int startIndex) {
-
 		int fromIndex = sql.indexOf("FROM", startIndex);
-
 		char previousChar = sql.charAt(fromIndex - 1);
-
 		char nextChar = sql.charAt(fromIndex + 4);
-
 		if (!(previousChar == ' ' || previousChar == '*' || previousChar == '\t' || previousChar == '\n')
 				&& !(nextChar == ' ' || nextChar == '(' || nextChar == '\t' || nextChar == '\n')) {
-
 			fromIndex = firstFromIndex(sql, fromIndex + 4);
 		}
-
 		return fromIndex;
 	}
 	

@@ -56,7 +56,7 @@ public class SqlExecutorTest extends BaseTest
 		Computer computer = new Computer();
 		computer.setBrand("p");
 		
-		QueryBuilder builder = SqlBuilder.query(Computer.class, "brand").like("brand", computer::getBrand).ge("", () -> 1);
+		QueryBuilder builder = SqlBuilder.query(Computer.class, "brand").like("brand", computer.getBrand()).ge(() -> 1);
 		
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());

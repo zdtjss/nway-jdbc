@@ -18,7 +18,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "t_nway")
-@com.nway.spring.jdbc.annotation.Table("t_nway")
+@com.nway.spring.jdbc.annotation.Table(name = "t_nway")
 public class ExampleEntity {
 
 	private int id;

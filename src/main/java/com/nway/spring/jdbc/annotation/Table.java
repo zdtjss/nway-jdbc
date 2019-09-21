@@ -15,5 +15,5 @@ public @interface Table {
 	/**
 	 * ±íÃû
 	 */
-	String value();
+	String name();
 }

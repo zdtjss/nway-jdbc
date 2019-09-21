@@ -44,10 +44,10 @@ public class QueryBuilder {
 				sql.append(column.name()).append(',');
 			}
 			else {
-				sql.append(fieldToColumn(field.getName())).append(',');
+				sql.append(ReflectUtils.fieldToColumn(field.getName())).append(',');
 			}
 		}
-		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.value()).append(" where ");
+		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.name()).append(" where ");
 	}
 	
 	private void initColumns(String ... columns) {
@@ -55,11 +55,11 @@ public class QueryBuilder {
 		for(String column : columns) {
 			sql.append(column).append(',');
 		}
-		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.value()).append(" where ");
+		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.name()).append(" where ");
 	}
 
-	public <T> QueryBuilder eq(String column, Supplier<T> val) {
-		sql.append(column).append(" = ?");
+	public <T> QueryBuilder eq(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" = ?");
 		param.add(val.get());
 		return this;
 	}
@@ -70,8 +70,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder ne(String column, Supplier<T> val) {
-		sql.append(column).append(" != ?");
+	public <T> QueryBuilder ne(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" != ?");
 		param.add(val.get());
 		return this;
 	}
@@ -82,8 +82,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder gt(String column, Supplier<T> val) {
-		sql.append(column).append(" > ?");
+	public <T> QueryBuilder gt(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" > ?");
 		param.add(val.get());
 		return this;
 	}
@@ -94,8 +94,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder ge(String column, Supplier<T> val) {
-		sql.append(column).append(" >= ?");
+	public <T> QueryBuilder ge(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" >= ?");
 		param.add(val.get());
 		return this;
 	}
@@ -106,8 +106,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder lt(String column, Supplier<T> val) {
-		sql.append(column).append(" < ?");
+	public <T> QueryBuilder lt(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" < ?");
 		param.add(val.get());
 		return this;
 	}
@@ -118,8 +118,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder le(String column, Supplier<T> val) {
-		sql.append(column).append(" <= ?");
+	public <T> QueryBuilder le(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" <= ?");
 		param.add(val.get());
 		return this;
 	}
@@ -130,8 +130,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public QueryBuilder like(String column, Supplier<String> val) {
-		sql.append(column).append(" like ?");
+	public QueryBuilder like(SSupplier<String> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" like ?");
 		param.add("%" + val.get() + "%");
 		return this;
 	}
@@ -142,8 +142,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public QueryBuilder notLike(String column, Supplier<String> val) {
-		sql.append(column).append(" not like ?");
+	public QueryBuilder notLike(SSupplier<String> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" not like ?");
 		param.add("%" + val.get() + "%");
 		return this;
 	}
@@ -154,8 +154,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder likeLeft(String column, Supplier<T> val) {
-		sql.append(column).append(" like ?");
+	public <T> QueryBuilder likeLeft(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" like ?");
 		param.add("%" + val.get());
 		return this;
 	}
@@ -166,8 +166,8 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder likeRight(String column, Supplier<T> val) {
-		sql.append(column).append(" like ?");
+	public <T> QueryBuilder likeRight(SSupplier<T> val) {
+		sql.append(ReflectUtils.getColumn(val)).append(" like ?");
 		param.add(val.get() + "%");
 		return this;
 	}
@@ -222,11 +222,11 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder in(String column, Supplier<T> val) {
+	public <T> QueryBuilder in(SSupplier<T> val) {
 		T cls = val.get();
 		if(cls instanceof Collection<?>) {
 			Collection values = (Collection) cls;
-			sql.append(column).append(" in (");
+			sql.append(ReflectUtils.getColumn(val)).append(" in (");
 			values.stream().forEach(e -> {
 				if(e instanceof Number) {
 					param.add(e);
@@ -260,11 +260,11 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public <T> QueryBuilder notIn(String column, Supplier<T> val) {
+	public <T> QueryBuilder notIn(SSupplier<T> val) {
 		T cls = val.get();
 		if(cls instanceof Collection<?>) {
 			Collection values = (Collection) cls;
-			sql.append(column).append(" not in (");
+			sql.append(ReflectUtils.getColumn(val)).append(" not in (");
 			values.stream().forEach(e -> {
 				if(e instanceof Number) {
 					param.add(e);
@@ -327,16 +327,4 @@ public class QueryBuilder {
 		return param;
 	}
 	
-	private String fieldToColumn(String fieldName) {
-		StringBuilder column = new StringBuilder();
-		for(char c :fieldName.toCharArray()) {
-			if(Character.isUpperCase(c)) {
-				column.append('_').append(Character.toLowerCase(c));
-			}
-			else {
-				column.append(c);
-			}
-		}
-		return column.toString();
-	}
 }

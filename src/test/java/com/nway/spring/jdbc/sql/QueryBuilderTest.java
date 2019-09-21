@@ -12,7 +12,7 @@ public class QueryBuilderTest {
 		Computer computer = new Computer();
 		computer.setBrand("abc¹þ¹þ");
 		
-		QueryBuilder builder = SqlBuilder.query(Computer.class).like("brand", computer::getBrand);
+		QueryBuilder builder = SqlBuilder.query(Computer.class).like(computer::getBrand).notLike(computer::getModel);
 		
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());

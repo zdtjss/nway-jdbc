@@ -26,7 +26,7 @@ import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "t_computer")
-@com.nway.spring.jdbc.annotation.Table("t_computer")
+@com.nway.spring.jdbc.annotation.Table(name = "t_computer")
 public class Computer {
 
 	private int id;
