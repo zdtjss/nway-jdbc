@@ -62,11 +62,11 @@ public class SqlExecutor extends JdbcTemplate {
 	 * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
 	 */
 	private static final Pattern SQL_ORDER_BY_PATTERN = Pattern
-			.compile(".+\\p{Blank}+ORDER\\p{Blank}+BY[\\,\\p{Blank}\\w\\.]+");
+			.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
 	/**
 	 * SQL 语句中top匹配
 	 */
-	private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+TOP\\p{Blank}+\\d+\\p{Blank}+.+");
+	private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+(TOP|top)\\p{Blank}+\\d+\\p{Blank}+.+");
 
 	public int update(SqlBuilder sqlBuilder) {
 		
@@ -292,7 +292,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public <T> Pagination<T> queryForBeanPagination(QueryBuilder queryBuilder, int page, int pageSize)
+	public <T> Pagination<T> queryForBeanPagination(SqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
 
 		return queryForBeanPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize, queryBuilder.getBeanClass());
@@ -334,22 +334,15 @@ public class SqlExecutor extends JdbcTemplate {
 
 		List<T> item = Collections.emptyList();
 
-		String upperSql = sql.toUpperCase();
-
-		String countSql = buildPaginationCountSql(upperSql);
-
+		String countSql = buildPaginationCountSql(sql);
 		int totalCount = queryCount(countSql, params, argTypes);
 		
 		if (totalCount != 0) {
-
-			String paginationSql = paginationSupport.buildPaginationSql(upperSql, page, pageSize);
-
+			String paginationSql = paginationSupport.buildPaginationSql(sql, page, pageSize);
 			if (argTypes == null) {
-				
 				item = queryForBeanList(paginationSql, beanClass, params);
 			} 
 			else {
-				
 				item = queryForBeanList(paginationSql, params, argTypes, beanClass);
 			}
 		}
@@ -607,27 +600,19 @@ public class SqlExecutor extends JdbcTemplate {
 	private String buildPaginationCountSql(String sql) {
 		
 		StringBuilder countSql = new StringBuilder(sql);
-		StringBuilder upperSql = new StringBuilder(sql.toUpperCase());
 
-		if (SQL_ORDER_BY_PATTERN.matcher(upperSql).matches()) {
-			
-			upperSql.delete(upperSql.lastIndexOf(" ORDER "), upperSql.length());
-			
-			countSql.delete(upperSql.lastIndexOf(" ORDER "), upperSql.length());
+		if (SQL_ORDER_BY_PATTERN.matcher(sql).matches()) {
+			countSql.delete(countSql.lastIndexOf(" ORDER "), countSql.length());
 		}
 		
-		int firstFromIndex = firstFromIndex(upperSql.toString(), 0);
+		int firstFromIndex = firstFromIndex(countSql.toString(), 0);
+		String selectedColumns = countSql.substring(0, firstFromIndex);
 		
-		String selectedColumns = upperSql.substring(0, firstFromIndex);
-		
-		if (selectedColumns.indexOf(" DISTINCT ") == -1 && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
-
-			upperSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1)");
-			
-			countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1)");
+		if ((selectedColumns.indexOf(" DISTINCT ") == -1 || selectedColumns.indexOf(" distinct ") == -1)
+				&& !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
+			countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1) ");
 		} 
 		else {
-
 			countSql.insert(0, "SELECT COUNT(1) FROM (").append(')');
 		}
 		
@@ -709,7 +694,7 @@ public class SqlExecutor extends JdbcTemplate {
 	}
 
 	private int firstFromIndex(String sql, int startIndex) {
-		int fromIndex = sql.indexOf("FROM", startIndex);
+		int fromIndex = sql.toUpperCase().indexOf("FROM", startIndex);
 		char previousChar = sql.charAt(fromIndex - 1);
 		char nextChar = sql.charAt(fromIndex + 4);
 		if (!(previousChar == ' ' || previousChar == '*' || previousChar == '\t' || previousChar == '\n')

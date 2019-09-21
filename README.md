@@ -62,7 +62,7 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 	
         各种参数的queryForBean方法支持单个Java对象查询
 		
-		SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).eq(usrQuery::getStatus);
+		SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).where().eq(usrQuery::getStatus);
         User user = sqlExecutor.queryForBean(builder);
         
         or
@@ -73,7 +73,7 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 	
         各种参数的queryForBeanList方法支持集合对象查询
         
-        SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).eq(usrQuery::getStatus);
+        SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).where().eq(usrQuery::getStatus);
         List<User> users = sqlExecutor.queryForBeanList(builder);
         
         or
@@ -84,7 +84,7 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 	
         各种参数的queryForBeanPagination方法支持Java对象分页查询
 		
-		SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).eq(usrQuery::getStatus).orderBy(usrQuery::getId);
+		SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).where().eq(usrQuery::getStatus).orderBy(usrQuery::getId);
         Pagination<User> users = sqlExecutor.queryForBeanList(builder, 1, 10);
         
         or

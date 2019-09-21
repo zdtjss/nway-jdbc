@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.sql.QueryBuilder;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilder;
 
@@ -103,10 +102,9 @@ public class SqlExecutorTest extends BaseTest
 
 		String input = "a order by abc1,a.ab2  ";
 
-		Pattern ORDER_BY_PATTERN = Pattern
-				.compile(".+\\p{Blank}+ORDER\\p{Blank}+BY[\\,\\p{Blank}\\w\\.]+");
+		Pattern ORDER_BY_PATTERN = Pattern.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
 
-		System.out.println(ORDER_BY_PATTERN.matcher(input.toUpperCase()).matches());
+		System.out.println(ORDER_BY_PATTERN.matcher(input.toLowerCase()).matches());
 	}
 	
 	@Test
@@ -265,6 +263,8 @@ public class SqlExecutorTest extends BaseTest
 
 		DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
 
+		example.setId(1);
+		
 		example.setpBoolean(1 == ((Math.random() * 10) % 2));
 
 		example.setpByte((byte) (Math.random() * 100));
@@ -357,6 +357,18 @@ public class SqlExecutorTest extends BaseTest
 		
 		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
 		List<ExampleEntity> ee = sqlExecutor.queryForBeanList(sqlBuilder);
+		
+		System.out.println(ee);
+	}
+	
+	@Test
+	public void lambdaQueryPageTest() {
+		
+		ExampleEntity example = new ExampleEntity();
+		example.setId(10);
+		
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
+		Pagination<ExampleEntity> ee = sqlExecutor.queryForBeanPagination(sqlBuilder, 1, 10);
 		
 		System.out.println(ee);
 	}
