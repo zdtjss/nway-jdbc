@@ -2,8 +2,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.nway</groupId>
-	<artifactId>Nway-JDBC</artifactId>
+	<groupId>com.github.zdtjss</groupId>
+	<artifactId>nway-jdbc</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
 	<properties>
@@ -189,4 +189,21 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<scm>
+		<connection>scm:git:https://github.com/zdtjss/nway-jdbc.git</connection>
+		<developerConnection>scm:git:https://github.com/zdtjss/nway-jdbc.git</developerConnection>
+		<url>https://github.com/zdtjss/nway-jdbc</url>
+	</scm>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<name>OSS Snapshots Repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<name>OSS Staging Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+	</distributionManagement>
 </project>
