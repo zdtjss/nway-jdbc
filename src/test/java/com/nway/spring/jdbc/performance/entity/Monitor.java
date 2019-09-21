@@ -17,21 +17,21 @@ import javax.persistence.TemporalType;
 @Table(name = "t_monitor")
 public class Monitor {
 
-	/** 编号 **/
+	/** 缂栧彿 **/
 	private int id;
-	/** 品牌 **/
+	/** 鍝佺墝 **/
 	private String brand;
-	/** 型号 **/
+	/** 鍨嬪彿 **/
 	private String model;
-	/** 价格 **/
+	/** 浠锋牸 **/
 	private float price;
-	/** 类型：CRT、LCD、LED **/
+	/** 绫诲瀷锛欳RT銆丩CD銆丩ED **/
 	private int type;
-	/** 最大分辨率 **/
+	/** 鏈�澶у垎杈ㄧ巼 **/
 	private String maxResolution;
-	/** 生产日期 **/
+	/** 鐢熶骇鏃ユ湡 **/
 	private Date productionDate;
-	/** 设备图片 **/
+	/** 璁惧鍥剧墖 **/
 	private byte[] photo;
 
 	@Id

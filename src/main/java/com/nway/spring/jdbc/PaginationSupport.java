@@ -18,10 +18,9 @@ package com.nway.spring.jdbc;
  *
  * @author zdtjss@163.com
  *
- * @since 2014Äê3ÔÂ2ÈÕ
+ * @since 2014å¹´3æœˆ2æ—¥
  */
 public interface PaginationSupport {
 
 	String buildPaginationSql(String sql, int start, int pageSize);
-
 }

@@ -21,7 +21,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 /**
  *
  * @author zdtjss@163.com
- * @param <T> ListÔªËØÀàÐÍ
  *
  * @since 2014-03-28
  */
@@ -41,7 +40,7 @@ public final class JsonListHandler implements ResultSetExtractor<String> {
 			return rs.next() ? JSON_PROCESSOR.toJsonList(rs, type) : "[]";
 		}
 		catch (Exception e) {
-			throw new JsonBuildException("´´½¨JSONÊ§°Ü [ " + this.type + " ]", e);
+			throw new JsonBuildException("ï¿½ï¿½ï¿½ï¿½JSONÊ§ï¿½ï¿½ [ " + this.type + " ]", e);
 		}
 	}
 

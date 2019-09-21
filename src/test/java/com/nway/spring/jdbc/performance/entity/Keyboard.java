@@ -17,25 +17,25 @@ import javax.persistence.TemporalType;
 @Table(name = "t_keyboard")
 public class Keyboard {
 
-	/** ±àºÅ **/
+	/** ç¼–å· **/
 	private int id;
-	/** Æ·ÅÆ **/
+	/** å“ç‰Œ **/
 	private String brand;
-	/** ĞÍºÅ **/
+	/** å‹å· **/
 	private String model;
-	/** ¼Û¸ñ **/
+	/** ä»·æ ¼ **/
 	private float price;
-	/** ÀàĞÍ£º±¡Ä¤¼üÅÌ£¬»úĞµ¼üÅÌ£¬¾²µçÈİÊ½¼üÅÌ **/
+	/** ç±»å‹ï¼šè–„è†œé”®ç›˜ï¼Œæœºæ¢°é”®ç›˜ï¼Œé™ç”µå®¹å¼é”®ç›˜ **/
 	private int type;
-	/** ½Ó¿ÚÀàĞÍ **/
+	/** æ¥å£ç±»å‹ **/
 	private int interfaceType;
-	/** ÊÇ·ñÊÇÎŞÏß **/
+	/** æ˜¯å¦æ˜¯æ— çº¿ **/
 	private boolean isWireless;
-	/** ÑÕÉ« **/
+	/** é¢œè‰² **/
 	private String color;
-	/** Éú²úÈÕÆÚ **/
+	/** ç”Ÿäº§æ—¥æœŸ **/
 	private Date productionDate;
-	/** Éè±¸Í¼Æ¬ **/
+	/** è®¾å¤‡å›¾ç‰‡ **/
 	private byte[] photo;
 
 	@Id

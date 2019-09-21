@@ -6,9 +6,15 @@
 	<artifactId>nway-jdbc</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
+
+	<name>nway-jdbc</name>
+	<description>简单易用的jdbc实用工具</description>
+	<url>https://github.com/zdtjss/nway-jdbc</url>
+
 	<properties>
-		<project.build.sourceEncoding>gbk</project.build.sourceEncoding>
+		<project.build.sourceEncoding>utf8</project.build.sourceEncoding>
 		<spring.version>5.1.0.RELEASE</spring.version>
+		<skip.test>true</skip.test>
 	</properties>
 	<licenses>
 		<license>
@@ -17,11 +23,15 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	<developers>
+		<developer>
+			<email>zdtjss@163.com</email>
+		</developer>
+	</developers>
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -32,7 +42,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.0</version>
 				<configuration>
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
@@ -44,6 +53,52 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<aggregate>true</aggregate>
+					<charset>UTF-8</charset>
+					<docencoding>UTF-8</docencoding>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -194,6 +249,33 @@
 		<developerConnection>scm:git:https://github.com/zdtjss/nway-jdbc.git</developerConnection>
 		<url>https://github.com/zdtjss/nway-jdbc</url>
 	</scm>
+	<profiles>
+		<profile>
+			<repositories>
+				<repository>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<id>central</id>
+					<name>Central Repository</name>
+					<url>http://repo1.maven.org/maven2/</url>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<releases>
+						<updatePolicy>never</updatePolicy>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<id>central</id>
+					<name>Central Repository</name>
+					<url>http://repo1.maven.org/maven2/</url>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>

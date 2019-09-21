@@ -34,19 +34,20 @@ import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.json.JsonHandler;
 import com.nway.spring.jdbc.json.JsonListHandler;
 import com.nway.spring.jdbc.sql.QueryBuilder;
+import com.nway.spring.jdbc.sql.SqlBuilder;
 
 /**
- * ×¢Òâ£º
+ * æ³¨æ„ï¼š
  * <p>
- * &nbsp;&nbsp;²éÑ¯²»µ½Êı¾İÊ±£º
+ * &nbsp;&nbsp;æŸ¥è¯¢ä¸åˆ°æ•°æ®æ—¶ï¼š
  * <ul>
- * <li>queryForBean·µ»Ønull£»</li>
- * <li>queryForBeanList·µ»ØÖµsize() == 0£»</li>
- * <li>queryForBeanPagination·µ»ØÖµgetTotalCount() == 0£»</li>
- * <li>queryForMapListPagination·µ»ØÖµgetTotalCount() == 0£»</li>
- * <li>queryForJson·µ»Ø"{}"</li>
- * <li>queryForJsonList·µ»Ø"[]"</li>
- * <li>testJsonPagination·µ»Ø¶ÔÏóÖĞtotalCount == 0</li>
+ * <li>queryForBeanè¿”å›nullï¼›</li>
+ * <li>queryForBeanListè¿”å›å€¼size() == 0ï¼›</li>
+ * <li>queryForBeanPaginationè¿”å›å€¼getTotalCount() == 0ï¼›</li>
+ * <li>queryForMapListPaginationè¿”å›å€¼getTotalCount() == 0ï¼›</li>
+ * <li>queryForJsonè¿”å›"{}"</li>
+ * <li>queryForJsonListè¿”å›"[]"</li>
+ * <li>testJsonPaginationè¿”å›å¯¹è±¡ä¸­totalCount == 0</li>
  * </ul>
  * 
  * @author zdtjss@163.com
@@ -58,104 +59,276 @@ public class SqlExecutor extends JdbcTemplate {
 	private PaginationSupport paginationSupport;
 
 	/**
-	 * ×îºóÒ»¸ö²»ÒÔ ) ½áÎ²µÄ order by Æ¥ÅäÕıÔò <br>
+	 * æœ€åä¸€ä¸ªä¸ä»¥ ) ç»“å°¾çš„ order by åŒ¹é…æ­£åˆ™ <br>
 	 */
 	private static final Pattern SQL_ORDER_BY_PATTERN = Pattern
 			.compile(".+\\p{Blank}+ORDER\\p{Blank}+BY[\\,\\p{Blank}\\w\\.]+");
 	/**
-	 * SQL Óï¾äÖĞtopÆ¥Åä
+	 * SQL è¯­å¥ä¸­topåŒ¹é…
 	 */
 	private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+TOP\\p{Blank}+\\d+\\p{Blank}+.+");
 
-	public <T> T queryForBean(QueryBuilder queryBuilder) throws DataAccessException {
+	public int update(SqlBuilder sqlBuilder) {
+		
+		return super.update(sqlBuilder.getSql(), sqlBuilder.getParam().toArray());
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param queryBuilder lambda
+	 * @return queryBuilderæè¿°çš„beanClassç±»å‹çš„å¯¹è±¡
+	 * @throws DataAccessException
+	 */
+	public <T> T queryForBean(SqlBuilder queryBuilder) throws DataAccessException {
 
 		return queryForBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> T queryForBean(String sql, Class<T> type) throws DataAccessException {
 
 		return super.query(sql, new BeanHandler<T>(type));
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @param args
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
 		return super.query(sql, new BeanHandler<T>(type), args);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param args
+	 * @param argTypes
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> T queryForBean(String sql, Object[] args, int[] argTypes, Class<T> type)
 			throws DataAccessException {
 
 		return super.query(sql, args, argTypes, new BeanHandler<T>(type));
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> List<T> queryForBeanList(String sql, Class<T> type) throws DataAccessException {
 
 		return super.query(sql, new BeanListHandler<T>(type));
 	}
-	
-	public <T> List<T> queryForBeanList(QueryBuilder queryBuilder) throws DataAccessException {
+
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param queryBuilder
+	 * @return
+	 * @throws DataAccessException
+	 */
+	public <T> List<T> queryForBeanList(SqlBuilder queryBuilder) throws DataAccessException {
 		
 		return queryForBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param sql
+	 * @param type
+	 * @param args
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		
 		return super.query(sql, new BeanListHandler<T>(type), args);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param sql
+	 * @param args
+	 * @param argTypes
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> List<T> queryForBeanList(String sql, Object[] args, int[] argTypes, Class<T> type)
 			throws DataAccessException {
 
 		return super.query(sql, args, argTypes, new BeanListHandler<T>(type));
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJson(String sql, Class<?> type) throws DataAccessException {
 
 		return super.query(sql, new JsonHandler(type, sql));
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @param args
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJson(String sql, Class<?> type,Object... args) throws DataAccessException {
 		
 		return super.query(sql, new JsonHandler(type, sql), args);
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param args
+	 * @param argTypes
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJson(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 
 		return super.query(sql, args, argTypes, new JsonHandler(type, sql));
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param queryBuilder
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonList(QueryBuilder queryBuilder) throws DataAccessException {
 	    
 	    return queryForJsonList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonList(String sql, Class<?> type) throws DataAccessException {
 		
 		return super.query(sql, new JsonListHandler(type));
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param type
+	 * @param args
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonList(String sql, Class<?> type, Object... args) throws DataAccessException {
 	    
 	    return super.query(sql, new JsonListHandler(type), args);
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param args
+	 * @param argTypes
+	 * @param type
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonList(String sql, Object[] args, int[] argTypes, Class<?> type) throws DataAccessException {
 	    
 	    return super.query(sql, args, argTypes, new JsonListHandler(type));
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param queryBuilder
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> Pagination<T> queryForBeanPagination(QueryBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
 
 		return queryForBeanPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize, queryBuilder.getBeanClass());
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param sql
+	 * @param params
+	 * @param page
+	 * @param pageSize
+	 * @param beanClass
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page,
 			int pageSize, Class<T> beanClass) throws DataAccessException {
 		
 		return queryForBeanPagination(sql, params, null, page, pageSize, beanClass);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param sql
+	 * @param params
+	 * @param argTypes
+	 * @param page
+	 * @param pageSize
+	 * @param beanClass
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int[] argTypes, int page,
 			int pageSize, Class<T> beanClass) throws DataAccessException {
 
@@ -184,12 +357,31 @@ public class SqlExecutor extends JdbcTemplate {
 		return new Pagination<T>(item, totalCount, page, pageSize);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param queryBuilder
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public Pagination<Map<String, Object>> queryForMapListPagination(QueryBuilder queryBuilder, int page,
 			int pageSize) throws DataAccessException {
 
 		return queryForMapListPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize);
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param params
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public Pagination<Map<String, Object>> queryForMapListPagination(String sql, Object[] params, int page,
 			int pageSize) throws DataAccessException {
 		
@@ -200,13 +392,13 @@ public class SqlExecutor extends JdbcTemplate {
 	 * 
 	 * 
 	 * @param sql
-	 *            ²éÑ¯Êı¾İµÄSQL
+	 *            æŸ¥è¯¢æ•°æ®çš„SQL
 	 * @param params
-	 *            SQL²ÎÊı
+	 *            SQLå‚æ•°
 	 * @param page
-	 *            µ±Ç°Ò³£¬<b>¸ºÊıÊ±½«²éÑ¯ËùÓĞ¼ÇÂ¼</b>
+	 *            å½“å‰é¡µï¼Œ<b>è´Ÿæ•°æ—¶å°†æŸ¥è¯¢æ‰€æœ‰è®°å½•</b>
 	 * @param pageSize
-	 *            Ã¿Ò³ÏÔÊ¾µÄÌõÊı£¬<b>¸ºÊıÊ±½«²éÑ¯ËùÓĞ¼ÇÂ¼</b>
+	 *            æ¯é¡µæ˜¾ç¤ºçš„æ¡æ•°ï¼Œ<b>è´Ÿæ•°æ—¶å°†æŸ¥è¯¢æ‰€æœ‰è®°å½•</b>
 	 * @return
 	 * @throws DataAccessException
 	 */
@@ -237,26 +429,67 @@ public class SqlExecutor extends JdbcTemplate {
 		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param params
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize)
 			throws DataAccessException {
 		
 		return queryForJsonPagination(sql, params, null, page, pageSize, null);
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param queryBuilder
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonPagination(QueryBuilder queryBuilder, int page, int pageSize)
 	        throws DataAccessException {
 	    
 	    return queryForJsonPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), null, page, pageSize, queryBuilder.getBeanClass());
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param params
+	 * @param page
+	 * @param pageSize
+	 * @param beanClass
+	 * @return
+	 * @throws DataAccessException
+	 */
 	public String queryForJsonPagination(String sql, Object[] params, int page, int pageSize, Class<?> beanClass)
 			throws DataAccessException {
 		
 		return queryForJsonPagination(sql, params, null, page, pageSize, beanClass);
 	}
     
+	/**
+	 * 
+	 * 
+	 * @param sql
+	 * @param params
+	 * @param argTypes
+	 * @param page
+	 * @param pageSize
+	 * @param beanClass 
+	 * @return
+	 */
 	public String queryForJsonPagination(String sql, Object[] params, int[] argTypes, int page, int pageSize,
-			Class<?> beanClass) throws DataAccessException {
+			Class<?> beanClass) {
 		
 		StringBuilder json = new StringBuilder("{");
 		
@@ -288,6 +521,15 @@ public class SqlExecutor extends JdbcTemplate {
 		return json.toString();
 	}
     
+	/**
+	 * 
+	 * 
+	 * @param requiredType é¢„æœŸç±»å‹
+	 * @param sql sql
+	 * @param defaultValue æœ‰å¼‚å¸¸æ—¶çš„é»˜è®¤å€¼
+	 * @return
+	 * @throws DataAccessException è¯¦è§ {@link JdbcTemplate#queryForObject(String, Class, Object...)}
+	 */
 	public <T> T queryForObject(Class<T> requiredType, String sql, T defaultValue) throws DataAccessException {
     	T obj = null;
 		try {
@@ -299,6 +541,16 @@ public class SqlExecutor extends JdbcTemplate {
 		return obj;
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param requiredType é¢„æœŸç±»å‹
+	 * @param sql sql
+	 * @param args argTypes
+	 * @param defaultValue æœ‰å¼‚å¸¸æ—¶çš„é»˜è®¤å€¼
+	 * @return
+	 * @throws DataAccessException è¯¦è§ {@link JdbcTemplate#queryForObject(String, Class, Object...)}
+	 */
 	public <T> T queryForObject(Class<T> requiredType, String sql, Object[] args, T defaultValue)
 			throws DataAccessException {
 		T obj = null;
@@ -311,6 +563,17 @@ public class SqlExecutor extends JdbcTemplate {
 		return obj;
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param requiredType é¢„æœŸç±»å‹
+	 * @param sql sql
+	 * @param args param
+	 * @param argTypes argTypes
+	 * @param defaultValue æœ‰å¼‚å¸¸æ—¶çš„é»˜è®¤å€¼
+	 * @return
+	 * @throws DataAccessException è¯¦è§ {@link JdbcTemplate#queryForObject(String, Class, Object...)}
+	 */
 	public <T> T queryForObject(Class<T> requiredType, String sql, Object[] args, int[] argTypes, T defaultValue)
 			throws DataAccessException {
 		T obj = null;
@@ -323,15 +586,23 @@ public class SqlExecutor extends JdbcTemplate {
 		return obj;
 	}
 	
-	public int count(QueryBuilder queryBuilder) {
+	/**
+	 * 
+	 * 
+	 * @param queryBuilder lambda
+	 * @return queryBuilderæè¿°çš„beanClassç±»å‹çš„å¯¹è±¡
+	 * 
+	 * @throws DataAccessException è¯¦è§ {@link JdbcTemplate#queryForObject(String, Class, Object...)}
+	 */
+	public int count(QueryBuilder queryBuilder) throws DataAccessException {
 		return queryForObject(queryBuilder.getSql(), Integer.class, queryBuilder.getParam().toArray());
 	}
 	
 	/**
 	 *
 	 * @param sql
-	 *            Ô­SQL
-	 * @return
+	 *            åŸSQL
+	 * @return åˆ†é¡µ sql
 	 */
 	private String buildPaginationCountSql(String sql) {
 		
@@ -374,7 +645,7 @@ public class SqlExecutor extends JdbcTemplate {
 			databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
 		} 
 		catch (SQLException e) {
-			throw new CannotGetJdbcConnectionException("·ÃÎÊÊı¾İ¿âÊ§°Ü", e);
+			throw new CannotGetJdbcConnectionException("è®¿é—®æ•°æ®åº“å¤±è´¥", e);
 		}
 		finally {
 			if(conn != null) {
@@ -390,7 +661,7 @@ public class SqlExecutor extends JdbcTemplate {
 			this.paginationSupport = new MysqlPaginationSupport();
 		} 
 		else {
-			throw new UnsupportedOperationException("Ôİ²»Ö§³Ö±¾Êı¾İ¿âµÄ·ÖÒ³²Ù×÷£¬ÇëÊµÏÖcom.nway.spring.jdbc.PaginationSupport½Ó¿Ú£¬Í¨¹ı±¾ÀàsetPaginationSupport·½·¨ÒıÈë¡£");
+			throw new UnsupportedOperationException("æš‚ä¸æ”¯æŒæœ¬æ•°æ®åº“çš„åˆ†é¡µæ“ä½œï¼Œè¯·å®ç°com.nway.spring.jdbc.PaginationSupportæ¥å£ï¼Œé€šè¿‡æœ¬ç±»setPaginationSupportæ–¹æ³•å¼•å…¥ã€‚");
 		}
 	}
 	
@@ -432,7 +703,7 @@ public class SqlExecutor extends JdbcTemplate {
 				return rs.next() ? rs.getInt(1) : 0;
 			} 
 			catch (SQLException e) {
-				throw new InvalidResultSetAccessException("»ñÈ¡×ÜÊı¾İÁ¿Ê§°Ü", sql, e);
+				throw new InvalidResultSetAccessException("è·å–æ€»æ•°æ®é‡å¤±è´¥", sql, e);
 			}
 		}
 	}

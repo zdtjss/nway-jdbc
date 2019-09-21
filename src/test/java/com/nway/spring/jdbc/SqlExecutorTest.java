@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -21,13 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.QueryBuilder;
+import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilder;
 
 //import oracle.jdbc.OracleCallableStatement;
 //import oracle.jdbc.OracleTypes;
 
 /**
- * 初始化测试表 可以执行initTable()方法
+ * 鍒濆鍖栨祴璇曡〃 鍙互鎵цinitTable()鏂规硶
  * 
  * @author zdtjss@163.com
  *
@@ -56,12 +58,12 @@ public class SqlExecutorTest extends BaseTest
 		Computer computer = new Computer();
 		computer.setBrand("p");
 		
-		QueryBuilder builder = SqlBuilder.query(Computer.class, "brand").like("brand", computer.getBrand()).ge(() -> 1);
+		SqlBuilder builder = SQL.query(Computer.class, "brand").like(computer::getBrand).ge(() -> 1);
 		
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
 		
-		Computer c = sqlExecutor.queryForBean(builder.getSql(), builder.getBeanClass(), builder.getParam().toArray());
+		Computer c = sqlExecutor.queryForBean(builder);
 		
 		System.out.println(c);
 	}
@@ -214,7 +216,7 @@ public class SqlExecutorTest extends BaseTest
 	            
 	            ocs.execute();
 	            
-	            // 返回无对应Java类的json 使用JsonListHandlerNRC
+	            // 杩斿洖鏃犲搴擩ava绫荤殑json 浣跨敤JsonListHandlerNRC
 	            JsonListHandler blh = new JsonListHandler(Monitor.class, "list_monitor2");
 	            
 	            return blh.extractData(ocs.getCursor(1));
@@ -256,6 +258,109 @@ public class SqlExecutorTest extends BaseTest
 		System.out.println(System.currentTimeMillis() - begin);
 	}
 	
+	@Test
+	public void lambdaInsertTest() throws SerialException, SQLException {
+		
+		ExampleEntity example = new ExampleEntity();
+
+		DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
+
+		example.setpBoolean(1 == ((Math.random() * 10) % 2));
+
+		example.setpByte((byte) (Math.random() * 100));
+
+		example.setpShort((short) (Math.random() * 100));
+
+		example.setpInt((int) (Math.random() * 1000000));
+		
+		example.setpLong((long) (Math.random() * 10000000));
+		
+		example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
+		
+		example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
+		
+		example.setpByteArr("nway-jdbc".getBytes());
+		
+		example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
+		
+		example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
+		
+		example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
+		
+		example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
+		
+		example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
+		
+		example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
+		
+		example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
+		
+		example.setString(UUID.randomUUID().toString());
+		
+		example.setUtilDate(new Date());
+		
+		example.setSqlDate(new java.sql.Date(System.currentTimeMillis()));
+		
+		example.setTimestamp(new Timestamp(System.currentTimeMillis()));
+		
+		example.setClob(new SerialClob("nway".toCharArray()));
+		
+		example.setBlob(new SerialBlob("nway".getBytes()));
+		
+		SqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
+		
+		System.out.println(sqlExecutor.update(sqlBuilder));
+	}
+	
+	@Test
+	public void lambdaUpdateTest() {
+		
+		ExampleEntity example = new ExampleEntity();
+		
+		example.setId(0);
+		example.setUtilDate(new Date());
+		
+		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
+		
+		System.out.println(sqlExecutor.update(sqlBuilder));
+	}
+	
+	@Test
+	public void lambdaDeleteTest() {
+		
+		ExampleEntity example = new ExampleEntity();
+		
+		example.setId(0);
+		
+		SqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
+		
+		System.out.println(sqlExecutor.update(sqlBuilder));
+	}
+
+	@Test
+	public void lambdaQueryTest() {
+
+		ExampleEntity example = new ExampleEntity();
+		example.setId(1);
+
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
+		ExampleEntity ee = sqlExecutor.queryForBean(sqlBuilder);
+		
+		System.out.println(ee);
+	}
+	
+	@Test
+	public void lambdaQueryListTest() {
+		
+		ExampleEntity example = new ExampleEntity();
+		example.setId(1);
+		
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
+		List<ExampleEntity> ee = sqlExecutor.queryForBeanList(sqlBuilder);
+		
+		System.out.println(ee);
+	}
+
 	@Test
 	public void initTable() throws SQLException {
 

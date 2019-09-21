@@ -10,9 +10,9 @@ public class QueryBuilderTest {
 	public void getSqlTest() {
 		
 		Computer computer = new Computer();
-		computer.setBrand("abc¹þ¹þ");
+		computer.setBrand("abcå“ˆå“ˆ");
 		
-		QueryBuilder builder = SqlBuilder.query(Computer.class).like(computer::getBrand).notLike(computer::getModel);
+		SqlBuilder builder = SQL.query(Computer.class).like(computer::getBrand).notLike(computer::getModel);
 		
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());

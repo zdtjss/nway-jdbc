@@ -20,12 +20,12 @@ public final class OraclePaginationSupport implements PaginationSupport {
 
 		if (page <= 0 || pageSize <= 0) {
 
-			throw new IllegalArgumentException("Ò³Êý»òÒ³ÃæÊý¾ÝÁ¿Ó¦¸Ã´óÓÚÁã");
+			throw new IllegalArgumentException("é¡µæ•°æˆ–é¡µé¢æ•°æ®é‡åº”è¯¥å¤§äºŽé›¶");
 		}
 
 		StringBuilder paginationSql = new StringBuilder(sql.length() + 90);
 
-		// oracle rownumÊÇ´Ó1¿ªÊ¼µÄ
+		// oracle rownumæ˜¯ä»Ž1å¼€å§‹çš„
 		paginationSql.append("SELECT * FROM ( SELECT ROWNUM RN, T.* FROM ( ").append(sql).append(" ) T WHERE ROWNUM <= ")
 				.append(page * pageSize).append(" ) WHERE RN  >= ").append(page);
 

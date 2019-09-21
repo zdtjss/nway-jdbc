@@ -10,16 +10,16 @@ import com.nway.spring.jdbc.performance.entity.Monitor;
 public interface Performance {
 
 	/**
-	 * ÓĞ¹ØÁªµ¥¸ö¶ÔÏó
+	 * æœ‰å…³è”å•ä¸ªå¯¹è±¡
 	 * 
 	 * @param id
-	 *            ¶ÔÏóID
+	 *            å¯¹è±¡ID
 	 * @return 
 	 */
 	public Computer getComputerById(int id);
 	
 	/**
-	 * ÓĞ¹ØÁª¶ÔÏó¼¯
+	 * æœ‰å…³è”å¯¹è±¡é›†
 	 * 
 	 * @return
 	 */
@@ -27,15 +27,15 @@ public interface Performance {
 	public List<Computer> listComputer();
 
 	/**
-	 * ÎŞ¹ØÁªµ¥¶ÔÏó
+	 * æ— å…³è”å•å¯¹è±¡
 	 * 
-	 * @param id ¶ÔÏóID
+	 * @param id å¯¹è±¡ID
 	 * @return
 	 */
 	public Monitor getMonitorById(int id);
 
 	/**
-	 * ÎŞ¹ØÁª¶ÔÏó¼¯
+	 * æ— å…³è”å¯¹è±¡é›†
 	 * 
 	 * @param num
 	 * @return

@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 /**
  *
  * @author zdtjss@163.com
- * @param <T> ListÔªËØÀàĞÍ
+ * @param <T> Listå…ƒç´ ç±»å‹
  *
  * @since 2014-03-28
  */
@@ -31,7 +31,7 @@ public final class BeanListHandler<T> implements ResultSetExtractor<List<T>> {
     private final Class<T> type;
     
     /**
-     * ¿¼ÂÇ±¾Àà¿ÉÄÜÔÚ²»Í¬ ClassLoaderÖĞÊ¹ÓÃ£¬ÕâÀï²»Ó¦¸ÃÊÇ¾²Ì¬µÄ *
+     * è€ƒè™‘æœ¬ç±»å¯èƒ½åœ¨ä¸åŒ ClassLoaderä¸­ä½¿ç”¨ï¼Œè¿™é‡Œä¸åº”è¯¥æ˜¯é™æ€çš„ *
      */
     private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
 

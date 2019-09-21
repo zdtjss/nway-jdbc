@@ -37,11 +37,9 @@ public class DefaultBeanProcessor implements BeanProcessor {
 
 		final List<T> results = new ArrayList<T>();
 
-		do {
-
+		while (rs.next()) {
 			results.add(mapper.mapRow(rs, rs.getRow()));
 		} 
-		while (rs.next());
 
 		return results;
 	}
@@ -93,8 +91,8 @@ public class DefaultBeanProcessor implements BeanProcessor {
 	 * {@link org.springframework.jdbc.core.RowMapper} implementation.
 	 *
 	 * <p>
-	 * ע������ʹ����{@link org.springframework.jdbc.core.BeanPropertyRowMapper}
-	 * Դ�룬������ͨ�� {@link com.nway.spring.jdbc.annotation.Column}�Զ�����ֶ���bean���Ե�ӳ��
+	 * 注：本类使用了{@link org.springframework.jdbc.core.BeanPropertyRowMapper}
+	 * 源码，新增了通过 {@link com.nway.spring.jdbc.annotation.Column}自定义表字段与bean属性的映射
 	 * 
 	 * @author Thomas Risberg
 	 * @author Juergen Hoeller
@@ -220,7 +218,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		/**
 		 * Initialize the mapping metadata for the given class.
 		 * 
-		 * ������ͨ��ע�ⷽʽ�Զ���ӳ����ֶκ������Թ�ϵ�ķ�ʽ
+		 * 添加了通过注解方式自定义映射表字段和类属性关系的方式
 		 * 
 		 * @param mappedClass
 		 *            the mapped class

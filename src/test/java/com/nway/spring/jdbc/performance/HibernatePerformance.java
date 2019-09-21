@@ -85,7 +85,7 @@ public class HibernatePerformance implements Performance {
 
 		Transaction transaction = session.beginTransaction();
 
-		for (int i = 0; i < 30000; i++) {
+		for (int i = 0; i < 30; i++) {
 
 			Computer computer = new Computer();
 
@@ -139,27 +139,27 @@ public class HibernatePerformance implements Performance {
 			
 			Software s1 = new Software();
 			
-			s1.setName("¼ÆËãÆ÷");
+			s1.setName("è®¡ç®—å™¨");
 			s1.setSize(100);
-			s1.setVender("Î¢Èí");
+			s1.setVender("å¾®è½¯");
 			s1.setVender("1.0");
 			
 			software.add(s1);
 			
 			Software s2 = new Software();
 			
-			s2.setName("¼ÆËãÆ÷");
+			s2.setName("è®¡ç®—å™¨");
 			s2.setSize(100);
-			s2.setVender("Î¢Èí");
+			s2.setVender("å¾®è½¯");
 			s2.setVender("1.0");
 			
 			software.add(s2);
 			
 			Software s3 = new Software();
 			
-			s3.setName("¼ÆËãÆ÷");
+			s3.setName("è®¡ç®—å™¨");
 			s3.setSize(100);
-			s3.setVender("Î¢Èí");
+			s3.setVender("å¾®è½¯");
 			s3.setVender("1.0");
 			
 			software.add(s3);

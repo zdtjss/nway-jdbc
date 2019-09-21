@@ -20,42 +20,37 @@ import java.util.List;
  *
  * @author zdtjss@163.com
  *
- * @since 2014Äê3ÔÂ2ÈÕ
- * @param <T>
+ * @since 2014å¹´3æœˆ2æ—¥
  */
 public class Pagination<T> {
 
 	/**
-	 * Ò³ÃæÊı¾İ *
+	 * é¡µé¢æ•°æ® *
 	 */
 	private List<T> pageData;
 	/**
-	 * Ò³Ãæ×î´óÌõÊı *
+	 * é¡µé¢æœ€å¤§æ¡æ•° *
 	 */
 	private int pageSize;
 	/**
-	 * ·ûºÏ²éÑ¯Ìõ¼şµÄ¼ÇÂ¼×ÜÊı *
+	 * ç¬¦åˆæŸ¥è¯¢æ¡ä»¶çš„è®°å½•æ€»æ•° *
 	 */
 	private int totalCount;
 	/**
-	 * ×ÜÒ³Êı *
+	 * æ€»é¡µæ•° *
 	 */
 	private int pageCount;
 	/**
-	 * µ±Ç°Ò³ *
+	 * å½“å‰é¡µ *
 	 */
 	private int currentPage;
 
 	/**
 	 *
-	 * @param pageData
-	 *            Ò³ÃæÊı¾İ
-	 * @param totalCount
-	 *            ·ûºÏ²éÑ¯Ìõ¼şµÄ¼ÇÂ¼×ÜÊı
-	 * @param page
-	 *            µ±Ç°Ò³Êı
-	 * @param pageSize
-	 *            Ò³Ãæ×î´óÌõÊı
+	 * @param pageData   é¡µé¢æ•°æ®
+	 * @param totalCount ç¬¦åˆæŸ¥è¯¢æ¡ä»¶çš„è®°å½•æ€»æ•°
+	 * @param page       å½“å‰é¡µæ•°
+	 * @param pageSize   é¡µé¢æœ€å¤§æ¡æ•°
 	 */
 	public Pagination(List<T> pageData, int totalCount, int page, int pageSize) {
 
@@ -115,6 +110,5 @@ public class Pagination<T> {
 
 		return builder.toString();
 	}
-
 
 }

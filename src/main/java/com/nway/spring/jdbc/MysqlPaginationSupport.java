@@ -20,12 +20,12 @@ public final class MysqlPaginationSupport implements PaginationSupport {
 
 		if (start <= 0 || pageSize <= 0) {
 
-			throw new IllegalArgumentException("Ò³Êý»òÒ³ÃæÊý¾ÝÁ¿Ó¦¸Ã´óÓÚÁã");
+			throw new IllegalArgumentException("é¡µæ•°æˆ–é¡µé¢æ•°æ®é‡åº”è¯¥å¤§äºŽé›¶");
 		}
 
 		StringBuilder paginationSql = new StringBuilder(sql.length() + 15);
 		
-		// mysql limit ÊÇ´Ó0¿ªÊ¼µÄ
+		// mysql limit æ˜¯ä»Ž0å¼€å§‹çš„
 		paginationSql.append(sql).append(" limit ").append(start - 1).append(',').append(pageSize);
 
 		return paginationSql.toString();

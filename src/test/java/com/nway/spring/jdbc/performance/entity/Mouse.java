@@ -17,23 +17,23 @@ import javax.persistence.TemporalType;
 @Table(name = "t_mouse")
 public class Mouse {
 
-	/** ±àºÅ **/
+	/** ç¼–å· **/
 	private int id;
-	/** Æ·ÅÆ **/
+	/** å“ç‰Œ **/
 	private String brand;
-	/** ĞÍºÅ **/
+	/** å‹å· **/
 	private String model;
-	/** ¼Û¸ñ **/
+	/** ä»·æ ¼ **/
 	private float price;
-	/** ÀàĞÍ£º»úĞµÊó±ê¡¢¹â»úÊó±ê¡¢¹âµçÊó±ê¡¢¹âÑ§Êó±ê **/
+	/** ç±»å‹ï¼šæœºæ¢°é¼ æ ‡ã€å…‰æœºé¼ æ ‡ã€å…‰ç”µé¼ æ ‡ã€å…‰å­¦é¼ æ ‡ **/
 	private int type;
-	/** ÊÇ·ñÊÇÎŞÏß **/
+	/** æ˜¯å¦æ˜¯æ— çº¿ **/
 	private boolean isWireless;
-	/** ÑÕÉ« **/
+	/** é¢œè‰² **/
 	private String color;
-	/** Éú²úÈÕÆÚ **/
+	/** ç”Ÿäº§æ—¥æœŸ **/
 	private Date productionDate;
-	/** Éè±¸Í¼Æ¬ **/
+	/** è®¾å¤‡å›¾ç‰‡ **/
 	private byte[] photo;
 
 	@Id

@@ -12,8 +12,5 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface Table {
 
-	/**
-	 * ±íÃû
-	 */
 	String name();
 }

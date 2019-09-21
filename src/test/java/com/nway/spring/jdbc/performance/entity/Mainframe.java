@@ -14,25 +14,25 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 /**
- * 主机
+ * 涓绘満
  */
 @Entity
 @Table(name = "t_mainframe")
 public class Mainframe {
 
-	/** 编号 **/
+	/** 缂栧彿 **/
 	private int id;
-	/** 品牌 **/
+	/** 鍝佺墝 **/
 	private String brand;
-	/** 型号 **/
+	/** 鍨嬪彿 **/
 	private String model;
-	/** 价格 **/
+	/** 浠锋牸 **/
 	private float price;
-	/** 类型：普通台式机、工作站、服务器 **/
+	/** 绫诲瀷锛氭櫘閫氬彴寮忔満銆佸伐浣滅珯銆佹湇鍔″櫒 **/
 	private int type;
-	/** 生产日期 **/
+	/** 鐢熶骇鏃ユ湡 **/
 	private Date productionDate;
-	/** 设备图片 **/
+	/** 璁惧鍥剧墖 **/
 	private byte[] photo;
 
 	@Id

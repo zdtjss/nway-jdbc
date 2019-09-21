@@ -21,6 +21,7 @@ import javax.persistence.TemporalType;
 @com.nway.spring.jdbc.annotation.Table(name = "t_nway")
 public class ExampleEntity {
 
+	@com.nway.spring.jdbc.annotation.Column(name = "pk_id")
 	private int id;
 	private boolean pBoolean;
 	private byte pByte;
@@ -42,14 +43,16 @@ public class ExampleEntity {
 	private String string;
 	private Date utilDate;
 	private java.sql.Date sqlDate;
+	@com.nway.spring.jdbc.annotation.Column(name = "c_timestamp")
 	private Timestamp timestamp;
+	@com.nway.spring.jdbc.annotation.Column(name = "c_clob")
 	private Clob clob;
+	@com.nway.spring.jdbc.annotation.Column(name = "b_blob")
 	private Blob blob;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE)
 	@Column(name = "pk_id")
-	@com.nway.spring.jdbc.annotation.Column("pk_id")
 	public int getId() {
 		return id;
 	}
@@ -232,7 +235,6 @@ public class ExampleEntity {
 
 	@Lob
 	@Column(name = "c_clob")
-	@com.nway.spring.jdbc.annotation.Column("c_clob")
 	public Clob getClob() {
 		return clob;
 	}
@@ -243,7 +245,6 @@ public class ExampleEntity {
 
 	@Lob
 	@Column(name = "b_blob")
-	@com.nway.spring.jdbc.annotation.Column("b_blob")
 	public Blob getBlob() {
 		return blob;
 	}

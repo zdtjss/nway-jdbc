@@ -30,33 +30,33 @@ import org.hibernate.annotations.FetchMode;
 public class Computer {
 
 	private int id;
-	/** Æ·ÅÆ **/
+	/** å“ç‰Œ **/
 	private String brand;
-	/** ĞÍºÅ **/
+	/** å‹å· **/
 	private String model;
-	/** ¼Û¸ñ **/
+	/** ä»·æ ¼ **/
 	private float price;
-	/** Ö÷»ú±àºÅ£¬nway»òspring jdbcÊ¹ÓÃ **/
+	/** ä¸»æœºç¼–å·ï¼Œnwayæˆ–spring jdbcä½¿ç”¨ **/
 	private int mainframeId;
-	/** Ö÷»ú **/
+	/** ä¸»æœº **/
 	private Mainframe mainframe;
-	/** ÏÔÊ¾Æ÷±àºÅ£¬nway»òspring jdbcÊ¹ÓÃ **/
+	/** æ˜¾ç¤ºå™¨ç¼–å·ï¼Œnwayæˆ–spring jdbcä½¿ç”¨ **/
 	private int monitorId;
-	/** ÏÔÊ¾Æ÷ **/
+	/** æ˜¾ç¤ºå™¨ **/
 	private Monitor monitor;
-	/** Êó±ê±àºÅ£¬nway»òspring jdbcÊ¹ÓÃ **/
+	/** é¼ æ ‡ç¼–å·ï¼Œnwayæˆ–spring jdbcä½¿ç”¨ **/
 	private int mouseId;
-	/** Êó±ê **/
+	/** é¼ æ ‡ **/
 	private Mouse mouse;
-	/** ¼üÅÌ±àºÅ£¬nway»òspring jdbcÊ¹ÓÃ **/
+	/** é”®ç›˜ç¼–å·ï¼Œnwayæˆ–spring jdbcä½¿ç”¨ **/
 	private int keyboardId;
-	/** ¼üÅÌ **/
+	/** é”®ç›˜ **/
 	private Keyboard keyboard;
-	/** Éú²úÈÕÆÚ **/
+	/** ç”Ÿäº§æ—¥æœŸ **/
 	private Date productionDate;
-	/** Éè±¸Í¼Æ¬ **/
+	/** è®¾å¤‡å›¾ç‰‡ **/
 	private byte[] photo;
-	/** Ô¤×°Èí¼ş **/
+	/** é¢„è£…è½¯ä»¶ **/
 	private List<Software> software;
 
 	@Id

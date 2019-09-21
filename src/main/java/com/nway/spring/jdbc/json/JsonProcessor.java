@@ -143,7 +143,7 @@ class JsonProcessor {
 				Column columnAnnotation = props[i].getReadMethod().getAnnotation(Column.class);
 
 				if (columnAnnotation == null) {
-					// È¥³ıÁĞÃûÀïµÄÏÂ»®Ïß'_'
+					// å»é™¤åˆ—åé‡Œçš„ä¸‹åˆ’çº¿'_'
 					if (columnName.replace("_", "").equalsIgnoreCase(props[i].getName())) {
 						columnToProperty[col] = i;
 						break;

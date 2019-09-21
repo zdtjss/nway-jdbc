@@ -19,7 +19,6 @@ package com.nway.spring.jdbc.bean;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 /**
@@ -27,7 +26,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * into a JavaBean. This class is thread safe.
  *
  * @param <T> the target bean type
- * @see org.apache.commons.dbutils2.ResultSetHandler
  */
 public class BeanHandler<T> implements ResultSetExtractor<T> {
 
@@ -52,7 +50,6 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      * <code>ResultSet</code>.
      *
      * @throws SQLException if a database access error occurs
-     * @see org.apache.commons.dbutils2.ResultSetHandler#handle(java.sql.ResultSet)
      */
 	@Override
 	public T extractData(ResultSet rs) throws SQLException {
