@@ -1,21 +1,23 @@
-package com.nway.spring.jdbc.sql;
+package com.nway.spring.jdbc.sql.builder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.annotation.Table;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SSupplier;
 
 public class UpdateBuilder extends SqlBuilder {
 
 	private List<String> sets = new ArrayList<>();
 	
-	UpdateBuilder(Class<?> beanClass) {
+	public UpdateBuilder(Class<?> beanClass) {
 		super(beanClass);
 	}
 	
 	public <T> SqlBuilder set(SSupplier<T> val) {
-		sets.add(ReflectUtils.getColumn(beanClass, val) + " = ?");
+		sets.add(SqlBuilderUtils.getColumn(beanClass, val) + " = ?");
 		param.add(val.get());
 		return this;
 	}

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.nway.spring.jdbc.annotation.Column;
 
-class ReflectUtils {
+public class SqlBuilderUtils {
 
 	/**
      * 字段映射
@@ -64,7 +64,7 @@ class ReflectUtils {
 		}
 	}
 	
-	private static String fieldNameToColumn(String fieldName) {
+	public static String fieldNameToColumn(String fieldName) {
 		StringBuilder columnName = new StringBuilder();
 		for(char c : fieldName.toCharArray()) {
 			if(Character.isUpperCase(c)) {

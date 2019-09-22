@@ -33,8 +33,8 @@ import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.json.JsonHandler;
 import com.nway.spring.jdbc.json.JsonListHandler;
-import com.nway.spring.jdbc.sql.QueryBuilder;
-import com.nway.spring.jdbc.sql.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
 /**
  * 注意：

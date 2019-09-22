@@ -1,5 +1,10 @@
 package com.nway.spring.jdbc.sql;
 
+import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
+import com.nway.spring.jdbc.sql.builder.InsertBuilder;
+import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import com.nway.spring.jdbc.sql.builder.UpdateBuilder;
+
 public class SQL {
 
 	public static QueryBuilder query(Class<?> beanClass, String... columns) {
