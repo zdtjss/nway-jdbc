@@ -11,36 +11,8 @@
 		<version>1.0.2</version>
 	</dependency>
 
-#数据库表与Java类的映射规则：  
-   
-   表名：
-   @Table(name = "t_user")  
-   
-   字段：
-   去除表字段中下划线(_)与Java类属性名称忽略大小写比较，相等则赋值，如：表字段名称为user_name，会通过类中setUserName方法赋值。
-    也可以通过com.nway.spring.jdbc.annotation.Column修改默认规则。
-    例：
-   
-      import com.nway.spring.jdbc.annotation.Table;
-      import com.nway.spring.jdbc.annotation.Column;
-      
-      @Table(name = "t_user")
-      public class User {
-      	@Column("user_name")
-	  	private String name;
-	  	private int status;
-      }
-  
-Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查询有类似方法)
-  
-  SqlBuilder  
-   
-	SQL.insert(Class beanClass);
-	SQL.delete(Class beanClass);
-	SQL.update(Class beanClass);
-	SQL.query(Class beanClass);
-	上述beanClass和数据对象可以不是同一类型，但需要使用的相应字段定义要一致。假设要对beanClass中field1操作（增删改查），则用于取值的对象otherClassObj中也应有field1的定义。   
-    
+#使用
+
 增、改、删：  
 
 	SqlBuilder builder = SQL.insert(Class beanClass);
@@ -106,7 +78,38 @@ Map对象集分页：
         Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination("select * from user_name where id <> ? order by id", new Object[]{ "abc", 1 }, 1, 10);
         users使用同queryForBeanPagination
 		分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
-		
+
+#数据库表与Java类的映射规则：  
+   
+   表名：
+   @Table(name = "t_user")  
+   
+   字段：
+   类属性和表列默认的对应规则是：删除下划线后首字符大写。表字段user_name对应属性userName，会通过类中setUserName方法赋值。
+    也可以通过com.nway.spring.jdbc.annotation.Column修改默认规则。
+    例：
+   
+      import com.nway.spring.jdbc.annotation.Table;
+      import com.nway.spring.jdbc.annotation.Column;
+      
+      @Table(name = "t_user")
+      public class User {
+      	@Column("user_name")
+	  	private String name;
+	  	private int status;
+      }
+  
+Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查询有类似方法)
+  
+  SqlBuilder  
+   
+	SQL.insert(Class beanClass);
+	SQL.delete(Class beanClass);
+	SQL.update(Class beanClass);
+	SQL.query(Class beanClass);
+	上述beanClass和数据对象可以不是同一类型，但需要使用的相应字段定义要一致。假设要对beanClass中field1操作（增删改查），则用于取值的对象otherClassObj中也应有field1的定义。   
+    
+
 #使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
 
 #查询不到数据时：
