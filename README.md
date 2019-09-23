@@ -4,6 +4,13 @@
 
 #镜像地址：https://gitee.com/nway/Nway-JDBC。
 
+
+	<dependency>
+		<groupId>com.github.zdtjss</groupId>
+		<artifactId>nway-jdbc</artifactId>
+		<version>1.0.2</version>
+	</dependency>
+
 #数据库表与Java类的映射规则：  
    
    表名：
