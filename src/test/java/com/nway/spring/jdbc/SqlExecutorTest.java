@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
 //import oracle.jdbc.OracleCallableStatement;
 //import oracle.jdbc.OracleTypes;
@@ -33,43 +33,43 @@ import com.nway.spring.jdbc.sql.SqlBuilder;
  * @author zdtjss@163.com
  *
  */
-public class SqlExecutorTest extends BaseTest
-{
+public class SqlExecutorTest extends BaseTest {
+	
 	@Autowired
 	private SqlExecutor sqlExecutor;
-	
+
 	@Autowired
-    private SessionFactory sessionFactory;
-	
+	private SessionFactory sessionFactory;
+
 	@Test
-	public void testQueryForBean()
-	{
-		String sql = "select * from t_nway where rownum = 1";
+	public void testQueryForBean() {
 		
+		String sql = "select * from t_nway where rownum = 1";
+
 		ExampleEntity usr = sqlExecutor.queryForBean(sql, ExampleEntity.class);
 
 		System.out.println(usr.toString());
 	}
-	
+
 	@Test
 	public void testQueryForBeanLambda() {
-		
+
 		Computer computer = new Computer();
 		computer.setBrand("p");
-		
+
 		SqlBuilder builder = SQL.query(Computer.class, "brand").like(computer::getBrand).ge(() -> 1);
-		
+
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
-		
+
 		Computer c = sqlExecutor.queryForBean(builder);
-		
+
 		System.out.println(c);
 	}
 
 	@Test
 	public void testQueryForBeanList() {
-		
+
 		String sql = "select a.*,'from' from( select * from t_nway limit 2) a";
 
 		List<ExampleEntity> users = sqlExecutor.queryForBeanList(sql, ExampleEntity.class);
@@ -78,8 +78,7 @@ public class SqlExecutorTest extends BaseTest
 	}
 
 	@Test
-	public void testQueryBeanPagination()
-	{
+	public void testQueryBeanPagination() {
 		String sql = "select * from t_nway order by c_p_int";
 
 		Pagination<ExampleEntity> users = sqlExecutor.queryForBeanPagination(sql, null, 1, 5, ExampleEntity.class);
@@ -88,11 +87,10 @@ public class SqlExecutorTest extends BaseTest
 	}
 
 	@Test
-	public void testQueryMapListPagination()
-	{
+	public void testQueryMapListPagination() {
 		String sql = "select * from t_nway order by c_int";
 
-		Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination(sql,null, 1, 3);
+		Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination(sql, null, 1, 3);
 
 		System.out.println(users);
 	}
@@ -102,23 +100,24 @@ public class SqlExecutorTest extends BaseTest
 
 		String input = "a order by abc1,a.ab2  ";
 
-		Pattern ORDER_BY_PATTERN = Pattern.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
+		Pattern ORDER_BY_PATTERN = Pattern
+				.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
 
 		System.out.println(ORDER_BY_PATTERN.matcher(input.toLowerCase()).matches());
 	}
-	
+
 	@Test
 	public void countSql() {
-		
+
 		StringBuilder countSql = new StringBuilder();
-		
-		//countSql.append("select DISTINCT aaa,bbb from t_nway".toUpperCase());
+
+		// countSql.append("select DISTINCT aaa,bbb from t_nway".toUpperCase());
 		countSql.append("select top 50 PERCENT * from t_nway".toUpperCase());
-		
+
 		int firstFromIndex = countSql.indexOf(" FROM ");
-		
+
 		String selectedColumns = countSql.substring(0, firstFromIndex + 1);
-		
+
 		if (selectedColumns.indexOf(" DISTINCT ") == -1
 				&& !selectedColumns.matches(".+TOP\\p{Blank}+\\d+\\p{Blank}+.+")) {
 
@@ -127,144 +126,136 @@ public class SqlExecutorTest extends BaseTest
 
 			countSql.insert(0, "SELECT COUNT(1) FROM (").append(')');
 		}
-		
+
 		System.out.println(countSql);
 	}
 
 	@Test
-	public void testJson()
-	{
+	public void testJson() {
 		String sql = "select * from t_nway where rownum = 1";
-		
+
 		String json = sqlExecutor.queryForJson(sql, ExampleEntity.class);
-		
+
 		System.out.println(json);
 	}
-	
+
 	@Test
 	public void testJsonList() {
-		
+
 		String sql = "select * from t_nway";
 
 		String json = sqlExecutor.queryForJsonList(sql, ExampleEntity.class);
 
 		System.out.println(json);
 	}
-	
+
 	@Test
-	public void testJsonPaginationNRC()
-	{
+	public void testJsonPaginationNRC() {
 		String sql = "select * from t_nway order by p_int";
 
 		String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5);
 
 		System.out.println(json);
 	}
-	
-	@Test
-	public void testJsonPagination()
-	{
-	    String sql = "select * from t_nway order by p_int";
-	    
-	    String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5, ExampleEntity.class);
-	    
-	    System.out.println(json);
-	}
-	
-	/*@Test
-	public void testCallForBeanList() {
-	    
-	    List<Monitor> monitors = sqlExecutor.execute("{? = call list_monitor2(?)}", new CallableStatementCallback<List<Monitor>>()
-        {
-            @Override
-            public List<Monitor> doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException
-            {
 
-                OracleCallableStatement ocs = (OracleCallableStatement) cs;
-                
-                ocs.setInt(2, 102);
-                
-                ocs.registerOutParameter(1, OracleTypes.CURSOR);
-                
-                ocs.execute();
-                
-                BeanListHandler<Monitor> blh = new BeanListHandler<Monitor>(Monitor.class, "list_monitor2");
-                
-                return blh.extractData(ocs.getCursor(1));
-            }
-        });
-	    
-	    System.out.println(Arrays.toString(monitors.toArray()));
-	}
-	
 	@Test
-	public void testCallForJsonList() {
-	    
-	    String monitors = sqlExecutor.execute("{? = call list_monitor2(?)}", new CallableStatementCallback<String>()
-	    {
-	        @Override
-	        public String doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException
-	        {
-	            
-	            OracleCallableStatement ocs = (OracleCallableStatement) cs;
-	            
-	            ocs.setInt(2, 102);
-	            
-	            ocs.registerOutParameter(1, OracleTypes.CURSOR);
-	            
-	            ocs.execute();
-	            
-	            // 返回无对应Java类的json 使用JsonListHandlerNRC
-	            JsonListHandler blh = new JsonListHandler(Monitor.class, "list_monitor2");
-	            
-	            return blh.extractData(ocs.getCursor(1));
-	        }
-	    });
-	    
-	    System.out.println(monitors);
-	}*/
-	
+	public void testJsonPagination() {
+		String sql = "select * from t_nway order by p_int";
+
+		String json = sqlExecutor.queryForJsonPagination(sql, null, 1, 5, ExampleEntity.class);
+
+		System.out.println(json);
+	}
+
+	/*
+	 * @Test public void testCallForBeanList() {
+	 * 
+	 * List<Monitor> monitors = sqlExecutor.execute("{? = call list_monitor2(?)}",
+	 * new CallableStatementCallback<List<Monitor>>() {
+	 * 
+	 * @Override public List<Monitor> doInCallableStatement(CallableStatement cs)
+	 * throws SQLException, DataAccessException {
+	 * 
+	 * OracleCallableStatement ocs = (OracleCallableStatement) cs;
+	 * 
+	 * ocs.setInt(2, 102);
+	 * 
+	 * ocs.registerOutParameter(1, OracleTypes.CURSOR);
+	 * 
+	 * ocs.execute();
+	 * 
+	 * BeanListHandler<Monitor> blh = new BeanListHandler<Monitor>(Monitor.class,
+	 * "list_monitor2");
+	 * 
+	 * return blh.extractData(ocs.getCursor(1)); } });
+	 * 
+	 * System.out.println(Arrays.toString(monitors.toArray())); }
+	 * 
+	 * @Test public void testCallForJsonList() {
+	 * 
+	 * String monitors = sqlExecutor.execute("{? = call list_monitor2(?)}", new
+	 * CallableStatementCallback<String>() {
+	 * 
+	 * @Override public String doInCallableStatement(CallableStatement cs) throws
+	 * SQLException, DataAccessException {
+	 * 
+	 * OracleCallableStatement ocs = (OracleCallableStatement) cs;
+	 * 
+	 * ocs.setInt(2, 102);
+	 * 
+	 * ocs.registerOutParameter(1, OracleTypes.CURSOR);
+	 * 
+	 * ocs.execute();
+	 * 
+	 * // 返回无对应Java类的json 使用JsonListHandlerNRC JsonListHandler blh = new
+	 * JsonListHandler(Monitor.class, "list_monitor2");
+	 * 
+	 * return blh.extractData(ocs.getCursor(1)); } });
+	 * 
+	 * System.out.println(monitors); }
+	 */
+
 	@Test
 	public void testUpdate() {
-		
+
 		String sql = "insert into t_monitor (ID,BRAND,MAX_RESOLUTION,MODEL,PHOTO,PRICE,PRODUCTION_DATE,TYPE) values (?,?,?,?,?,?,?,?)";
-		
-		sqlExecutor.update(sql, new Object[] { 100, "abc", "aa", "bb",null, 1.0, new Date(), 0 });
-		
+
+		sqlExecutor.update(sql, new Object[] { 100, "abc", "aa", "bb", null, 1.0, new Date(), 0 });
+
 		long begin = System.currentTimeMillis();
-		
+
 		for (int i = 0; i < 10; i++) {
 
-			Object[] param = new Object[] { i, "abc", "aa", "bb",null, 1.0, new Date(), 0 };
+			Object[] param = new Object[] { i, "abc", "aa", "bb", null, 1.0, new Date(), 0 };
 
 			sqlExecutor.update(sql, param);
 		}
-		
+
 		System.out.println(System.currentTimeMillis() - begin);
-		
+
 		begin = System.currentTimeMillis();
-		
+
 		List<Object[]> batchArgs = new ArrayList<Object[]>();
-		
+
 		for (int i = 10; i < 20; i++) {
 
-			batchArgs.add(new Object[] { i, "abc", "aa","bb", null, 1.0, new Date(), 0 });
+			batchArgs.add(new Object[] { i, "abc", "aa", "bb", null, 1.0, new Date(), 0 });
 		}
-		
+
 		sqlExecutor.batchUpdate(sql, batchArgs);
-		
+
 		System.out.println(System.currentTimeMillis() - begin);
 	}
-	
+
 	@Test
 	public void lambdaInsertTest() throws SerialException, SQLException {
-		
+
 		ExampleEntity example = new ExampleEntity();
 
 		DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
 
 		example.setId(1);
-		
+
 		example.setpBoolean(1 == ((Math.random() * 10) % 2));
 
 		example.setpByte((byte) (Math.random() * 100));
@@ -272,68 +263,68 @@ public class SqlExecutorTest extends BaseTest
 		example.setpShort((short) (Math.random() * 100));
 
 		example.setpInt((int) (Math.random() * 1000000));
-		
+
 		example.setpLong((long) (Math.random() * 10000000));
-		
+
 		example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
-		
+
 		example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
-		
+
 		example.setpByteArr("nway-jdbc".getBytes());
-		
+
 		example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
-		
+
 		example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
-		
+
 		example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
-		
+
 		example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
-		
+
 		example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
-		
+
 		example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
-		
+
 		example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
-		
+
 		example.setString(UUID.randomUUID().toString());
-		
+
 		example.setUtilDate(new Date());
-		
+
 		example.setSqlDate(new java.sql.Date(System.currentTimeMillis()));
-		
+
 		example.setTimestamp(new Timestamp(System.currentTimeMillis()));
-		
+
 		example.setClob(new SerialClob("nway".toCharArray()));
-		
+
 		example.setBlob(new SerialBlob("nway".getBytes()));
-		
+
 		SqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
-		
+
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
-	
+
 	@Test
 	public void lambdaUpdateTest() {
-		
+
 		ExampleEntity example = new ExampleEntity();
-		
+
 		example.setId(0);
 		example.setUtilDate(new Date());
-		
+
 		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
-		
+
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
-	
+
 	@Test
 	public void lambdaDeleteTest() {
-		
+
 		ExampleEntity example = new ExampleEntity();
-		
+
 		example.setId(0);
-		
+
 		SqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
-		
+
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
 
@@ -342,46 +333,53 @@ public class SqlExecutorTest extends BaseTest
 
 		ExampleEntity example = new ExampleEntity();
 		example.setId(1);
+		example.setwDouble(10.d);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
+				.ge(example::getpFloat).le(example::getpDouble).lt(example::getpLong).gt(example::getpDouble)
+				.between(example::getId, example::getId, example::getpLong).notBetween(example::getId, example::getId, example::getId)
+				.like(example::getString).notLike(example::getString)
+				.or(e -> e.eq(example::getId).eq(example::getpByte))
+				.and(e -> e.eq(example::getpLong).or().eq(example::getwDouble));
+
 		ExampleEntity ee = sqlExecutor.queryForBean(sqlBuilder);
-		
+
 		System.out.println(ee);
 	}
-	
+
 	@Test
 	public void lambdaQueryListTest() {
-		
+
 		ExampleEntity example = new ExampleEntity();
 		example.setId(1);
-		
+
 		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
 		List<ExampleEntity> ee = sqlExecutor.queryForBeanList(sqlBuilder);
-		
+
 		System.out.println(ee);
 	}
-	
+
 	@Test
 	public void lambdaQueryPageTest() {
-		
+
 		ExampleEntity example = new ExampleEntity();
 		example.setId(10);
-		
+
 		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
 		Pagination<ExampleEntity> ee = sqlExecutor.queryForBeanPagination(sqlBuilder, 1, 10);
-		
+
 		System.out.println(ee);
 	}
 
 	@Test
 	public void initTable() throws SQLException {
 
-	    Session session = sessionFactory.openSession();
-	    
-	    Transaction transaction = session.beginTransaction();
-	    
+		Session session = sessionFactory.openSession();
+
+		Transaction transaction = session.beginTransaction();
+
 		for (int i = 0; i < 10; i++) {
-			
+
 			ExampleEntity example = new ExampleEntity();
 
 			DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
@@ -393,46 +391,46 @@ public class SqlExecutorTest extends BaseTest
 			example.setpShort((short) (Math.random() * 100));
 
 			example.setpInt((int) (Math.random() * 1000000));
-			
+
 			example.setpLong((long) (Math.random() * 10000000));
-			
+
 			example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
-			
+
 			example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
-			
+
 			example.setpByteArr("nway-jdbc".getBytes());
-			
+
 			example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
-			
+
 			example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
-			
+
 			example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
-			
+
 			example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
-			
+
 			example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
-			
+
 			example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
-			
+
 			example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
-			
+
 			example.setString(UUID.randomUUID().toString());
-			
+
 			example.setUtilDate(new Date());
-			
+
 			example.setSqlDate(new java.sql.Date(System.currentTimeMillis()));
-			
+
 			example.setTimestamp(new Timestamp(System.currentTimeMillis()));
-			
+
 			example.setClob(new SerialClob("nway".toCharArray()));
-			
+
 			example.setBlob(new SerialBlob("nway".getBytes()));
-			
+
 //			example.setInputStream(Hibernate.getLobCreator(session).createBlob("nway".getBytes()).getBinaryStream());
-		
+
 			session.save(example);
 		}
-		
+
 		transaction.commit();
 	}
 }

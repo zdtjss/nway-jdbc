@@ -1,24 +1,15 @@
-#Nway-JDBC基于Spring JDBC，扩展自Spring的JdbcTemplate，完全兼容Spring JDBC，提供了方便简单的单表操作方法。
+#Nway-JDBC扩展自Spring的JdbcTemplate，完全兼容Spring JDBC。提供了方便简单的单表操作方法，只需要给主类SqlExecutor配置好数据源，就没有其他需要配置的了，不需要继承某个类，也不需要实现哪个接口。
 
 #如遇问题可联系zdtjss@163.com或QQ:670950251。
 
 #镜像地址：https://gitee.com/nway/Nway-JDBC。
 
-#使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
 
-#查询不到数据时：
- <ul>
-  <li>queryForBean返回null</li>
-  <li>queryForBeanList返回值size() == 0</li>
-  <li>queryForBeanPagination返回值getTotalCount() == 0</li>
-  <li>queryForMapListPagination返回值getTotalCount() == 0</li>
-  <li>queryForJson返回"{}"</li>
-  <li>queryForJsonList返回"[]"</li>
-  <li>queryForJsonPagination返回{"totalCount":0,"pageCount":0,"page":XX,"pageSize":XX}</li>
- </ul>
-
-#第三方依赖：
-	Spring-jdbc
+	<dependency>
+		<groupId>com.github.zdtjss</groupId>
+		<artifactId>nway-jdbc</artifactId>
+		<version>1.0.2</version>
+	</dependency>
 
 #数据库表与Java类的映射规则：  
    
@@ -62,7 +53,7 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 	
         各种参数的queryForBean方法支持单个Java对象查询
 		
-		SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).where().eq(usrQuery::getStatus);
+		SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
         User user = sqlExecutor.queryForBean(builder);
         
         or
@@ -73,7 +64,7 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 	
         各种参数的queryForBeanList方法支持集合对象查询
         
-        SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).where().eq(usrQuery::getStatus);
+        SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
         List<User> users = sqlExecutor.queryForBeanList(builder);
         
         or
@@ -84,7 +75,7 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 	
         各种参数的queryForBeanPagination方法支持Java对象分页查询
 		
-		SqlBuilder builder = SQL.query(User.class).like(usrQuery::getName).where().eq(usrQuery::getStatus).orderBy(usrQuery::getId);
+		SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName).orderBy(usrQuery::getId);
         Pagination<User> users = sqlExecutor.queryForBeanList(builder, 1, 10);
         
         or
@@ -115,3 +106,16 @@ Map对象集分页：
         Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination("select * from user_name where id <> ? order by id", new Object[]{ "abc", 1 }, 1, 10);
         users使用同queryForBeanPagination
 		分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
+		
+#使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
+
+#查询不到数据时：
+ <ul>
+  <li>queryForBean返回null</li>
+  <li>queryForBeanList返回值size() == 0</li>
+  <li>queryForBeanPagination返回值getTotalCount() == 0</li>
+  <li>queryForMapListPagination返回值getTotalCount() == 0</li>
+  <li>queryForJson返回"{}"</li>
+  <li>queryForJsonList返回"[]"</li>
+  <li>queryForJsonPagination返回{"totalCount":0,"pageCount":0,"page":XX,"pageSize":XX}</li>
+ </ul>

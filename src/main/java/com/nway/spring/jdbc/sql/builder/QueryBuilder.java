@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.sql;
+package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.annotation.Table;
 
@@ -6,7 +6,7 @@ public class QueryBuilder extends SqlBuilder {
 
 	private String[] columns;
 	
-	QueryBuilder(Class<?> beanClass, String ... columns) {
+	public QueryBuilder(Class<?> beanClass, String ... columns) {
 		super(beanClass);
 		this.columns = columns;
 		init();

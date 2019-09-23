@@ -1,10 +1,10 @@
-package com.nway.spring.jdbc.sql;
+package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.annotation.Table;
 
 public class DeleteBuilder extends SqlBuilder {
 
-	DeleteBuilder(Class<?> beanClass) {
+	public DeleteBuilder(Class<?> beanClass) {
 		super(beanClass);
 	}
 	

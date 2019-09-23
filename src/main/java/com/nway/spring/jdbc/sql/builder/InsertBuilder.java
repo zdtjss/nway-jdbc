@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.sql;
+package com.nway.spring.jdbc.sql.builder;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -7,12 +7,13 @@ import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 
 public class InsertBuilder extends SqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	
-	InsertBuilder(Class<?> beanClass) {
+	public InsertBuilder(Class<?> beanClass) {
 		super(beanClass);
 	}
 	
@@ -25,7 +26,7 @@ public class InsertBuilder extends SqlBuilder {
 					columns.add(column.name());
 				}
 				else {
-					columns.add(ReflectUtils.fieldToColumn(field));
+					columns.add(SqlBuilderUtils.fieldToColumn(field));
 				}
 				field.setAccessible(true);
 				param.add(field.get(obj));
