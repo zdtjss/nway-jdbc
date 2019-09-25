@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.function.SSupplier;
 
 public class SqlBuilderUtils {
 
@@ -44,6 +46,15 @@ public class SqlBuilderUtils {
 			return null;
 		}
 	}
+	
+	public static <T, R> String getColumn(Class<?> beanClass, SFunction<T, R> lambda) {
+		try {
+			SerializedLambda serializedLambda = getSerializedLambda(lambda);
+			return methodToColumn(beanClass, serializedLambda.getImplMethodName());
+		} catch (Exception e) {
+			return null;
+		}
+	}
     
 	public static <T> SerializedLambda getSerializedLambda(SSupplier<T> lambda) throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -51,6 +62,15 @@ public class SqlBuilderUtils {
 		Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
 		writeReplace.setAccessible(true);
 
+		return (SerializedLambda) writeReplace.invoke(lambda);
+	}
+	
+	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) throws NoSuchMethodException, SecurityException,
+	IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		
+		Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
+		writeReplace.setAccessible(true);
+		
 		return (SerializedLambda) writeReplace.invoke(lambda);
 	}
 	

@@ -9,7 +9,7 @@ import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 
-public class InsertBuilder extends SqlBuilder {
+public class InsertBuilder extends DefaultSqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	

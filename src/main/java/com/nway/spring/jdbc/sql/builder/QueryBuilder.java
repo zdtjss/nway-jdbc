@@ -2,7 +2,7 @@ package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.annotation.Table;
 
-public class QueryBuilder extends SqlBuilder {
+public class QueryBuilder extends DefaultSqlBuilder {
 
 	private String[] columns;
 	

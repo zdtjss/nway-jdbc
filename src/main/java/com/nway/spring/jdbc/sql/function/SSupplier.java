@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.sql;
+package com.nway.spring.jdbc.sql.function;
 
 import java.io.Serializable;
 import java.util.function.Supplier;

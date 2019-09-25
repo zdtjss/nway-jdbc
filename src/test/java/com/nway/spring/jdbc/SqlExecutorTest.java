@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
 
 //import oracle.jdbc.OracleCallableStatement;
 //import oracle.jdbc.OracleTypes;
@@ -57,7 +57,7 @@ public class SqlExecutorTest extends BaseTest {
 		Computer computer = new Computer();
 		computer.setBrand("p");
 
-		SqlBuilder builder = SQL.query(Computer.class, "brand").like(computer::getBrand).ge(() -> 1);
+		DefaultSqlBuilder builder = SQL.query(Computer.class, "brand").like(computer::getBrand).ge(() -> 1);
 
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
@@ -298,7 +298,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setBlob(new SerialBlob("nway".getBytes()));
 
-		SqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
+		DefaultSqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
 
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -311,7 +311,7 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(0);
 		example.setUtilDate(new Date());
 
-		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
+		DefaultSqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -323,7 +323,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setId(0);
 
-		SqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
+		DefaultSqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
 
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -335,7 +335,7 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(1);
 		example.setwDouble(10.d);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
+		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
 				.ge(example::getpFloat).le(example::getpDouble).lt(example::getpLong).gt(example::getpDouble)
 				.between(example::getId, example::getId, example::getpLong).notBetween(example::getId, example::getId, example::getId)
 				.like(example::getString).notLike(example::getString)
@@ -353,7 +353,7 @@ public class SqlExecutorTest extends BaseTest {
 		ExampleEntity example = new ExampleEntity();
 		example.setId(1);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
+		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
 		List<ExampleEntity> ee = sqlExecutor.queryForBeanList(sqlBuilder);
 
 		System.out.println(ee);
@@ -365,7 +365,7 @@ public class SqlExecutorTest extends BaseTest {
 		ExampleEntity example = new ExampleEntity();
 		example.setId(10);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
+		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
 		Pagination<ExampleEntity> ee = sqlExecutor.queryForBeanPagination(sqlBuilder, 1, 10);
 
 		System.out.println(ee);
