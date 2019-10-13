@@ -28,7 +28,7 @@ public class UpdateBuilder extends DefaultSqlBuilder {
 		Table table = (Table) beanClass.getAnnotation(Table.class);
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(table.name()).append(" set ")
+		sql.append("update ").append(table.value().length() > 0 ? table.value() : table.name()).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
 
 		return sql.toString();

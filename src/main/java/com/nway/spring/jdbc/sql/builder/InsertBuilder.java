@@ -18,12 +18,11 @@ public class InsertBuilder extends DefaultSqlBuilder {
 	}
 	
 	public InsertBuilder use(Object obj) {
-		Table table = obj.getClass().getAnnotation(Table.class);
 		try {
 			for (Field field : beanClass.getDeclaredFields()) {
 				Column column = field.getAnnotation(Column.class);
 				if (column != null) {
-					columns.add(column.name());
+					columns.add(column.value().length() > 0 ? column.value() : column.name());
 				}
 				else {
 					columns.add(SqlBuilderUtils.fieldToColumn(field));
@@ -41,11 +40,12 @@ public class InsertBuilder extends DefaultSqlBuilder {
 	@Override
 	public String getSql() {
 		Table table = (Table) beanClass.getAnnotation(Table.class);
-		sql.append("insert into ").append(table.name()).append(" (")
-				.append(columns.stream().collect(Collectors.joining(",")))
-				.append(") values (")
-				.append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))
-				.append(")");
+		sql.append("insert into ")
+			.append(table.value().length() > 0 ? table.value() : table.name()).append(" (")
+			.append(columns.stream().collect(Collectors.joining(",")))
+			.append(") values (")
+			.append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))
+			.append(")");
 		return sql.toString();
 	}
 }

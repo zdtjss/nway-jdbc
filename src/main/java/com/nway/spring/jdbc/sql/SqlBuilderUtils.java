@@ -28,7 +28,7 @@ public class SqlBuilderUtils {
     	for(Field field : classz.getDeclaredFields()) {
 			Column column = field.getAnnotation(Column.class);
 			if(column != null) {
-				columnFieldMap.put(field.getName(), column.name());
+				columnFieldMap.put(field.getName(), column.value().length() > 0 ? column.value() : column.name());
 			}
 			else {
 				columnFieldMap.put(field.getName(), fieldToColumn(field));
@@ -77,7 +77,7 @@ public class SqlBuilderUtils {
 	public static String fieldToColumn(Field field) {
 		Column column = field.getAnnotation(Column.class);
 		if(column != null) {
-			return column.name();
+			return column.value().length() > 0 ? column.value() : column.name();
 		}
 		else {
 			return fieldNameToColumn(field.getName());

@@ -263,7 +263,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 
 			if (columnAnnotation != null) {
 
-				String columnName = columnAnnotation.value() == null ? columnAnnotation.name()
+				String columnName = columnAnnotation.value().length() == 0 ? columnAnnotation.name()
 						: columnAnnotation.value();
 
 				if (!(columnName == null || columnName.length() == 0)) {

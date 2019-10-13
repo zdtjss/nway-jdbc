@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
+import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
 //import oracle.jdbc.OracleCallableStatement;
 //import oracle.jdbc.OracleTypes;
@@ -311,7 +312,7 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(0);
 		example.setUtilDate(new Date());
 
-		DefaultSqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
+		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -323,7 +324,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setId(0);
 
-		DefaultSqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
+		SqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
 
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -335,7 +336,7 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(1);
 		example.setwDouble(10.d);
 
-		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
 				.ge(example::getpFloat).le(example::getpDouble).lt(example::getpLong).gt(example::getpDouble)
 				.between(example::getId, example::getId, example::getpLong).notBetween(example::getId, example::getId, example::getId)
 				.like(example::getString).notLike(example::getString)

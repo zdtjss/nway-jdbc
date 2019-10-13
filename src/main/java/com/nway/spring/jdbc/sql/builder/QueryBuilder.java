@@ -23,7 +23,7 @@ public class QueryBuilder extends DefaultSqlBuilder {
 
 	private void initColumns() {
 		Table table = (Table) beanClass.getAnnotation(Table.class);
-		sql.append("select *  from ").append(table.name());
+		sql.append("select *  from ").append(table.value().length() > 0 ? table.value() : table.name());
 	}
 	
 	private void initColumns(String ... columns) {
@@ -32,7 +32,7 @@ public class QueryBuilder extends DefaultSqlBuilder {
 		for(String column : columns) {
 			sql.append(column).append(',');
 		}
-		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.name());
+		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.value().length() > 0 ? table.value() : table.name());
 	}
 	
 }

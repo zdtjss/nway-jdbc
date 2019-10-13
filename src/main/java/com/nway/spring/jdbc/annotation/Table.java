@@ -12,5 +12,7 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface Table {
 
-	String name();
+	String name() default "";
+
+	String value() default "";
 }
