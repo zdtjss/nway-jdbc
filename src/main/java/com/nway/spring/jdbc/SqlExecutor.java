@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -71,6 +72,21 @@ public class SqlExecutor extends JdbcTemplate {
 	public int update(SqlBuilder sqlBuilder) {
 		
 		return super.update(sqlBuilder.getSql(), sqlBuilder.getParam().toArray());
+	}
+	
+	public int[] batchUpdate(SqlBuilder sqlBuilder) {
+		
+		List<Object> params = sqlBuilder.getParam();
+		
+		return super.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> (Object[]) e).collect(Collectors.toList()));
+	}
+	
+	public int insert(SqlBuilder sqlBuilder) {
+		return update(sqlBuilder);
+	}
+	
+	public int[] batchInsert(SqlBuilder sqlBuilder) {
+		return batchUpdate(sqlBuilder);
 	}
 	
 	/**

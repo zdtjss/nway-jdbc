@@ -9,7 +9,7 @@ import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 
-public class InsertBuilder implements SqlBuilder {
+public class BatchInsertBuilder implements SqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	
@@ -17,11 +17,15 @@ public class InsertBuilder implements SqlBuilder {
 	protected List<Object> param = new ArrayList<>();
 	protected Class beanClass;
 	
-	public InsertBuilder(Class<?> beanClass) {
+	public BatchInsertBuilder(Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
 	
-	public InsertBuilder use(Object obj) {
+	public BatchInsertBuilder use(List<Object> objList) {
+		List<List<Object>> batchParam = new ArrayList<>(objList.size());
+		for(int i = 0;i < objList.size(); i++) {
+			batchParam.add(new ArrayList<Object>());
+		}
 		try {
 			for (Field field : beanClass.getDeclaredFields()) {
 				Column column = field.getAnnotation(Column.class);
@@ -32,12 +36,15 @@ public class InsertBuilder implements SqlBuilder {
 					columns.add(SqlBuilderUtils.fieldToColumn(field));
 				}
 				field.setAccessible(true);
-				param.add(field.get(obj));
+				for(int i = 0;i < objList.size(); i++) {
+					batchParam.get(i).add(field.get(objList.get(i)));
+				}
 			}
 		} catch (Exception e) {
 			// TODO
 			return null;
 		}
+		param.addAll(batchParam.stream().map(e -> e.toArray()).collect(Collectors.toList()));
 		return this;
 	}
 	
