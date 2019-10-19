@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
 
 @Service
@@ -17,6 +18,10 @@ public class PerformanceTest extends BaseTest {
 	@Autowired
 	@Qualifier("nwayPerformance")
 	private NwayPerformance nwayPerformance;
+	
+	@Autowired
+	@Qualifier("nwayLambdaPerformance")
+	private NwayLambdaPerformance nwayLambdaPerformance;
 
 	@Autowired
 	@Qualifier("springJdbcPerformance")
@@ -27,7 +32,7 @@ public class PerformanceTest extends BaseTest {
 	private HibernatePerformance hibernatePerformance;
 	
 	@Autowired
-        @Qualifier("hibernateJpaPerformance")
+    @Qualifier("hibernateJpaPerformance")
 	private HibernateJpaPerformance jpaPerformance;
 	
 	@Autowired
@@ -36,6 +41,10 @@ public class PerformanceTest extends BaseTest {
 	@Autowired
 	@Qualifier("myBatisPerformance")
 	private MyBatisPerformance myBatisPerformance;
+	
+	@Autowired
+	@Qualifier("myBatisPlusPerformance")
+	private MyBatisPlusPerformance myBatisPlusPerformance;
 	
 	@Autowired
 	@Qualifier("jdbcPerformance")
@@ -48,21 +57,25 @@ public class PerformanceTest extends BaseTest {
 	@Test
 	public void testGetMonitor() {
 
-		int id = 70;
+		List<Monitor> monitorList = nwayPerformance.listMonitor();
+		
+		for (Monitor monitor:monitorList) {
 
-		for (int i = 0; i < 10; i++) {
-
-			nwayPerformance.getMonitorById(id);
-
-			hibernatePerformance.getMonitorById(id);
+			nwayPerformance.getMonitorById(monitor.getId());
 			
-			jpaPerformance.getMonitorById(id);
-			
-			springDataJpaPerformance.getMonitorById(id);
+			nwayLambdaPerformance.getMonitorById(monitor.getId());
 
-			springJdbcPerformance.getMonitorById(id);
+			hibernatePerformance.getMonitorById(monitor.getId());
 			
-			myBatisPerformance.getMonitorById(id);
+			jpaPerformance.getMonitorById(monitor.getId());
+			
+			springDataJpaPerformance.getMonitorById(monitor.getId());
+
+			springJdbcPerformance.getMonitorById(monitor.getId());
+			
+			myBatisPerformance.getMonitorById(monitor.getId());
+			
+			myBatisPlusPerformance.getMonitorById(monitor.getId());
 
 			System.out.println();
 		}
@@ -75,6 +88,8 @@ public class PerformanceTest extends BaseTest {
 
 			nwayPerformance.listMonitor();
 			
+			nwayLambdaPerformance.listMonitor();
+			
 			jdbcPerformance.listMonitor();
 
 			hibernatePerformance.listMonitor();
@@ -86,6 +101,8 @@ public class PerformanceTest extends BaseTest {
 			springJdbcPerformance.listMonitor();
 			
 			myBatisPerformance.listMonitor();
+			
+			myBatisPlusPerformance.listMonitor();
 			
 			scriptPerformance.listMonitor();
 

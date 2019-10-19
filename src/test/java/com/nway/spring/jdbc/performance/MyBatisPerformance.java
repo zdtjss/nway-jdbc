@@ -23,8 +23,6 @@ public class MyBatisPerformance implements Performance , JsonQueryPerformance {
 	@Override
 	public Computer getComputerById(int id) {
 		
-		computerMapper.getById(id);
-		
 		return computerMapper.getComputerById(id);
 	}
 

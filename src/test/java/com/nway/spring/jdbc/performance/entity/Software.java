@@ -9,6 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "t_software")
+@com.nway.spring.jdbc.annotation.Table("t_software")
 public class Software {
 
 	private int id;

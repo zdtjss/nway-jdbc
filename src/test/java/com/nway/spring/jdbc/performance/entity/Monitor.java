@@ -13,8 +13,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+
 @Entity
 @Table(name = "t_monitor")
+@TableName("t_monitor")
+@com.nway.spring.jdbc.annotation.Table("t_monitor")
 public class Monitor {
 
 	/** 编号 **/

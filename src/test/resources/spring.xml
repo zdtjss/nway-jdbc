@@ -13,7 +13,7 @@
 		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
 	<context:component-scan base-package="com.nway.spring.jdbc" />
-	
+
 	<jpa:repositories base-package="com.nway.spring.jdbc.performance.repositories"/>
 
 	<aop:aspectj-autoproxy proxy-target-class="true" />
@@ -26,7 +26,7 @@
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
 		<property name="persistenceUnitName" value="nway.perfomance.jpa" />
-	</bean>
+	</bean> 
 
 	<bean id="jpaTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
@@ -53,9 +53,9 @@
 	</bean>
 
 	<tx:annotation-driven transaction-manager="jdbcTxManager" />
-	
+
 	<tx:annotation-driven transaction-manager="jpaTxManager" />
-	
+
 	<tx:annotation-driven transaction-manager="hibernateTxManager" />
 
 	<bean id="sqlExecutor" class="com.nway.spring.jdbc.SqlExecutor">
@@ -91,7 +91,18 @@
 		<property name="basePackage" value="com.nway.spring.jdbc.performance.mapper" />
 		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
 	</bean>
-	
+
+	<bean id="sqlSessionFactoryMybatisPlus"
+		class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath*:com/nway/spring/jdbc/performance/mybatisplus/*.xml"/>
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryMybatisPlus" />
+		<property name="basePackage" value="com.nway.spring.jdbc.performance.mybatisplus" />
+	</bean>
+
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
 		<constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
@@ -101,20 +112,19 @@
 			<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
 
 				<property name="username" value="root" />
-				<property name="password" value="nway" />
+				<property name="password" value="Zdt12345#" />
 
 				<!-- <property name="driverClassName" value="org.mariadb.jdbc.Driver" />
 				<property name="url"
 					value="jdbc:mariadb://localhost:3306/wform?cacheResultSetMetadata=true&amp;metadataCacheSize=10" /> -->
 
-				<property name="driverClassName" value="com.mysql.jdbc.Driver" /> 
-				<property name="url" value="jdbc:mysql://192.168.3.2:3306/test" 
-					/>
-				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" /> 
-					<property name="url" value="jdbc:mysql://localhost:3306/test?cacheResultSetMetadata=true&amp;metadataCacheSize=1" 
+				<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://192.168.56.3:3306/test?useSSL=false" />
+				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+					<property name="url" value="jdbc:mysql://localhost:3306/test?cacheResultSetMetadata=true&amp;metadataCacheSize=1"
 					/> -->
 
-				<property name="initialSize" value="50" />
+				<property name="initialSize" value="3" />
 				<property name="maxActive" value="150" />
 			</bean>
 		</constructor-arg>

@@ -15,6 +15,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "t_keyboard")
+@com.nway.spring.jdbc.annotation.Table("t_keyboard")
 public class Keyboard {
 
 	/** 编号 **/

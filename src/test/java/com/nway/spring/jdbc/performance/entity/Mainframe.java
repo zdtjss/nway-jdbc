@@ -18,6 +18,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "t_mainframe")
+@com.nway.spring.jdbc.annotation.Table("t_mainframe")
 public class Mainframe {
 
 	/** 编号 **/

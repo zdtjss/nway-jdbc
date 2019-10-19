@@ -299,7 +299,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setBlob(new SerialBlob("nway".getBytes()));
 
-		DefaultSqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
+		SqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
 
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}

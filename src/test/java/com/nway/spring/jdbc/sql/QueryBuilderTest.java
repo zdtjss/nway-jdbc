@@ -3,7 +3,7 @@ package com.nway.spring.jdbc.sql;
 import org.junit.Test;
 
 import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
+import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
 public class QueryBuilderTest {
 
@@ -13,9 +13,11 @@ public class QueryBuilderTest {
 		Computer computer = new Computer();
 		computer.setBrand("abc哈哈");
 		
-		DefaultSqlBuilder builder = SQL.query(Computer.class).like(computer::getBrand).notLike(computer::getModel);
+		SqlBuilder builder = SQL.query(Computer.class).like(computer::getBrand).notLike(computer::getModel);
 		
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
+		
+		builder = SQL.insert(Computer.class).use(new Computer());
 	}
 }

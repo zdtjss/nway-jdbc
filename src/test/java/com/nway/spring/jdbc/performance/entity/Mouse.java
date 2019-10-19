@@ -15,6 +15,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "t_mouse")
+@com.nway.spring.jdbc.annotation.Table("t_mouse")
 public class Mouse {
 
 	/** 编号 **/

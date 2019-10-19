@@ -24,9 +24,12 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+
 @Entity
 @Table(name = "t_computer")
-@com.nway.spring.jdbc.annotation.Table(name = "t_computer")
+@TableName("t_computer")
+@com.nway.spring.jdbc.annotation.Table("t_computer")
 public class Computer {
 
 	private int id;
