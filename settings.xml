@@ -115,13 +115,13 @@ under the License.
      | 
      | NOTE: You should either specify username/password OR privateKey/passphrase, since these pairings are 
      |       used together.
-     |
+     |-->
     <server>
-      <id>deploymentRepo</id>
-      <username>repouser</username>
-      <password>repopwd</password>
+      <id>ossrh</id>
+      <username>nway</username>
+      <password>Zdt1234567890#</password>
     </server>
-    -->
+    
     
     <!-- Another sample, using keys to authenticate.
     <server>
@@ -307,6 +307,16 @@ under the License.
       </repositories>  
     </profile>  
     <!-- jboss.org config end -->  
+    <profile>
+      <id>ossrh</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <gpg.executable>gpg.exe</gpg.executable>
+        <gpg.passphrase>A9760CA4</gpg.passphrase>
+      </properties>
+    </profile>
   </profiles>
 
   <!-- activeProfiles
