@@ -23,7 +23,7 @@ import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
 @Service("nwayLambdaPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
-public class NwayLambdaPerformance implements Performance , JsonQueryPerformance{
+public class NwayLambdaPerformance implements Performance {
 
     private Gson gson = new Gson();
     
@@ -94,26 +94,5 @@ public class NwayLambdaPerformance implements Performance , JsonQueryPerformance
 
 	    return sqlExecutor.queryForBeanList(SQL.query(Monitor.class));
 	}
-	
-	public String queryComputerJson(int id) {
-		
-		return sqlExecutor.queryForJson("select * from t_computer where id = ?", Computer.class, id);
-	}
-	
-	public String queryComputerListJson() {
-		
-		return sqlExecutor.queryForJson("select * from t_computer", Computer.class);
-	}
-	
-	public String queryMonitorListJson() {
-	    
-	    return sqlExecutor.queryForJsonList("select * from t_monitor", null, Monitor.class);
-	}
-
-    @Override
-    public String queryMonitorJsonList()
-    {
-        return queryMonitorListJson();//gson.toJson(listMonitor());
-    }
 
 }

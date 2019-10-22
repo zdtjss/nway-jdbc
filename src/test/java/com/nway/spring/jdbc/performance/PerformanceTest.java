@@ -129,8 +129,6 @@ public class PerformanceTest extends BaseTest {
 	        
 	        scriptPerformance.queryMonitorJsonList();
 	        
-	        nwayPerformance.queryMonitorJsonList();
-	        
 	        System.out.println();
 	    }
 	}
@@ -187,35 +185,6 @@ public class PerformanceTest extends BaseTest {
 		}
 	}
 	
-	@Test
-	public void testQueryComputerJson() {
-		
-		int id = 1;
-		
-		for (int i = 0; i < 30; i++) {
-
-			((NwayPerformance) nwayPerformance).queryComputerJson(id);
-		}
-	}
-	
-	@Test
-	public void testQueryComputerListJson() {
-		
-		for (int i = 0; i < 30; i++) {
-			
-			((NwayPerformance) nwayPerformance).queryComputerListJson();
-		}
-	}
-	
-	@Test
-	public void testQueryMonitorListJson() {
-	    
-	    for (int i = 0; i < 30; i++) {
-	        
-	        ((NwayPerformance) nwayPerformance).queryMonitorListJson();
-	    }
-	}
-
 	@Test
 	public void initDB() {
 
