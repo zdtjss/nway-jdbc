@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.annotation.Table;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 
 public class QueryBuilder extends DefaultSqlBuilder {
 
@@ -14,25 +15,25 @@ public class QueryBuilder extends DefaultSqlBuilder {
 	
 	private void init() {
 		if (columns.length > 0) {
-			initColumns(columns);
+			initSql(columns);
 		}
 		else {
-			initColumns();
+			initSql();
 		}
 	}
 
-	private void initColumns() {
+	private void initSql() {
 		Table table = (Table) beanClass.getAnnotation(Table.class);
-		sql.append("select *  from ").append(table.value().length() > 0 ? table.value() : table.name());
+		sql.append("select *  from ").append(SqlBuilderUtils.getTableName(table));
 	}
 	
-	private void initColumns(String ... columns) {
+	private void initSql(String ... columns) {
 		Table table = (Table) beanClass.getAnnotation(Table.class);
 		sql.append("select ");
 		for(String column : columns) {
 			sql.append(column).append(',');
 		}
-		sql.deleteCharAt(sql.length() - 1).append(" from ").append(table.value().length() > 0 ? table.value() : table.name());
+		sql.deleteCharAt(sql.length() - 1).append(" from ").append(SqlBuilderUtils.getTableName(table));
 	}
 	
 }

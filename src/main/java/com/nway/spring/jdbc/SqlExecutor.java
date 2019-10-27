@@ -16,7 +16,7 @@ package com.nway.spring.jdbc;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -99,7 +99,6 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @throws DataAccessException
 	 */
 	public <T> T queryForBean(SqlBuilder queryBuilder) throws DataAccessException {
-
 		return queryForBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
@@ -113,7 +112,6 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @throws DataAccessException
 	 */
 	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
-		
 		return super.query(sql, new BeanHandler<T>(type), args);
 	}
 
@@ -126,7 +124,6 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @throws DataAccessException
 	 */
 	public <T> List<T> queryForBeanList(SqlBuilder queryBuilder) throws DataAccessException {
-		
 		return queryForBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
@@ -141,7 +138,6 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @throws DataAccessException
 	 */
 	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
-		
 		return super.query(sql, new BeanListHandler<T>(type), args);
 	}
 
@@ -157,7 +153,6 @@ public class SqlExecutor extends JdbcTemplate {
 	 */
 	public <T> Pagination<T> queryForBeanPagination(SqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
-
 		return queryForBeanPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
 	}
 
@@ -177,7 +172,7 @@ public class SqlExecutor extends JdbcTemplate {
 	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page, int pageSize,
 			Class<T> beanClass) throws DataAccessException {
 
-		List<T> item = Collections.emptyList();
+		List<T> item = new ArrayList<T>();
 
 		String countSql = buildPaginationCountSql(sql);
 		int totalCount = queryCount(countSql, params);
@@ -221,7 +216,7 @@ public class SqlExecutor extends JdbcTemplate {
 	public Pagination<Map<String, Object>> queryForMapListPagination(String sql, Object[] params, int page,
 			int pageSize) throws DataAccessException {
 
-		List<Map<String, Object>> item = Collections.emptyList();
+		List<Map<String, Object>> item = new ArrayList<>();
 
 		String upperCaseSql = sql.toUpperCase();
 		String countSql = buildPaginationCountSql(upperCaseSql);

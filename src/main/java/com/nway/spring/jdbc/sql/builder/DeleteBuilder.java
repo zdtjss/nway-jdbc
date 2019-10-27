@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.annotation.Table;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 
 public class DeleteBuilder extends DefaultSqlBuilder {
 
@@ -14,7 +15,7 @@ public class DeleteBuilder extends DefaultSqlBuilder {
 		Table table = (Table) beanClass.getAnnotation(Table.class);
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("delete from ").append(table.value().length() > 0 ? table.value() : table.name()).append(" ")
+		sql.append("delete from ").append(SqlBuilderUtils.getTableName(table)).append(" ")
 				.append(super.getSql());
 
 		return sql.toString();

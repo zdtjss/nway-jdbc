@@ -28,13 +28,7 @@ public class BatchInsertBuilder implements SqlBuilder {
 		}
 		try {
 			for (Field field : beanClass.getDeclaredFields()) {
-				Column column = field.getAnnotation(Column.class);
-				if (column != null) {
-					columns.add(column.value().length() > 0 ? column.value() : column.name());
-				}
-				else {
-					columns.add(SqlBuilderUtils.fieldToColumn(field));
-				}
+				columns.add(SqlBuilderUtils.getColumnName(field));
 				field.setAccessible(true);
 				for(int i = 0;i < objList.size(); i++) {
 					batchParam.get(i).add(field.get(objList.get(i)));

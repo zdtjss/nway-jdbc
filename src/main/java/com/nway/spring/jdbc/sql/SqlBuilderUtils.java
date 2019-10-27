@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 
@@ -31,7 +32,7 @@ public class SqlBuilderUtils {
 				columnFieldMap.put(field.getName(), column.value().length() > 0 ? column.value() : column.name());
 			}
 			else {
-				columnFieldMap.put(field.getName(), fieldToColumn(field));
+				columnFieldMap.put(field.getName(), getColumnName(field));
 			}
     	}
     	FIELD_COLUMN_MAP.put(classz, columnFieldMap);
@@ -65,16 +66,16 @@ public class SqlBuilderUtils {
 		return (SerializedLambda) writeReplace.invoke(lambda);
 	}
 	
-	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) throws NoSuchMethodException, SecurityException,
-	IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		
+	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) throws NoSuchMethodException,
+			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
 		Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
 		writeReplace.setAccessible(true);
 		
 		return (SerializedLambda) writeReplace.invoke(lambda);
 	}
 	
-	public static String fieldToColumn(Field field) {
+	public static String getColumnName(Field field) {
 		Column column = field.getAnnotation(Column.class);
 		if(column != null) {
 			return column.value().length() > 0 ? column.value() : column.name();
@@ -82,6 +83,10 @@ public class SqlBuilderUtils {
 		else {
 			return fieldNameToColumn(field.getName());
 		}
+	}
+	
+	public static String getTableName(Table table) {
+		return table.value().length() > 0 ? table.value() : table.name();
 	}
 	
 	public static String fieldNameToColumn(String fieldName) {
