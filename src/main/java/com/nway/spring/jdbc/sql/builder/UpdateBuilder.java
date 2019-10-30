@@ -11,9 +11,11 @@ import com.nway.spring.jdbc.sql.function.SSupplier;
 public class UpdateBuilder extends DefaultSqlBuilder {
 
 	private List<String> sets = new ArrayList<>();
+	private Table table;
 	
 	public UpdateBuilder(Class<?> beanClass) {
 		super(beanClass);
+		table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
 	public <T> DefaultSqlBuilder set(SSupplier<T> val) {
@@ -24,13 +26,9 @@ public class UpdateBuilder extends DefaultSqlBuilder {
 	
 	@Override
 	public String getSql() {
-
-		Table table = (Table) beanClass.getAnnotation(Table.class);
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ").append(SqlBuilderUtils.getTableName(table)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
-
 		return sql.toString();
 	}
 }

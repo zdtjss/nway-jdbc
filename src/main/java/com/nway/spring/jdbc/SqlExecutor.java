@@ -58,7 +58,7 @@ import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 public class SqlExecutor extends JdbcTemplate {
 
 	private PaginationSupport paginationSupport;
-
+	
 	/**
 	 * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
 	 */

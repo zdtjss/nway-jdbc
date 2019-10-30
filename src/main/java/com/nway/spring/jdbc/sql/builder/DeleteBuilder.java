@@ -5,19 +5,18 @@ import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 
 public class DeleteBuilder extends DefaultSqlBuilder {
 
+	private Table table;
+	
 	public DeleteBuilder(Class<?> beanClass) {
 		super(beanClass);
+		this.table = (Table) beanClass.getAnnotation(Table.class);
 	}
 
 	@Override
 	public String getSql() {
-
-		Table table = (Table) beanClass.getAnnotation(Table.class);
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("delete from ").append(SqlBuilderUtils.getTableName(table)).append(" ")
 				.append(super.getSql());
-
 		return sql.toString();
 	}
 

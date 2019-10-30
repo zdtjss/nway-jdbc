@@ -6,10 +6,12 @@ import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 public class QueryBuilder extends DefaultSqlBuilder {
 
 	private String[] columns;
+	private Table table;
 	
 	public QueryBuilder(Class<?> beanClass, String ... columns) {
 		super(beanClass);
 		this.columns = columns;
+		table = (Table) beanClass.getAnnotation(Table.class);
 		init();
 	}
 	
@@ -23,12 +25,10 @@ public class QueryBuilder extends DefaultSqlBuilder {
 	}
 
 	private void initSql() {
-		Table table = (Table) beanClass.getAnnotation(Table.class);
-		sql.append("select *  from ").append(SqlBuilderUtils.getTableName(table));
+		sql.append("select * from ").append(SqlBuilderUtils.getTableName(table));
 	}
 	
 	private void initSql(String ... columns) {
-		Table table = (Table) beanClass.getAnnotation(Table.class);
 		sql.append("select ");
 		for(String column : columns) {
 			sql.append(column).append(',');

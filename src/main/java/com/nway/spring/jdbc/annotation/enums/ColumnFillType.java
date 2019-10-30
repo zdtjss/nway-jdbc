@@ -1,7 +1,5 @@
 package com.nway.spring.jdbc.annotation.enums;
 
-import com.nway.spring.jdbc.fill.ColumnFillStrategy;
-
 public enum ColumnFillType {
 
 	NONE,

@@ -13,12 +13,14 @@ public class BatchInsertBuilder implements SqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	
-	protected StringBuilder sql = new StringBuilder();
-	protected List<Object> param = new ArrayList<>();
-	protected Class beanClass;
+	private StringBuilder sql = new StringBuilder();
+	private List<Object> param = new ArrayList<>();
+	private Class beanClass;
+	private Table table;
 	
 	public BatchInsertBuilder(Class<?> beanClass) {
 		this.beanClass = beanClass;
+		this.table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
 	public BatchInsertBuilder use(List<Object> objList) {
@@ -44,7 +46,6 @@ public class BatchInsertBuilder implements SqlBuilder {
 	
 	@Override
 	public String getSql() {
-		Table table = (Table) beanClass.getAnnotation(Table.class);
 		sql.append("insert into ")
 			.append(table.value().length() > 0 ? table.value() : table.name()).append(" (")
 			.append(columns.stream().collect(Collectors.joining(",")))
