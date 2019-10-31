@@ -18,6 +18,7 @@ public class DefaultSqlBuilder implements SqlBuilder {
 	
 	// 查询条件一定是以where()方法开始，where后的第一个条件不要and
 	private boolean canAppendAnd = false;
+	private boolean canAppendWhere = true;
 
 	protected DefaultSqlBuilder(Class beanClass) {
 		this.beanClass = beanClass;
@@ -28,7 +29,10 @@ public class DefaultSqlBuilder implements SqlBuilder {
 	}
 
 	public <T> DefaultSqlBuilder where() {
-		sql.append(" where ");
+		if (canAppendWhere) {
+			sql.append(" where ");
+		}
+		canAppendWhere = false;
 		return this;
 	}
 
