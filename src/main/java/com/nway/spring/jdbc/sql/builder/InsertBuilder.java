@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
 
 public class InsertBuilder implements SqlBuilder {
 
@@ -26,12 +27,11 @@ public class InsertBuilder implements SqlBuilder {
 		try {
 			for (Field field : beanClass.getDeclaredFields()) {
 				columns.add(SqlBuilderUtils.getColumnName(field));
-				field.setAccessible(true);
-				param.add(field.get(obj));
+				Object columnValue = SqlBuilderUtils.getColumnValue(field, obj, SqlType.INSERT);
+				param.add(columnValue);
 			}
 		} catch (Exception e) {
-			// TODO
-			return null;
+			throw new SqlBuilderException(e);
 		}
 		return this;
 	}

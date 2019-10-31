@@ -13,6 +13,7 @@
  */
 package com.nway.spring.jdbc;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,7 +34,11 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.sql.SQL;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
+import com.nway.spring.jdbc.sql.builder.BatchUpdateBuilder;
+import com.nway.spring.jdbc.sql.builder.BeanUpdateBuilder;
+import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
@@ -78,8 +83,28 @@ public class SqlExecutor extends JdbcTemplate {
 		return super.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> (Object[]) e).collect(Collectors.toList()));
 	}
 	
+	public int updateById(Object obj) {
+		Class<?> beanClass = obj.getClass();
+		BeanUpdateBuilder sqlBuilder = new BeanUpdateBuilder(obj);
+		sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
+		return update(sqlBuilder);
+	}
+	
+	public int[] batchUpdateById(Serializable id, List<Object> objs) {
+		if (objs == null || objs.size() == 0) {
+			return new int[] {};
+		}
+		Class<?> beanClass = objs.get(0).getClass();
+		BatchUpdateBuilder sqlBuilder = SQL.batchUpdate(beanClass);
+		sqlBuilder.use(objs);
+		sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), id);
+		return batchUpdate(sqlBuilder);
+	}
+	
 	public int insert(Object obj) {
-		return update(SQL.insert(obj.getClass()).use(obj));
+		InsertBuilder sqlBuilder = SQL.insert(obj.getClass());
+		sqlBuilder.use(obj);
+		return update(sqlBuilder);
 	}
 	
 	public int[] batchInsert(List<Object> objs) {

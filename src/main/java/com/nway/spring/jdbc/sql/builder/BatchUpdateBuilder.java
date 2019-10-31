@@ -1,12 +1,13 @@
 package com.nway.spring.jdbc.sql.builder;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.SqlType;
 
 public class BatchUpdateBuilder extends DefaultSqlBuilder {
 
@@ -18,15 +19,26 @@ public class BatchUpdateBuilder extends DefaultSqlBuilder {
 		table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
-	public <T,R> DefaultSqlBuilder set(SFunction<T, R> val) {
-		sets.add(SqlBuilderUtils.getColumn(beanClass, val) + " = ?");
+	public DefaultSqlBuilder use(List<Object> params) {
+		List<List<Object>> batchParam = new ArrayList<>(params.size());
+		for(int i = 0;i < params.size(); i++) {
+			batchParam.add(new ArrayList<Object>());
+		}
+		try {
+			for (Field field : getBeanClass().getDeclaredFields()) {
+				sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
+				for(int i = 0;i < params.size(); i++) {
+					Object columnValue = SqlBuilderUtils.getColumnValue(field, params.get(i), SqlType.UPDATE);
+					batchParam.get(i).add(columnValue);
+				}
+			}
+		} catch (Exception e) {
+			throw new SqlBuilderException(e);
+		}
+		
 		return this;
 	}
 	
-	public DefaultSqlBuilder setParam(List<List<Object>> params) {
-		super.param.addAll(params.stream().map(e -> e.toArray()).collect(Collectors.toList()));
-		return this;
-	}
 	
 	@Override
 	public String getSql() {

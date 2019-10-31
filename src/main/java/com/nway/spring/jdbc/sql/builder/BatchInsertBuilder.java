@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
 
 public class BatchInsertBuilder implements SqlBuilder {
 
@@ -33,14 +33,14 @@ public class BatchInsertBuilder implements SqlBuilder {
 				columns.add(SqlBuilderUtils.getColumnName(field));
 				field.setAccessible(true);
 				for(int i = 0;i < objList.size(); i++) {
-					batchParam.get(i).add(field.get(objList.get(i)));
+					Object columnValue = SqlBuilderUtils.getColumnValue(field, objList.get(i), SqlType.INSERT);
+					batchParam.get(i).add(columnValue);
 				}
 			}
 		} catch (Exception e) {
-			// TODO
-			return null;
+			throw new SqlBuilderException(e);
 		}
-		param.addAll(batchParam.stream().map(e -> e.toArray()).collect(Collectors.toList()));
+		param.addAll(batchParam);
 		return this;
 	}
 	

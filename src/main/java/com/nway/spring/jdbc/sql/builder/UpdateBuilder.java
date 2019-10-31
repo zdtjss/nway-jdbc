@@ -1,11 +1,15 @@
 package com.nway.spring.jdbc.sql.builder;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 
 public class UpdateBuilder extends DefaultSqlBuilder {
@@ -24,8 +28,24 @@ public class UpdateBuilder extends DefaultSqlBuilder {
 		return this;
 	}
 	
+	private void initFilled() {
+		try {
+			for (Field field : getBeanClass().getDeclaredFields()) {
+				Column column = field.getAnnotation(Column.class);
+				if (column != null && column.fillStrategy().equals(NoneFillStrategy.class)) {
+					Object value = SqlBuilderUtils.getColumnValue(column.fillStrategy(), SqlType.UPDATE);
+					sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
+					param.add(value);
+				}
+			}
+		} catch (Exception e) {
+			throw new SqlBuilderException(e);
+		}
+	}
+	
 	@Override
 	public String getSql() {
+		initFilled();
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ").append(SqlBuilderUtils.getTableName(table)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());

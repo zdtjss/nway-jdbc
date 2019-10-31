@@ -11,6 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
+import com.nway.spring.jdbc.sql.builder.SqlBuilderException;
+import com.nway.spring.jdbc.sql.fill.FillStrategy;
+import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 
@@ -20,6 +24,8 @@ public class SqlBuilderUtils {
      * 字段映射
      */
     private static final Map<Class<?>, Map<String, String>> FIELD_COLUMN_MAP = new ConcurrentHashMap<>();
+    
+    private static final Map<Class<?>, FillStrategy> FILL_STRATEGY = new ConcurrentHashMap<>();
 
     public static Map<String, String> getColumnFieldMap(Class<?> classz) {
     	if(FIELD_COLUMN_MAP.containsKey(classz)) {
@@ -85,6 +91,24 @@ public class SqlBuilderUtils {
 		}
 	}
 	
+	public static Object getColumnValue(Class<? extends FillStrategy> fillStrategyClass, SqlType sqlType) throws InstantiationException, IllegalAccessException {
+		FillStrategy fillStrategy = FILL_STRATEGY.get(fillStrategyClass);
+		if (fillStrategy == null) {
+			fillStrategy = fillStrategyClass.newInstance();
+			FILL_STRATEGY.put(fillStrategyClass, fillStrategy);
+		}
+		return fillStrategy.getValue(sqlType);
+	}
+	
+	public static Object getColumnValue(Field field, Object obj, SqlType sqlType) throws InstantiationException, IllegalAccessException {
+		Column column = field.getAnnotation(Column.class);
+		if(column == null || column.fillStrategy().equals(NoneFillStrategy.class)) {
+			field.setAccessible(true);
+			return field.get(obj);
+		}
+		return getColumnValue(column.fillStrategy(), sqlType);
+	}
+	
 	public static String getTableName(Table table) {
 		return table.value().length() > 0 ? table.value() : table.name();
 	}
@@ -119,4 +143,33 @@ public class SqlBuilderUtils {
 		}
 		return getColumnFieldMap(beanClass).get(fieldName);
 	}
+	
+	public static String getIdName(Class<?> beanClass) {
+		String id = "";
+		for (Field field : beanClass.getDeclaredFields()) {
+			Column column = field.getAnnotation(Column.class);
+			if(column != null && column.type().equals(ColumnType.ID)) {
+				id = getColumnName(field);
+				break;
+			}
+		}
+		return id;
+	}
+	
+	public static Object getIdValue(Class<?> beanClass, Object obj) {
+		Object value = null;
+		try {
+			for (Field field : beanClass.getDeclaredFields()) {
+				Column column = field.getAnnotation(Column.class);
+				if (column != null && column.type().equals(ColumnType.ID)) {
+					value = getColumnValue(field, obj, SqlType.UPDATE);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			throw new SqlBuilderException(e);
+		}
+		return value;
+	}
+	
 }

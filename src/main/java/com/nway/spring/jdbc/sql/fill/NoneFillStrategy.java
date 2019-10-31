@@ -7,7 +7,7 @@ public class NoneFillStrategy implements FillStrategy {
 	@Override
 	public Object getValue(SqlType sqlType) {
 		
-		return IdWorker.getId();
+		return null;
 	}
 
 }
