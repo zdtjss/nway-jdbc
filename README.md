@@ -1,4 +1,4 @@
-#Nway-JDBC扩展自Spring的JdbcTemplate，完全兼容Spring JDBC。提供了方便简单的单表操作方法，只需要给主类SqlExecutor配置好数据源，就没有其他需要配置的了，不需要继承某个类，也不需要实现哪个接口。
+#Nway-JDBC扩展自Spring的JdbcTemplate，完全兼容Spring JDBC。提供了方便简单的单表操作方法，支持和自动填充数据和数据权限控制，只需要给主类SqlExecutor配置好数据源，就没有其他需要配置的了，不需要继承某个类，也不需要实现哪个接口。
 
 #如遇问题可联系zdtjss@163.com或QQ:670950251。
 
@@ -27,6 +27,7 @@
 		
 		SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
         User user = sqlExecutor.queryForBean(builder);
+        User user = sqlExecutor.queryForBeanById(100, User.class);
         
         or
         
@@ -38,6 +39,7 @@
         
         SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
         List<User> users = sqlExecutor.queryForBeanList(builder);
+        List<User> users = sqlExecutor.queryForBeanListById(Arrays.asList(100), User.class);
         
         or
 		
@@ -48,11 +50,11 @@
         各种参数的queryForBeanPagination方法支持Java对象分页查询
 		
 		SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName).orderBy(usrQuery::getId);
-        Pagination<User> users = sqlExecutor.queryForBeanList(builder, 1, 10);
+        Pagination<User> users = sqlExecutor.queryForBeanPage(builder, 1, 10);
         
         or
         
-        Pagination<User> users = sqlExecutor.queryForBeanPagination("select * from t_user where user_name like ? and status = ? order by id", new Object[]{ "abc", 1 }, 1, 10, User.class);
+        Pagination<User> users = sqlExecutor.queryForBeanPage("select * from t_user where user_name like ? and status = ? order by id", new Object[]{ "abc", 1 }, 1, 10, User.class);
 		
         //页面数据 List<T>
         users.getPageData();
@@ -75,9 +77,18 @@
 Map对象集分页：	
 	各种参数的queryForMapListPagination方法支持Map对象分页查询
 		
-        Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination("select * from user_name where id <> ? order by id", new Object[]{ "abc", 1 }, 1, 10);
-        users使用同queryForBeanPagination
+        Pagination<Map<String, Object>> users = sqlExecutor.queryForMapPage("select * from user_name where id <> ? order by id", new Object[]{ "abc", 1 }, 1, 10);
+        users使用同queryForBeanPage
 		分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
+
+自动填充数据和数据权限支持：
+
+	使用场景： 
+		1、数据权限可用于数据查询时自动限制可返回的数据
+		2、自动填充功能可应用于统一处理数据的“创建人”、“修改人”、“创建时间”、“修改时间“等
+	使用并发：
+		查询对象对应属性加入注解 Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
+		fillStrategy取值需要实现FillStrategy接口，permissionStrategy取值需要实现PermissionStrategy接口，程序在插入或更新时将自动从fillStrategy中取值，在查询时会根据permissionStrategy自动补充where条件
 
 #数据库表与Java类的映射规则：  
    
@@ -116,9 +127,6 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
  <ul>
   <li>queryForBean返回null</li>
   <li>queryForBeanList返回值size() == 0</li>
-  <li>queryForBeanPagination返回值getTotalCount() == 0</li>
-  <li>queryForMapListPagination返回值getTotalCount() == 0</li>
-  <li>queryForJson返回"{}"</li>
-  <li>queryForJsonList返回"[]"</li>
-  <li>queryForJsonPagination返回{"totalCount":0,"pageCount":0,"page":XX,"pageSize":XX}</li>
+  <li>queryForBeanPage返回值getTotalCount() == 0</li>
+  <li>queryForMapPage返回值getTotalCount() == 0</li>
  </ul>
