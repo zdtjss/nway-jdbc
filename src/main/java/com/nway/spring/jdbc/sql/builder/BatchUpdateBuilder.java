@@ -35,10 +35,8 @@ public class BatchUpdateBuilder extends DefaultSqlBuilder {
 		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
-		
 		return this;
 	}
-	
 	
 	@Override
 	public String getSql() {

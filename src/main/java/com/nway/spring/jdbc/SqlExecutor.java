@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -36,7 +37,6 @@ import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
-import com.nway.spring.jdbc.sql.builder.BatchUpdateBuilder;
 import com.nway.spring.jdbc.sql.builder.BeanUpdateBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
@@ -49,11 +49,8 @@ import com.nway.spring.jdbc.sql.builder.SqlBuilder;
  * <ul>
  * <li>queryForBean返回null；</li>
  * <li>queryForBeanList返回值size() == 0；</li>
- * <li>queryForBeanPagination返回值getTotalCount() == 0；</li>
- * <li>queryForMapListPagination返回值getTotalCount() == 0；</li>
- * <li>queryForJson返回"{}"</li>
- * <li>queryForJsonList返回"[]"</li>
- * <li>testJsonPagination返回对象中totalCount == 0</li>
+ * <li>queryForBeanPage返回值getTotalCount() == 0；</li>
+ * <li>queryForMapPage返回值getTotalCount() == 0；</li>
  * </ul>
  * 
  * @author zdtjss@163.com
@@ -80,7 +77,7 @@ public class SqlExecutor extends JdbcTemplate {
 	
 	public int[] batchUpdate(SqlBuilder sqlBuilder) {
 		List<Object> params = sqlBuilder.getParam();
-		return super.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> (Object[]) e).collect(Collectors.toList()));
+		return super.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList()));
 	}
 	
 	public int updateById(Object obj) {
@@ -90,14 +87,12 @@ public class SqlExecutor extends JdbcTemplate {
 		return update(sqlBuilder);
 	}
 	
-	public int[] batchUpdateById(Serializable id, List<Object> objs) {
+	public int[] batchUpdate(List<Object> objs) {
 		if (objs == null || objs.size() == 0) {
 			return new int[] {};
 		}
 		Class<?> beanClass = objs.get(0).getClass();
-		BatchUpdateBuilder sqlBuilder = SQL.batchUpdate(beanClass);
-		sqlBuilder.use(objs);
-		sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), id);
+		SqlBuilder sqlBuilder = SQL.batchUpdate(beanClass).use(objs);
 		return batchUpdate(sqlBuilder);
 	}
 	
@@ -114,6 +109,16 @@ public class SqlExecutor extends JdbcTemplate {
 		BatchInsertBuilder batchInsertBuilder = new BatchInsertBuilder(objs.get(0).getClass());
 		batchInsertBuilder.use(objs);
 		return batchUpdate(batchInsertBuilder);
+	}
+	
+	public <T> T queryById(Serializable id, Class<T> type) {
+		SqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
+		return queryForBean(queryBuilder);
+	}
+	
+	public <T> List<T> queryForBeanListById(List<? extends Serializable> ids, Class<T> type) {
+		SqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
+		return queryForBeanList(queryBuilder);
 	}
 	
 	/**
@@ -176,9 +181,9 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public <T> Pagination<T> queryForBeanPagination(SqlBuilder queryBuilder, int page, int pageSize)
+	public <T> Pagination<T> queryForBeanPage(SqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
-		return queryForBeanPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
+		return queryForBeanPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
 	}
 
 	/**
@@ -194,7 +199,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public <T> Pagination<T> queryForBeanPagination(String sql, Object[] params, int page, int pageSize,
+	public <T> Pagination<T> queryForBeanPage(String sql, Object[] params, int page, int pageSize,
 			Class<T> beanClass) throws DataAccessException {
 
 		List<T> item = new ArrayList<T>();
@@ -219,9 +224,9 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Pagination<Map<String, Object>> queryForMapListPagination(QueryBuilder queryBuilder, int page,
+	public Pagination<Map<String, Object>> queryForMapPage(QueryBuilder queryBuilder, int page,
 			int pageSize) throws DataAccessException {
-		return queryForMapListPagination(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
+		return queryForMapPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
 	}
 	
 	/**
@@ -238,7 +243,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Pagination<Map<String, Object>> queryForMapListPagination(String sql, Object[] params, int page,
+	public Pagination<Map<String, Object>> queryForMapPage(String sql, Object[] params, int page,
 			int pageSize) throws DataAccessException {
 
 		List<Map<String, Object>> item = new ArrayList<>();
@@ -252,7 +257,6 @@ public class SqlExecutor extends JdbcTemplate {
 			String paginationSql = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
 			item = queryForList(paginationSql, params);
 		}
-
 		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
 
@@ -340,11 +344,8 @@ public class SqlExecutor extends JdbcTemplate {
 	}
 
 	private void initPaginationSupport() {
-
 		Connection conn = null;
-		
 		String databaseProductName = "";
-
 		try {
 			conn = getDataSource().getConnection();
 			databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
@@ -357,7 +358,6 @@ public class SqlExecutor extends JdbcTemplate {
 				DataSourceUtils.releaseConnection(conn, getDataSource());
 			}
 		}
-
 		if (databaseProductName.contains("ORACLE")) {
 			this.paginationSupport = new OraclePaginationSupport();
 		} 
@@ -396,7 +396,6 @@ public class SqlExecutor extends JdbcTemplate {
 		IntegerResultSetExtractor(String sql) {
 			this.sql = sql;
 		}
-		
 		@Override
 		public Integer extractData(ResultSet rs) {
 			try {

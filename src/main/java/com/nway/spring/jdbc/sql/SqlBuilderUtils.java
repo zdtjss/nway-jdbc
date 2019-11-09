@@ -17,6 +17,8 @@ import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
+import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.PermissionStrategy;
 
 public class SqlBuilderUtils {
 
@@ -26,6 +28,7 @@ public class SqlBuilderUtils {
     private static final Map<Class<?>, Map<String, String>> FIELD_COLUMN_MAP = new ConcurrentHashMap<>();
     
     private static final Map<Class<?>, FillStrategy> FILL_STRATEGY = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, PermissionStrategy> PERMISSION_STRATEGY = new ConcurrentHashMap<>();
 
     public static Map<String, String> getColumnFieldMap(Class<?> classz) {
     	if(FIELD_COLUMN_MAP.containsKey(classz)) {
@@ -49,8 +52,9 @@ public class SqlBuilderUtils {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
 			return methodToColumn(beanClass, serializedLambda.getImplMethodName());
-		} catch (Exception e) {
-			return null;
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			throw new SqlBuilderException(e);
 		}
 	}
 	
@@ -58,8 +62,9 @@ public class SqlBuilderUtils {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
 			return methodToColumn(beanClass, serializedLambda.getImplMethodName());
-		} catch (Exception e) {
-			return null;
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			throw new SqlBuilderException(e);
 		}
 	}
     
@@ -102,11 +107,29 @@ public class SqlBuilderUtils {
 	
 	public static Object getColumnValue(Field field, Object obj, SqlType sqlType) throws InstantiationException, IllegalAccessException {
 		Column column = field.getAnnotation(Column.class);
-		if(column == null || column.fillStrategy().equals(NoneFillStrategy.class)) {
+		if(column == null || NoneFillStrategy.class.equals(column.fillStrategy())) {
 			field.setAccessible(true);
 			return field.get(obj);
 		}
 		return getColumnValue(column.fillStrategy(), sqlType);
+	}
+	
+	public static String getWhereCondition(Field field) {
+		Column column = field.getAnnotation(Column.class);
+		if(column == null ||NonePermissionStrategy.class.equals(column.permissionStrategy())) {
+			return "";
+		}
+		Class<? extends PermissionStrategy> permissionStrategyClass = column.permissionStrategy();
+		PermissionStrategy permissionStrategy = PERMISSION_STRATEGY.get(permissionStrategyClass);
+		if(permissionStrategy == null) {
+			try {
+				permissionStrategy = permissionStrategyClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new SqlBuilderException(e);
+			}
+			PERMISSION_STRATEGY.put(permissionStrategyClass, permissionStrategy);
+		}
+		return permissionStrategy.getSqlSegment(getColumnName(field));
 	}
 	
 	public static String getTableName(Table table) {

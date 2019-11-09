@@ -224,7 +224,7 @@ public class ExampleEntity {
 		this.sqlDate = sqlDate;
 	}
 
-	@Column(name = "timestamp")
+	@Column(name = "c_timestamp")
 	public Timestamp getTimestamp() {
 		return timestamp;
 	}

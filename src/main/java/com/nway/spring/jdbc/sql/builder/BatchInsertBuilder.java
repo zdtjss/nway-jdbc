@@ -23,7 +23,7 @@ public class BatchInsertBuilder implements SqlBuilder {
 		this.table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
-	public BatchInsertBuilder use(List<Object> objList) {
+	public BatchInsertBuilder use(List<? extends Object> objList) {
 		List<List<Object>> batchParam = new ArrayList<>(objList.size());
 		for(int i = 0;i < objList.size(); i++) {
 			batchParam.add(new ArrayList<Object>());

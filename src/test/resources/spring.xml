@@ -60,6 +60,9 @@
 
 	<bean id="sqlExecutor" class="com.nway.spring.jdbc.SqlExecutor">
 		<property name="dataSource" ref="dataSource" />
+		<property name="paginationSupport">
+			<bean class="com.nway.spring.jdbc.HsqldbPaginationSupport"/>
+		</property>
 	</bean>
 
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
@@ -111,18 +114,11 @@
 		<constructor-arg>
 			<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
 
-				<property name="username" value="root" />
-				<property name="password" value="Zdt12345#" />
+				<property name="username" value="SA" />
+				<property name="password" value="" />
 
-				<!-- <property name="driverClassName" value="org.mariadb.jdbc.Driver" />
-				<property name="url"
-					value="jdbc:mariadb://localhost:3306/wform?cacheResultSetMetadata=true&amp;metadataCacheSize=10" /> -->
-
-				<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
-				<property name="url" value="jdbc:mysql://192.168.56.3:3306/test?useSSL=false" />
-				<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-					<property name="url" value="jdbc:mysql://localhost:3306/test?cacheResultSetMetadata=true&amp;metadataCacheSize=1"
-					/> -->
+				<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+				<property name="url" value="jdbc:hsqldb:file:nwaydb/db;shutdown=true;create=true;write_delay=false;full_log_replay=true" />
 
 				<property name="initialSize" value="3" />
 				<property name="maxActive" value="150" />

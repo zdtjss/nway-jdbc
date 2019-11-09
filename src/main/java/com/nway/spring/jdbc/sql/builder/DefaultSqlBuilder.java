@@ -354,6 +354,12 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		canAppendAnd = true;
 	}
 
+	public <T> DefaultSqlBuilder appendWhereCondition(String whereCondition) {
+		appendAnd();
+		sql.append(whereCondition);
+		return this;
+	}
+	
 	public String getSql() {
 		return sql.toString();
 	}

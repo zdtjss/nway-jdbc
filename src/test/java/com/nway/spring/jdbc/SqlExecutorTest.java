@@ -17,6 +17,8 @@ import javax.sql.rowset.serial.SerialException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,7 +43,7 @@ public class SqlExecutorTest extends BaseTest {
 
 	@Autowired
 	private SessionFactory sessionFactory;
-
+	
 	@Test
 	public void testQueryForBean() {
 		
@@ -82,7 +84,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void testQueryBeanPagination() {
 		String sql = "select * from t_nway order by c_p_int";
 
-		Pagination<ExampleEntity> users = sqlExecutor.queryForBeanPagination(sql, null, 1, 5, ExampleEntity.class);
+		Pagination<ExampleEntity> users = sqlExecutor.queryForBeanPage(sql, null, 1, 5, ExampleEntity.class);
 
 		System.out.println(users);
 	}
@@ -91,7 +93,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void testQueryMapListPagination() {
 		String sql = "select * from t_nway order by c_int";
 
-		Pagination<Map<String, Object>> users = sqlExecutor.queryForMapListPagination(sql, null, 1, 3);
+		Pagination<Map<String, Object>> users = sqlExecutor.queryForMapPage(sql, null, 1, 3);
 
 		System.out.println(users);
 	}
@@ -167,57 +169,65 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void lambdaInsertTest() throws SerialException, SQLException {
 
-		ExampleEntity example = new ExampleEntity();
+		List<ExampleEntity> exampleEntityList = new ArrayList<ExampleEntity>();
+		for (int i = 0; i < 10; i++) {
 
-		DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
+			ExampleEntity example = new ExampleEntity();
 
-		example.setId(1);
+			DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
 
-		example.setpBoolean(1 == ((Math.random() * 10) % 2));
+			example.setId((int) (Math.random() * 1000));
 
-		example.setpByte((byte) (Math.random() * 100));
+			example.setpBoolean(1 == ((Math.random() * 10) % 2));
 
-		example.setpShort((short) (Math.random() * 100));
+			example.setpByte((byte) (Math.random() * 100));
 
-		example.setpInt((int) (Math.random() * 1000000));
+			example.setpShort((short) (Math.random() * 100));
 
-		example.setpLong((long) (Math.random() * 10000000));
+			example.setpInt((int) (Math.random() * 1000000));
 
-		example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
+			example.setpLong((long) (Math.random() * 10000000));
 
-		example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
+			example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
 
-		example.setpByteArr("nway-jdbc".getBytes());
+			example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
 
-		example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
+			example.setpByteArr("nway-jdbc".getBytes());
 
-		example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
+			example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
 
-		example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
+			example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
 
-		example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
+			example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
 
-		example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
+			example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
 
-		example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
+			example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
 
-		example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
+			example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
 
-		example.setString(UUID.randomUUID().toString());
+			example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
 
-		example.setUtilDate(new Date());
+			example.setString(UUID.randomUUID().toString());
 
-		example.setSqlDate(new java.sql.Date(System.currentTimeMillis()));
+			example.setUtilDate(new Date());
 
-		example.setTimestamp(new Timestamp(System.currentTimeMillis()));
+			example.setSqlDate(new java.sql.Date(System.currentTimeMillis()));
 
-		example.setClob(new SerialClob("nway".toCharArray()));
+			example.setTimestamp(new Timestamp(System.currentTimeMillis()));
 
-		example.setBlob(new SerialBlob("nway".getBytes()));
+			example.setClob(new SerialClob("nway".toCharArray()));
 
-		SqlBuilder sqlBuilder = SQL.insert(ExampleEntity.class).use(example);
+			example.setBlob(new SerialBlob("nway".getBytes()));
 
-		System.out.println(sqlExecutor.update(sqlBuilder));
+			exampleEntityList.add(example);
+		}
+		
+		SqlBuilder sqlBuilder = SQL.batchInsert(ExampleEntity.class).use(exampleEntityList);
+
+		System.out.println(sqlExecutor.batchUpdate(sqlBuilder));
+		
+		listAll();
 	}
 
 	@Test
@@ -283,9 +293,15 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(10);
 
 		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
-		Pagination<ExampleEntity> ee = sqlExecutor.queryForBeanPagination(sqlBuilder, 1, 10);
+		Pagination<ExampleEntity> ee = sqlExecutor.queryForBeanPage(sqlBuilder, 1, 10);
 
 		System.out.println(ee);
+	}
+	
+	@Test
+	public void listAll() {
+		List<ExampleEntity> list = sqlExecutor.queryForBeanList(SQL.query(ExampleEntity.class));
+		System.out.println(list);
 	}
 
 	@Test
