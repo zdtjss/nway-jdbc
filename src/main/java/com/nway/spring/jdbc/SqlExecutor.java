@@ -37,7 +37,9 @@ import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
+import com.nway.spring.jdbc.sql.builder.BatchUpdateByIdBuilder;
 import com.nway.spring.jdbc.sql.builder.BeanUpdateBuilder;
+import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
@@ -87,13 +89,24 @@ public class SqlExecutor extends JdbcTemplate {
 		return update(sqlBuilder);
 	}
 	
-	public int[] batchUpdate(List<Object> objs) {
+	public int[] batchUpdateById(List<Object> objs) {
 		if (objs == null || objs.size() == 0) {
 			return new int[] {};
 		}
 		Class<?> beanClass = objs.get(0).getClass();
-		SqlBuilder sqlBuilder = SQL.batchUpdate(beanClass).use(objs);
-		return batchUpdate(sqlBuilder);
+		return batchUpdate(new BatchUpdateByIdBuilder(beanClass).use(objs));
+	}
+	
+	public int deleteById(Serializable id, Class<?> beanClass) {
+		DeleteBuilder sqlBuilder = new DeleteBuilder(beanClass);
+		sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), id);
+		return update(sqlBuilder);
+	}
+	
+	public int batchDeleteById(Collection<? extends Serializable> ids, Class<?> beanClass) {
+		DeleteBuilder sqlBuilder = new DeleteBuilder(beanClass);
+		sqlBuilder.where().in(SqlBuilderUtils.getIdName(beanClass), ids);
+		return update(sqlBuilder);
 	}
 	
 	public int insert(Object obj) {
@@ -112,7 +125,7 @@ public class SqlExecutor extends JdbcTemplate {
 	}
 	
 	public <T> T queryById(Serializable id, Class<T> type) {
-		SqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
+		SqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
 		return queryForBean(queryBuilder);
 	}
 	

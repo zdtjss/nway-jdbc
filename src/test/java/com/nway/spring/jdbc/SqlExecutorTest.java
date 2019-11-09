@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -229,17 +230,27 @@ public class SqlExecutorTest extends BaseTest {
 		
 		listAll();
 	}
+	
+	@Test
+	public void lambdaQueryOneTest() {
+		
+		System.out.println(sqlExecutor.queryById(922, ExampleEntity.class));
+	}
 
 	@Test
 	public void lambdaUpdateTest() {
 
 		ExampleEntity example = new ExampleEntity();
 
-		example.setId(0);
+		example.setId(10);
 		example.setUtilDate(new Date());
 
 		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
+		sqlExecutor.updateById(example);
+		
+		sqlExecutor.batchUpdateById(Collections.singletonList(example));
+		
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
 
@@ -252,6 +263,10 @@ public class SqlExecutorTest extends BaseTest {
 
 		SqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
 
+		sqlExecutor.deleteById(0, ExampleEntity.class);
+		
+		sqlExecutor.batchDeleteById(Collections.singletonList(0), ExampleEntity.class);
+		
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
 

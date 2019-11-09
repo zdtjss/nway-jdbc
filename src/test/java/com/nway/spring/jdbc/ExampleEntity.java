@@ -16,12 +16,16 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
+import com.nway.spring.jdbc.sql.TestFillStrategy;
+import com.nway.spring.jdbc.sql.TestPermissionStrategy;
+
 @Entity
 @Table(name = "t_nway")
 @com.nway.spring.jdbc.annotation.Table(name = "t_nway")
 public class ExampleEntity {
 
-	@com.nway.spring.jdbc.annotation.Column(name = "pk_id")
+	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID)
 	private int id;
 	private boolean pBoolean;
 	private byte pByte;
@@ -35,7 +39,9 @@ public class ExampleEntity {
 	private Boolean wBoolean;
 	private Byte wByte;
 	private Short wShort;
+	@com.nway.spring.jdbc.annotation.Column(fillStrategy = TestFillStrategy.class)
 	private Integer wInt;
+	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
 	private Long wLong;
 	private Float wFloat;
 	private Double wDouble;

@@ -88,7 +88,7 @@ public class SqlBuilderUtils {
 	
 	public static String getColumnName(Field field) {
 		Column column = field.getAnnotation(Column.class);
-		if(column != null) {
+		if(column != null && (column.name().length() > 0 || column.value().length() > 0)) {
 			return column.value().length() > 0 ? column.value() : column.name();
 		}
 		else {

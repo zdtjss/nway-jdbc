@@ -11,4 +11,9 @@ public class SqlBuilderException extends RuntimeException {
 	public SqlBuilderException(Throwable cause) {
 		super(cause);
 	}
+	
+	public SqlBuilderException(String message) {
+		super(message);
+	}
+	
 }
