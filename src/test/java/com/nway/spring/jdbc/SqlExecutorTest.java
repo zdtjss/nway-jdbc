@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -18,8 +19,6 @@ import javax.sql.rowset.serial.SerialException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -234,7 +233,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void lambdaQueryOneTest() {
 		
-		System.out.println(sqlExecutor.queryById(922, ExampleEntity.class));
+		System.out.println(sqlExecutor.queryForBeanById(922, ExampleEntity.class));
 	}
 
 	@Test
@@ -297,6 +296,8 @@ public class SqlExecutorTest extends BaseTest {
 
 		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
 		List<ExampleEntity> ee = sqlExecutor.queryForBeanList(sqlBuilder);
+		
+		sqlExecutor.queryForBeanListById(Arrays.asList(100), ExampleEntity.class);
 
 		System.out.println(ee);
 	}

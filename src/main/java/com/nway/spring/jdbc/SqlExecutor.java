@@ -124,7 +124,7 @@ public class SqlExecutor extends JdbcTemplate {
 		return batchUpdate(batchInsertBuilder);
 	}
 	
-	public <T> T queryById(Serializable id, Class<T> type) {
+	public <T> T queryForBeanById(Serializable id, Class<T> type) {
 		SqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
 		return queryForBean(queryBuilder);
 	}
