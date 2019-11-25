@@ -73,15 +73,30 @@ public class SqlExecutor extends JdbcTemplate {
 	 */
 	private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+(TOP|top)\\p{Blank}+\\d+\\p{Blank}+.+");
 
+	/**
+	 * 
+	 * @param sqlBuilder sqlBuilder
+	 * @return
+	 */
 	public int update(SqlBuilder sqlBuilder) {
 		return super.update(sqlBuilder.getSql(), sqlBuilder.getParam().toArray());
 	}
 	
+	/**
+	 * 
+	 * @param sqlBuilder sqlBuilder
+	 * @return
+	 */
 	public int[] batchUpdate(SqlBuilder sqlBuilder) {
 		List<Object> params = sqlBuilder.getParam();
 		return super.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList()));
 	}
 	
+	/**
+	 * 
+	 * @param obj bean
+	 * @return
+	 */
 	public int updateById(Object obj) {
 		Class<?> beanClass = obj.getClass();
 		BeanUpdateBuilder sqlBuilder = new BeanUpdateBuilder(obj);
@@ -89,6 +104,11 @@ public class SqlExecutor extends JdbcTemplate {
 		return update(sqlBuilder);
 	}
 	
+	/**
+	 * 
+	 * @param objs beans
+	 * @return
+	 */
 	public int[] batchUpdateById(List<Object> objs) {
 		if (objs == null || objs.size() == 0) {
 			return new int[] {};
@@ -97,6 +117,12 @@ public class SqlExecutor extends JdbcTemplate {
 		return batchUpdate(new BatchUpdateByIdBuilder(beanClass).use(objs));
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param beanClass
+	 * @return
+	 */
 	public int deleteById(Serializable id, Class<?> beanClass) {
 		DeleteBuilder sqlBuilder = new DeleteBuilder(beanClass);
 		sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), id);
@@ -139,7 +165,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * 
 	 * @param queryBuilder lambda
 	 * @return queryBuilder描述的beanClass类型的对象
-	 * @throws DataAccessException
+	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> T queryForBean(SqlBuilder queryBuilder) throws DataAccessException {
 		return queryForBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
@@ -152,7 +178,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @param type
 	 * @param args
 	 * @return
-	 * @throws DataAccessException
+	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		return super.query(sql, new BeanHandler<T>(type), args);
@@ -164,7 +190,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @param <T>
 	 * @param queryBuilder
 	 * @return
-	 * @throws DataAccessException
+	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> List<T> queryForBeanList(SqlBuilder queryBuilder) throws DataAccessException {
 		return queryForBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
@@ -178,7 +204,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @param type
 	 * @param args
 	 * @return
-	 * @throws DataAccessException
+	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		return super.query(sql, new BeanListHandler<T>(type), args);
@@ -192,7 +218,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @param page
 	 * @param pageSize
 	 * @return
-	 * @throws DataAccessException
+	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> Pagination<T> queryForBeanPage(SqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
@@ -210,7 +236,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @param pageSize
 	 * @param beanClass
 	 * @return
-	 * @throws DataAccessException
+	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> Pagination<T> queryForBeanPage(String sql, Object[] params, int page, int pageSize,
 			Class<T> beanClass) throws DataAccessException {

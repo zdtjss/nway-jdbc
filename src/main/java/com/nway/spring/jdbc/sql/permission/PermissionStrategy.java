@@ -10,7 +10,6 @@ public interface PermissionStrategy {
 
 	/**
 	 * 
-	 * @param table  表名
 	 * @param column 字段名
 	 * @return 不支持时此表和字段时，请返回null
 	 */
