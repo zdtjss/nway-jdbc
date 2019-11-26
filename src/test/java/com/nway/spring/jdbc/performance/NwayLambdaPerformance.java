@@ -41,15 +41,15 @@ public class NwayLambdaPerformance implements Performance {
 		QueryBuilder softwareSql = SQL.query(Software.class);
 		DefaultSqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, id);
 		
-		Computer computer = sqlExecutor.queryForBean(computerSql);
+		Computer computer = sqlExecutor.queryBean(computerSql);
 
-		computer.setMainframe(sqlExecutor.queryForBean(mainframeSql.eq(Mainframe::getId, computer.getMainframeId()) ));
-		computer.setMonitor(sqlExecutor.queryForBean(monitorSql.eq(Monitor::getId, computer.getMonitorId())));
-		computer.setMouse(sqlExecutor.queryForBean(mouseSql.eq(Mouse::getId, computer.getMouseId())));
-		computer.setKeyboard(sqlExecutor.queryForBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
-		List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryForBeanList(somputerSoftwareSql);
+		computer.setMainframe(sqlExecutor.queryBean(mainframeSql.eq(Mainframe::getId, computer.getMainframeId()) ));
+		computer.setMonitor(sqlExecutor.queryBean(monitorSql.eq(Monitor::getId, computer.getMonitorId())));
+		computer.setMouse(sqlExecutor.queryBean(mouseSql.eq(Mouse::getId, computer.getMouseId())));
+		computer.setKeyboard(sqlExecutor.queryBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
+		List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryBeanList(somputerSoftwareSql);
 		List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
-		computer.setSoftware(sqlExecutor.queryForBeanList(softwareSql.in(Software::getId, softwareIdList)));
+		computer.setSoftware(sqlExecutor.queryBeanList(softwareSql.in(Software::getId, softwareIdList)));
 		
 		return computer;
 	}
@@ -65,19 +65,19 @@ public class NwayLambdaPerformance implements Performance {
 		QueryBuilder softwareSql = SQL.query(Software.class);
 		
 
-		List<Computer> computers = sqlExecutor.queryForBeanList(computerSql);
+		List<Computer> computers = sqlExecutor.queryBeanList(computerSql);
 
 		for (Computer computer : computers) {
 
-			computer.setMainframe(sqlExecutor.queryForBean(mainframeSql.eq(Mainframe::getId, computer.getMainframeId()) ));
-			computer.setMonitor(sqlExecutor.queryForBean(monitorSql.eq(Monitor::getId, computer.getMonitorId())));
-			computer.setMouse(sqlExecutor.queryForBean(mouseSql.eq(Mouse::getId, computer.getMouseId())));
-			computer.setKeyboard(sqlExecutor.queryForBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
+			computer.setMainframe(sqlExecutor.queryBean(mainframeSql.eq(Mainframe::getId, computer.getMainframeId()) ));
+			computer.setMonitor(sqlExecutor.queryBean(monitorSql.eq(Monitor::getId, computer.getMonitorId())));
+			computer.setMouse(sqlExecutor.queryBean(mouseSql.eq(Mouse::getId, computer.getMouseId())));
+			computer.setKeyboard(sqlExecutor.queryBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
 			
 			DefaultSqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, computer.getId());
-			List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryForBeanList(somputerSoftwareSql);
+			List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryBeanList(somputerSoftwareSql);
 			List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
-			computer.setSoftware(sqlExecutor.queryForBeanList(softwareSql.in(Software::getId, softwareIdList)));
+			computer.setSoftware(sqlExecutor.queryBeanList(softwareSql.in(Software::getId, softwareIdList)));
 		}
 
 		return computers;
@@ -86,13 +86,13 @@ public class NwayLambdaPerformance implements Performance {
 	@Override
 	public Monitor getMonitorById(int id) {
 
-		return sqlExecutor.queryForBean(SQL.query(Monitor.class).where().eq(Monitor::getId, id));
+		return sqlExecutor.queryBean(SQL.query(Monitor.class).where().eq(Monitor::getId, id));
 	}
 
 	@Override
 	public List<Monitor> listMonitor() {
 
-	    return sqlExecutor.queryForBeanList(SQL.query(Monitor.class));
+	    return sqlExecutor.queryBeanList(SQL.query(Monitor.class));
 	}
 
 }

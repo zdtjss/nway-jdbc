@@ -24,8 +24,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -49,25 +51,28 @@ import com.nway.spring.jdbc.sql.builder.SqlBuilder;
  * <p>
  * &nbsp;&nbsp;查询不到数据时：
  * <ul>
- * <li>queryForBean返回null；</li>
- * <li>queryForBeanList返回值size() == 0；</li>
- * <li>queryForBeanPage返回值getTotalCount() == 0；</li>
- * <li>queryForMapPage返回值getTotalCount() == 0；</li>
+ * <li>queryBean返回null；</li>
+ * <li>queryBeanList返回值size() == 0；</li>
+ * <li>queryBeanPage返回值getTotal() == 0；</li>
+ * <li>queryMapPage返回值getTotal() == 0；</li>
  * </ul>
  * 
  * @author zdtjss@163.com
  *
  * @since 2014-03-28
  */
-public class SqlExecutor extends JdbcTemplate {
+public class SqlExecutor implements InitializingBean {
 
 	private PaginationSupport paginationSupport;
+	
+	private JdbcTemplate jdbcTemplate;
+	
+	private DataSource dataSource;
 	
 	/**
 	 * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
 	 */
-	private static final Pattern SQL_ORDER_BY_PATTERN = Pattern
-			.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
+	private static final Pattern SQL_ORDER_BY_PATTERN = Pattern.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
 	/**
 	 * SQL 语句中top匹配
 	 */
@@ -79,7 +84,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 */
 	public int update(SqlBuilder sqlBuilder) {
-		return super.update(sqlBuilder.getSql(), sqlBuilder.getParam().toArray());
+		return jdbcTemplate.update(sqlBuilder.getSql(), sqlBuilder.getParam().toArray());
 	}
 	
 	/**
@@ -89,7 +94,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 */
 	public int[] batchUpdate(SqlBuilder sqlBuilder) {
 		List<Object> params = sqlBuilder.getParam();
-		return super.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList()));
+		return jdbcTemplate.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList()));
 	}
 	
 	/**
@@ -150,14 +155,9 @@ public class SqlExecutor extends JdbcTemplate {
 		return batchUpdate(batchInsertBuilder);
 	}
 	
-	public <T> T queryForBeanById(Serializable id, Class<T> type) {
+	public <T> T queryBean(Serializable id, Class<T> type) {
 		SqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
-		return queryForBean(queryBuilder);
-	}
-	
-	public <T> List<T> queryForBeanListById(List<? extends Serializable> ids, Class<T> type) {
-		SqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
-		return queryForBeanList(queryBuilder);
+		return queryBean(queryBuilder);
 	}
 	
 	/**
@@ -167,8 +167,8 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return queryBuilder描述的beanClass类型的对象
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> T queryForBean(SqlBuilder queryBuilder) throws DataAccessException {
-		return queryForBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	public <T> T queryBean(SqlBuilder queryBuilder) throws DataAccessException {
+		return queryBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
 	/**
@@ -180,8 +180,8 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> T queryForBean(String sql, Class<T> type, Object... args) throws DataAccessException {
-		return super.query(sql, new BeanHandler<T>(type), args);
+	public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
+		return jdbcTemplate.query(sql, new BeanHandler<T>(type), args);
 	}
 
 	/**
@@ -192,8 +192,13 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> List<T> queryForBeanList(SqlBuilder queryBuilder) throws DataAccessException {
-		return queryForBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	public <T> List<T> queryBeanList(SqlBuilder queryBuilder) throws DataAccessException {
+		return queryBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	}
+	
+	public <T> List<T> queryBeanList(List<? extends Serializable> ids, Class<T> type) {
+		SqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
+		return queryBeanList(queryBuilder);
 	}
 	
 	/**
@@ -206,8 +211,8 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> List<T> queryForBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
-		return super.query(sql, new BeanListHandler<T>(type), args);
+	public <T> List<T> queryBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
+		return jdbcTemplate.query(sql, new BeanListHandler<T>(type), args);
 	}
 
 	/**
@@ -220,9 +225,9 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> Pagination<T> queryForBeanPage(SqlBuilder queryBuilder, int page, int pageSize)
+	public <T> Pagination<T> queryBeanPage(SqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
-		return queryForBeanPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
+		return queryBeanPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
 	}
 
 	/**
@@ -238,8 +243,8 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> Pagination<T> queryForBeanPage(String sql, Object[] params, int page, int pageSize,
-			Class<T> beanClass) throws DataAccessException {
+	public <T> Pagination<T> queryBeanPage(String sql, Object[] params, int page, int pageSize, Class<T> beanClass)
+			throws DataAccessException {
 
 		List<T> item = new ArrayList<T>();
 
@@ -248,7 +253,7 @@ public class SqlExecutor extends JdbcTemplate {
 		
 		if (totalCount != 0) {
 			String paginationSql = paginationSupport.buildPaginationSql(sql, page, pageSize);
-			item = queryForBeanList(paginationSql, beanClass, params);
+			item = queryBeanList(paginationSql, beanClass, params);
 		}
 
 		return new Pagination<T>(item, totalCount, page, pageSize);
@@ -263,9 +268,9 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Pagination<Map<String, Object>> queryForMapPage(QueryBuilder queryBuilder, int page,
+	public Pagination<Map<String, Object>> queryMapPage(QueryBuilder queryBuilder, int page,
 			int pageSize) throws DataAccessException {
-		return queryForMapPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
+		return queryMapPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
 	}
 	
 	/**
@@ -282,8 +287,8 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Pagination<Map<String, Object>> queryForMapPage(String sql, Object[] params, int page,
-			int pageSize) throws DataAccessException {
+	public Pagination<Map<String, Object>> queryMapPage(String sql, Object[] params, int page, int pageSize)
+			throws DataAccessException {
 
 		List<Map<String, Object>> item = new ArrayList<>();
 
@@ -294,54 +299,11 @@ public class SqlExecutor extends JdbcTemplate {
 
 		if (totalCount != 0) {
 			String paginationSql = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
-			item = queryForList(paginationSql, params);
+			item = jdbcTemplate.queryForList(paginationSql, params);
 		}
 		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
 
-    
-	/**
-	 * 
-	 * 
-	 * @param requiredType 预期类型
-	 * @param sql sql
-	 * @param defaultValue 有异常时的默认值
-	 * @return
-	 * @throws DataAccessException 详见 {@link JdbcTemplate#queryForObject(String, Class, Object...)}
-	 */
-	public <T> T queryForObject(Class<T> requiredType, String sql, T defaultValue) throws DataAccessException {
-    	T obj = null;
-		try {
-			obj = super.queryForObject(sql, requiredType);
-		}
-		catch (EmptyResultDataAccessException e) {
-			obj = defaultValue;
-		}
-		return obj;
-	}
-	
-	/**
-	 * 
-	 * 
-	 * @param requiredType 预期类型
-	 * @param sql sql
-	 * @param args argTypes
-	 * @param defaultValue 有异常时的默认值
-	 * @return
-	 * @throws DataAccessException 详见 {@link JdbcTemplate#queryForObject(String, Class, Object...)}
-	 */
-	public <T> T queryForObject(Class<T> requiredType, String sql, Object[] args, T defaultValue)
-			throws DataAccessException {
-		T obj = null;
-		try {
-			obj = super.queryForObject(sql, args, requiredType);
-		}
-		catch (EmptyResultDataAccessException e) {
-			obj = defaultValue;
-		}
-		return obj;
-	}
-	
 	/**
 	 * 
 	 * 
@@ -351,7 +313,7 @@ public class SqlExecutor extends JdbcTemplate {
 	 * @throws DataAccessException 详见 {@link JdbcTemplate#queryForObject(String, Class, Object...)}
 	 */
 	public int count(QueryBuilder queryBuilder) throws DataAccessException {
-		return queryForObject(queryBuilder.getSql(), Integer.class, queryBuilder.getParam().toArray());
+		return jdbcTemplate.queryForObject(queryBuilder.getSql(), Integer.class, queryBuilder.getParam().toArray());
 	}
 	
 	/**
@@ -386,7 +348,7 @@ public class SqlExecutor extends JdbcTemplate {
 		Connection conn = null;
 		String databaseProductName = "";
 		try {
-			conn = getDataSource().getConnection();
+			conn = dataSource.getConnection();
 			databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
 		} 
 		catch (SQLException e) {
@@ -394,7 +356,7 @@ public class SqlExecutor extends JdbcTemplate {
 		}
 		finally {
 			if(conn != null) {
-				DataSourceUtils.releaseConnection(conn, getDataSource());
+				DataSourceUtils.releaseConnection(conn, dataSource);
 			}
 		}
 		if (databaseProductName.contains("ORACLE")) {
@@ -410,16 +372,24 @@ public class SqlExecutor extends JdbcTemplate {
 	}
 	
 	private int queryCount(String countSql, Object[] params) {
-		return query(countSql, params, new IntegerResultSetExtractor(countSql));
+		return jdbcTemplate.query(countSql, params, new IntegerResultSetExtractor(countSql));
 	}
-
 
 	@Override
 	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
+		jdbcTemplate = new JdbcTemplate(dataSource);
+		jdbcTemplate.afterPropertiesSet();
 		if (getPaginationSupport() == null) {
 			initPaginationSupport();
 		}
+	}
+	
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
 	}
 	
 	public PaginationSupport getPaginationSupport() {
