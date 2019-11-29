@@ -197,7 +197,7 @@ public class SqlExecutor implements InitializingBean {
 	}
 	
 	public <T> List<T> queryBeanList(List<? extends Serializable> ids, Class<T> type) {
-		SqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
+		SqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
 		return queryBeanList(queryBuilder);
 	}
 	

@@ -243,12 +243,17 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setId(10);
 		example.setUtilDate(new Date());
+		
+		ExampleEntity example2 = new ExampleEntity();
+		
+		example2.setId(11);
+		example2.setUtilDate(new Date());
 
 		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
 		sqlExecutor.updateById(example);
 		
-		sqlExecutor.batchUpdateById(Collections.singletonList(example));
+		sqlExecutor.batchUpdateById(Arrays.asList(example, example2));
 		
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -264,7 +269,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		sqlExecutor.deleteById(0, ExampleEntity.class);
 		
-		sqlExecutor.batchDeleteById(Collections.singletonList(0), ExampleEntity.class);
+		sqlExecutor.batchDeleteById(Arrays.asList(0), ExampleEntity.class);
 		
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
