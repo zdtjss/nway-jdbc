@@ -49,7 +49,7 @@ public class SqlExecutorTest extends BaseTest {
 		
 		String sql = "select * from t_nway where rownum = 1";
 
-		ExampleEntity usr = sqlExecutor.queryForBean(sql, ExampleEntity.class);
+		ExampleEntity usr = sqlExecutor.queryBean(sql, ExampleEntity.class);
 
 		System.out.println(usr.toString());
 	}
@@ -65,7 +65,7 @@ public class SqlExecutorTest extends BaseTest {
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
 
-		Computer c = sqlExecutor.queryForBean(builder);
+		Computer c = sqlExecutor.queryBean(builder);
 
 		System.out.println(c);
 	}
@@ -75,7 +75,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		String sql = "select a.*,'from' from( select * from t_nway limit 2) a";
 
-		List<ExampleEntity> users = sqlExecutor.queryForBeanList(sql, ExampleEntity.class);
+		List<ExampleEntity> users = sqlExecutor.queryBeanList(sql, ExampleEntity.class);
 
 		System.out.println(users);
 	}
@@ -84,7 +84,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void testQueryBeanPagination() {
 		String sql = "select * from t_nway order by c_p_int";
 
-		Pagination<ExampleEntity> users = sqlExecutor.queryForBeanPage(sql, null, 1, 5, ExampleEntity.class);
+		Pagination<ExampleEntity> users = sqlExecutor.queryBeanPage(sql, null, 1, 5, ExampleEntity.class);
 
 		System.out.println(users);
 	}
@@ -93,7 +93,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void testQueryMapListPagination() {
 		String sql = "select * from t_nway order by c_int";
 
-		Pagination<Map<String, Object>> users = sqlExecutor.queryForMapPage(sql, null, 1, 3);
+		Pagination<Map<String, Object>> users = sqlExecutor.queryMapPage(sql, null, 1, 3);
 
 		System.out.println(users);
 	}
@@ -139,7 +139,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		String sql = "insert into t_monitor (ID,BRAND,MAX_RESOLUTION,MODEL,PHOTO,PRICE,PRODUCTION_DATE,TYPE) values (?,?,?,?,?,?,?,?)";
 
-		sqlExecutor.update(sql, new Object[] { 100, "abc", "aa", "bb", null, 1.0, new Date(), 0 });
+		sqlExecutor.getJdbcTemplate().update(sql, new Object[] { 100, "abc", "aa", "bb", null, 1.0, new Date(), 0 });
 
 		long begin = System.currentTimeMillis();
 
@@ -147,7 +147,7 @@ public class SqlExecutorTest extends BaseTest {
 
 			Object[] param = new Object[] { i, "abc", "aa", "bb", null, 1.0, new Date(), 0 };
 
-			sqlExecutor.update(sql, param);
+			sqlExecutor.getJdbcTemplate().update(sql, param);
 		}
 
 		System.out.println(System.currentTimeMillis() - begin);
@@ -161,7 +161,7 @@ public class SqlExecutorTest extends BaseTest {
 			batchArgs.add(new Object[] { i, "abc", "aa", "bb", null, 1.0, new Date(), 0 });
 		}
 
-		sqlExecutor.batchUpdate(sql, batchArgs);
+		sqlExecutor.getJdbcTemplate().batchUpdate(sql, batchArgs);
 
 		System.out.println(System.currentTimeMillis() - begin);
 	}
@@ -233,7 +233,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void lambdaQueryOneTest() {
 		
-		System.out.println(sqlExecutor.queryForBeanById(922, ExampleEntity.class));
+		System.out.println(sqlExecutor.queryBean(922, ExampleEntity.class));
 	}
 
 	@Test
@@ -243,12 +243,17 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setId(10);
 		example.setUtilDate(new Date());
+		
+		ExampleEntity example2 = new ExampleEntity();
+		
+		example2.setId(11);
+		example2.setUtilDate(new Date());
 
 		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
 		sqlExecutor.updateById(example);
 		
-		sqlExecutor.batchUpdateById(Collections.singletonList(example));
+		sqlExecutor.batchUpdateById(Arrays.asList(example, example2));
 		
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -264,7 +269,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		sqlExecutor.deleteById(0, ExampleEntity.class);
 		
-		sqlExecutor.batchDeleteById(Collections.singletonList(0), ExampleEntity.class);
+		sqlExecutor.batchDeleteById(Arrays.asList(0), ExampleEntity.class);
 		
 		System.out.println(sqlExecutor.update(sqlBuilder));
 	}
@@ -283,7 +288,7 @@ public class SqlExecutorTest extends BaseTest {
 				.or(e -> e.eq(example::getId).eq(example::getpByte))
 				.and(e -> e.eq(example::getpLong).or().eq(example::getwDouble));
 
-		ExampleEntity ee = sqlExecutor.queryForBean(sqlBuilder);
+		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
 
 		System.out.println(ee);
 	}
@@ -295,9 +300,9 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(1);
 
 		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
-		List<ExampleEntity> ee = sqlExecutor.queryForBeanList(sqlBuilder);
+		List<ExampleEntity> ee = sqlExecutor.queryBeanList(sqlBuilder);
 		
-		sqlExecutor.queryForBeanListById(Arrays.asList(100), ExampleEntity.class);
+		sqlExecutor.queryBeanList(Arrays.asList(100), ExampleEntity.class);
 
 		System.out.println(ee);
 	}
@@ -309,14 +314,14 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(10);
 
 		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
-		Pagination<ExampleEntity> ee = sqlExecutor.queryForBeanPage(sqlBuilder, 1, 10);
+		Pagination<ExampleEntity> ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 10);
 
 		System.out.println(ee);
 	}
 	
 	@Test
 	public void listAll() {
-		List<ExampleEntity> list = sqlExecutor.queryForBeanList(SQL.query(ExampleEntity.class));
+		List<ExampleEntity> list = sqlExecutor.queryBeanList(SQL.query(ExampleEntity.class));
 		System.out.println(list);
 	}
 

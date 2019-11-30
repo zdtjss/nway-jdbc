@@ -35,7 +35,7 @@ public class Pagination<T> {
 	/**
 	 * 符合查询条件的记录总数 *
 	 */
-	private int totalCount;
+	private int total;
 	/**
 	 * 总页数 *
 	 */
@@ -55,7 +55,7 @@ public class Pagination<T> {
 	public Pagination(List<T> pageData, int totalCount, int page, int pageSize) {
 
 		this.pageData = pageData;
-		this.totalCount = totalCount;
+		this.total = totalCount;
 		this.pageSize = pageSize;
 		this.currentPage = page;
 
@@ -63,9 +63,9 @@ public class Pagination<T> {
 	}
 
 	private void init() {
-		if (totalCount > 0) {
-			pageCount = (totalCount / pageSize);
-			if (totalCount % pageSize > 0) {
+		if (total > 0) {
+			pageCount = (total / pageSize);
+			if (total % pageSize > 0) {
 				pageCount++;
 			}
 		}
@@ -79,8 +79,8 @@ public class Pagination<T> {
 		return pageSize;
 	}
 
-	public int getTotalCount() {
-		return totalCount;
+	public int getTotal() {
+		return total;
 	}
 
 	public int getPageCount() {
@@ -97,7 +97,7 @@ public class Pagination<T> {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("Pagination [totalCount=");
-		builder.append(totalCount);
+		builder.append(total);
 		builder.append(", pageCount=");
 		builder.append(pageCount);
 		builder.append(", currentPage=");

@@ -8,7 +8,7 @@
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 	</dependency>
 
 #使用
@@ -125,8 +125,8 @@ Java对象查询支持(JSON字符串单对象及对象集查询与Java对象查�
 
 #查询不到数据时：
  <ul>
-  <li>queryForBean返回null</li>
-  <li>queryForBeanList返回值size() == 0</li>
-  <li>queryForBeanPage返回值getTotalCount() == 0</li>
-  <li>queryForMapPage返回值getTotalCount() == 0</li>
+  <li>queryBean返回null</li>
+  <li>queryBeanList返回值size() == 0</li>
+  <li>queryBeanPage返回值getTotal() == 0</li>
+  <li>queryMapPage返回值getTotal() == 0</li>
  </ul>

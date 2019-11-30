@@ -34,13 +34,13 @@ public class NwayPerformance implements Performance {
 		String keyboardSql = "select * from t_keyboard where id = ?";
 		String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
-		Computer computer = sqlExecutor.queryForBean(computerSql, Computer.class, id);
+		Computer computer = sqlExecutor.queryBean(computerSql, Computer.class, id);
 
-		computer.setMainframe(sqlExecutor.queryForBean(mainframeSql, Mainframe.class, computer.getMainframeId()));
-		computer.setMonitor(sqlExecutor.queryForBean(monitorSql, Monitor.class, computer.getMonitorId()));
-		computer.setMouse(sqlExecutor.queryForBean(mouseSql, Mouse.class, computer.getMouseId()));
-		computer.setKeyboard(sqlExecutor.queryForBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
-		computer.setSoftware(sqlExecutor.queryForBeanList(softwareSql, Software.class, computer.getId()));
+		computer.setMainframe(sqlExecutor.queryBean(mainframeSql, Mainframe.class, computer.getMainframeId()));
+		computer.setMonitor(sqlExecutor.queryBean(monitorSql, Monitor.class, computer.getMonitorId()));
+		computer.setMouse(sqlExecutor.queryBean(mouseSql, Mouse.class, computer.getMouseId()));
+		computer.setKeyboard(sqlExecutor.queryBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
+		computer.setSoftware(sqlExecutor.queryBeanList(softwareSql, Software.class, computer.getId()));
 		
 		return computer;
 	}
@@ -55,15 +55,15 @@ public class NwayPerformance implements Performance {
 		String keyboardSql = "select * from t_keyboard where id = ?";
 	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
-		List<Computer> computers = sqlExecutor.queryForBeanList(computerSql, Computer.class);
+		List<Computer> computers = sqlExecutor.queryBeanList(computerSql, Computer.class);
 
 		for (Computer computer : computers) {
 
-			computer.setMainframe(sqlExecutor.queryForBean(mainframeSql, Mainframe.class, computer.getMainframeId()));
-			computer.setMonitor(sqlExecutor.queryForBean(monitorSql, Monitor.class, computer.getMonitorId()));
-			computer.setMouse(sqlExecutor.queryForBean(mouseSql, Mouse.class, computer.getMouseId()));
-			computer.setKeyboard(sqlExecutor.queryForBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
-			computer.setSoftware(sqlExecutor.queryForBeanList(softwareSql, Software.class, computer.getId()));
+			computer.setMainframe(sqlExecutor.queryBean(mainframeSql, Mainframe.class, computer.getMainframeId()));
+			computer.setMonitor(sqlExecutor.queryBean(monitorSql, Monitor.class, computer.getMonitorId()));
+			computer.setMouse(sqlExecutor.queryBean(mouseSql, Mouse.class, computer.getMouseId()));
+			computer.setKeyboard(sqlExecutor.queryBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
+			computer.setSoftware(sqlExecutor.queryBeanList(softwareSql, Software.class, computer.getId()));
 		}
 
 		return computers;
@@ -72,13 +72,13 @@ public class NwayPerformance implements Performance {
 	@Override
 	public Monitor getMonitorById(int id) {
 
-		return sqlExecutor.queryForBean("select * from t_monitor where id = ?", Monitor.class, id);
+		return sqlExecutor.queryBean("select * from t_monitor where id = ?", Monitor.class, id);
 	}
 
 	@Override
 	public List<Monitor> listMonitor() {
 
-	    return sqlExecutor.queryForBeanList("select * from t_monitor", Monitor.class);
+	    return sqlExecutor.queryBeanList("select * from t_monitor", Monitor.class);
 	}
 
 }
