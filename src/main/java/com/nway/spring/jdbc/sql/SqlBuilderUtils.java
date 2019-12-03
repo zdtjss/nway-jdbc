@@ -36,13 +36,7 @@ public class SqlBuilderUtils {
     	}
     	Map<String, String> columnFieldMap = new HashMap<String, String>();
     	for(Field field : classz.getDeclaredFields()) {
-			Column column = field.getAnnotation(Column.class);
-			if(column != null) {
-				columnFieldMap.put(field.getName(), column.value().length() > 0 ? column.value() : column.name());
-			}
-			else {
-				columnFieldMap.put(field.getName(), getColumnName(field));
-			}
+			columnFieldMap.put(field.getName(), getColumnName(field));
     	}
     	FIELD_COLUMN_MAP.put(classz, columnFieldMap);
     	return columnFieldMap;

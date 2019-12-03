@@ -60,7 +60,7 @@ public class SqlExecutorTest extends BaseTest {
 		Computer computer = new Computer();
 		computer.setBrand("p");
 
-		DefaultSqlBuilder builder = SQL.query(Computer.class, "brand").like(computer::getBrand).ge(() -> 1);
+		DefaultSqlBuilder builder = SQL.query(Computer.class).withColumn(Computer::getBrand).where().like(computer::getBrand).ge(Computer::getPrice, 1).or().ne(Computer::getPrice, 1000);
 
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
@@ -290,6 +290,15 @@ public class SqlExecutorTest extends BaseTest {
 
 		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
 
+		System.out.println(ee);
+		
+		ee = sqlExecutor.queryBean(SQL.query(ExampleEntity.class)
+				.withColumn(ExampleEntity::getwInt)
+				.withColumn(ExampleEntity::getId)
+				.where().eq(ExampleEntity::getId, 136));
+		System.out.println(ee);
+		
+		ee = sqlExecutor.queryBean("select * from t_nway where pk_id = ?", ExampleEntity.class, 136);
 		System.out.println(ee);
 	}
 

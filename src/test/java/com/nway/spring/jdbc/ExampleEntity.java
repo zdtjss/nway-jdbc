@@ -18,7 +18,7 @@ import javax.persistence.TemporalType;
 
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
-import com.nway.spring.jdbc.sql.TestPermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 
 @Entity
 @Table(name = "t_nway")
@@ -41,7 +41,7 @@ public class ExampleEntity {
 	private Short wShort;
 	@com.nway.spring.jdbc.annotation.Column(fillStrategy = TestFillStrategy.class)
 	private Integer wInt;
-	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
+	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = NonePermissionStrategy.class)
 	private Long wLong;
 	private Float wFloat;
 	private Double wDouble;

@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.bean;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -113,7 +114,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		private boolean primitivesDefaultedForNullValue = false;
 
 		/** Map of the fields we provide mapping for */
-		private Map<String, PropertyDescriptor> mappedFields;
+		private Map<String, Field> mappedFields;
 
 		/** Set of bean properties we provide mapping for */
 		private Set<String> mappedProperties;
@@ -226,40 +227,37 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		protected void initialize(Class<T> mappedClass) {
 
 			this.mappedClass = mappedClass;
-			this.mappedFields = new HashMap<String, PropertyDescriptor>();
+			this.mappedFields = new HashMap<String, Field>();
 			this.mappedProperties = new HashSet<String>();
 
-			PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
+			Field[] fields = mappedClass.getDeclaredFields();
 
-			for (PropertyDescriptor pd : pds) {
+			for (Field field : fields) {
 
-				if (pd.getWriteMethod() != null) {
+				String columnName = annotationName(field);
 
-					String columnName = annotationName(pd);
+				this.mappedFields.put(lowerCaseName(field.getName()), field);
 
-					this.mappedFields.put(lowerCaseName(pd.getName()), pd);
+				if (columnName == null) {
 
-					if (columnName == null) {
+					columnName = underscoreName(field.getName());
 
-						columnName = underscoreName(pd.getName());
+					if (!lowerCaseName(field.getName()).equals(columnName)) {
 
-						if (!lowerCaseName(pd.getName()).equals(columnName)) {
-
-							this.mappedFields.put(columnName, pd);
-						}
-					} else if (!lowerCaseName(pd.getName()).equals(columnName)) {
-
-						this.mappedFields.put(columnName, pd);
+						this.mappedFields.put(columnName, field);
 					}
+				} else if (!lowerCaseName(field.getName()).equals(columnName)) {
 
-					this.mappedProperties.add(pd.getName());
+					this.mappedFields.put(columnName, field);
 				}
+
+				this.mappedProperties.add(field.getName());
 			}
 		}
 
-		private String annotationName(PropertyDescriptor pd) {
+		private String annotationName(Field field) {
 
-			Column columnAnnotation = pd.getReadMethod().getAnnotation(Column.class);
+			Column columnAnnotation = field.getAnnotation(Column.class);
 
 			if (columnAnnotation != null) {
 
@@ -337,31 +335,31 @@ public class DefaultBeanProcessor implements BeanProcessor {
 
 			for (int index = 1; index <= columnCount; index++) {
 				String column = JdbcUtils.lookupColumnName(rsmd, index);
-				PropertyDescriptor pd = this.mappedFields.get(lowerCaseName(column.replaceAll(" ", "")));
-				if (pd != null) {
+				Field field = this.mappedFields.get(lowerCaseName(column.replaceAll(" ", "")));
+				if (field != null) {
 					try {
-						Object value = getColumnValue(rs, index, pd);
+						Object value = getColumnValue(rs, index, field);
 						if (logger.isDebugEnabled() && rowNumber == 0) {
-							logger.debug("Mapping column '" + column + "' to property '" + pd.getName() + "' of type "
-									+ pd.getPropertyType());
+							logger.debug("Mapping column '" + column + "' to property '" + field.getName() + "' of type "
+									+ field.getType());
 						}
 						try {
-							bw.setPropertyValue(pd.getName(), value);
+							bw.setPropertyValue(field.getName(), value);
 						} catch (TypeMismatchException ex) {
 							if (value == null && this.primitivesDefaultedForNullValue) {
 								logger.debug("Intercepted TypeMismatchException for row " + rowNumber + " and column '"
-										+ column + "' with null value when setting property '" + pd.getName()
-										+ "' of type " + pd.getPropertyType() + " on object: " + mappedObject);
+										+ column + "' with null value when setting property '" + field.getName()
+										+ "' of type " + field.getType() + " on object: " + mappedObject);
 							} else {
 								throw ex;
 							}
 						}
 						if (populatedProperties != null) {
-							populatedProperties.add(pd.getName());
+							populatedProperties.add(field.getName());
 						}
 					} catch (NotWritablePropertyException ex) {
 						throw new DataRetrievalFailureException(
-								"Unable to map column " + column + " to property " + pd.getName(), ex);
+								"Unable to map column " + column + " to property " + field.getName(), ex);
 					}
 				}
 			}
@@ -398,7 +396,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		 *            is the ResultSet holding the data
 		 * @param index
 		 *            is the column index
-		 * @param pd
+		 * @param filed
 		 *            the bean property that each result object is expected to
 		 *            match (or {@code null} if none specified)
 		 * @return the Object value
@@ -407,8 +405,8 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet,
 		 *      int, Class)
 		 */
-		protected Object getColumnValue(ResultSet rs, int index, PropertyDescriptor pd) throws SQLException {
-			return JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType());
+		protected Object getColumnValue(ResultSet rs, int index, Field filed) throws SQLException {
+			return JdbcUtils.getResultSetValue(rs, index, filed.getType());
 		}
 	}
 }

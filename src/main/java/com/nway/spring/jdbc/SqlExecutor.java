@@ -78,6 +78,13 @@ public class SqlExecutor implements InitializingBean {
 	 */
 	private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+(TOP|top)\\p{Blank}+\\d+\\p{Blank}+.+");
 
+	public SqlExecutor() {
+	}
+
+	public SqlExecutor(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+	
 	/**
 	 * 
 	 * @param sqlBuilder sqlBuilder
