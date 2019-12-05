@@ -130,6 +130,14 @@ public class SqlBuilderUtils {
 		return table.value().length() > 0 ? table.value() : table.name();
 	}
 	
+	public static String getTableName(Class<?> entityClass) {
+		Table table = entityClass.getAnnotation(Table.class);
+		if(table != null) {
+			return getTableName(table);
+		}
+		return fieldNameToColumn(entityClass.getSimpleName());
+	}
+	
 	public static String fieldNameToColumn(String fieldName) {
 		StringBuilder columnName = new StringBuilder();
 		for(char c : fieldName.toCharArray()) {

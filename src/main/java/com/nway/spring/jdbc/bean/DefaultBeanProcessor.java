@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc.bean;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

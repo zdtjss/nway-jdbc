@@ -16,12 +16,10 @@ public class BeanUpdateBuilder extends DefaultSqlBuilder {
 	private List<String> sets = new ArrayList<>();
 	private List<Object> setsParam = new ArrayList<>();
 	private Object obj;
-	private Table table;
 	
 	public BeanUpdateBuilder(Object obj) {
 		super(obj.getClass());
 		this.obj = obj;
-		table = (Table) getBeanClass().getAnnotation(Table.class);
 	}
 	
 	private void init() {
@@ -47,7 +45,7 @@ public class BeanUpdateBuilder extends DefaultSqlBuilder {
 	public String getSql() {
 		init();
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableName(table)).append(" set ")
+		sql.append("update ").append(SqlBuilderUtils.getTableName(beanClass)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
 		return sql.toString();
 	}

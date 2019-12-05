@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @author hubin
  * @since 2016-08-18
  */
-public class Sequence {
+class Sequence {
 
 	private static final Log logger = LogFactory.getLog(Sequence.class);
 	/**

@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author zhangdetao
  * @since 2016-08-01
  */
-public class IdWorker {
+class IdWorker {
 
 	/**
 	 * 主机和进程的机器码

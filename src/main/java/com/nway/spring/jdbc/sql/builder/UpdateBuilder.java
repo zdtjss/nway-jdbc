@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.annotation.Column;
-import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
@@ -16,11 +15,9 @@ import com.nway.spring.jdbc.sql.function.SSupplier;
 public class UpdateBuilder extends DefaultSqlBuilder {
 
 	private List<String> sets = new ArrayList<>();
-	private Table table;
 	
 	public UpdateBuilder(Class<?> beanClass) {
 		super(beanClass);
-		table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
 	public <T> DefaultSqlBuilder set(SSupplier<T> val) {
@@ -33,7 +30,7 @@ public class UpdateBuilder extends DefaultSqlBuilder {
 	public String getSql() {
 		initFilled();
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableName(table)).append(" set ")
+		sql.append("update ").append(SqlBuilderUtils.getTableName(beanClass)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
 		return sql.toString();
 	}

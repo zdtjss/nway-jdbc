@@ -16,11 +16,9 @@ public class InsertBuilder implements SqlBuilder {
 	private StringBuilder sql = new StringBuilder();
 	private List<Object> param = new ArrayList<>();
 	private Class beanClass;
-	private Table table;
 	
 	public InsertBuilder(Class<?> beanClass) {
 		this.beanClass = beanClass;
-		table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
 	public InsertBuilder use(Object obj) {
@@ -39,7 +37,7 @@ public class InsertBuilder implements SqlBuilder {
 	@Override
 	public String getSql() {
 		sql.append("insert into ")
-			.append(SqlBuilderUtils.getTableName(table)).append(" (")
+			.append(SqlBuilderUtils.getTableName(beanClass)).append(" (")
 			.append(columns.stream().collect(Collectors.joining(",")))
 			.append(") values (")
 			.append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))

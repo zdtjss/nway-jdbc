@@ -19,11 +19,9 @@ public class BatchUpdateByIdBuilder implements SqlBuilder {
 	private List<Object> idVals = new ArrayList<>();
 	protected Class beanClass;
 	private String idName = "";
-	private Table table;
 	
 	public BatchUpdateByIdBuilder(Class<?> beanClass) {
 		this.beanClass = beanClass;
-		table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
 	public SqlBuilder use(List<Object> params) {
@@ -62,7 +60,7 @@ public class BatchUpdateByIdBuilder implements SqlBuilder {
 	@Override
 	public String getSql() {
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableName(table)).append(" set ")
+		sql.append("update ").append(SqlBuilderUtils.getTableName(beanClass)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(",")));
 		sql.append(" where ").append(idName).append(" = ?");
 		for (int i = 0; i < getParam().size(); i++) {

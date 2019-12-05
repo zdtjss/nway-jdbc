@@ -4,18 +4,15 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.function.SFunction;
 
 public class QueryBuilder extends DefaultSqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
-	private Table table;
 	
 	public QueryBuilder(Class<?> beanClass) {
 		super(beanClass);
-		table = (Table) beanClass.getAnnotation(Table.class);
 	}
 	
 	public <T, R> QueryBuilder withColumn(SFunction<T, R> field) {
@@ -45,10 +42,10 @@ public class QueryBuilder extends DefaultSqlBuilder {
 			for(String column : columns) {
 				sql.append(column).append(',');
 			}
-			sql.deleteCharAt(sql.length() - 1).append(" from ").append(SqlBuilderUtils.getTableName(table));
+			sql.deleteCharAt(sql.length() - 1).append(" from ").append(SqlBuilderUtils.getTableName(beanClass));
 		}
 		else {
-			sql.append("select * from ").append(SqlBuilderUtils.getTableName(table));
+			sql.append("select * from ").append(SqlBuilderUtils.getTableName(beanClass));
 		}
 		return sql.toString();
 	}
