@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +26,10 @@ import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 
-//import oracle.jdbc.OracleCallableStatement;
-//import oracle.jdbc.OracleTypes;
-
 /**
  * 初始化测试表 可以执行initTable()方法
  * 
  * @author zdtjss@163.com
- *
  */
 public class SqlExecutorTest extends BaseTest {
 	
@@ -60,7 +55,7 @@ public class SqlExecutorTest extends BaseTest {
 		Computer computer = new Computer();
 		computer.setBrand("p");
 
-		DefaultSqlBuilder builder = SQL.query(Computer.class).withColumn(Computer::getBrand).where().like(computer::getBrand).ge(Computer::getPrice, 1).or().ne(Computer::getPrice, 1000);
+		DefaultSqlBuilder builder = SQL.query(Computer.class).where().like(computer::getBrand).ge(Computer::getPrice, 1).or().ne(Computer::getPrice, 1000);
 
 		System.out.println(builder.getSql());
 		System.out.println(builder.getParam());
@@ -323,9 +318,18 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(10);
 
 		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
-		Pagination<ExampleEntity> ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 10);
-
+		Pagination<ExampleEntity> ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 1);
 		System.out.println(ee);
+		
+		sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
+		ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 1);
+		System.out.println(ee);
+	}
+	
+	@Test
+	public void countTest() {
+		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
+		System.out.println(sqlExecutor.count(sqlBuilder));
 	}
 	
 	@Test

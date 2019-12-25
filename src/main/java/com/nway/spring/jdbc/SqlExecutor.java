@@ -319,8 +319,8 @@ public class SqlExecutor implements InitializingBean {
 	 * 
 	 * @throws DataAccessException 详见 {@link JdbcTemplate#queryForObject(String, Class, Object...)}
 	 */
-	public int count(QueryBuilder queryBuilder) throws DataAccessException {
-		return jdbcTemplate.queryForObject(queryBuilder.getSql(), Integer.class, queryBuilder.getParam().toArray());
+	public int count(SqlBuilder queryBuilder) throws DataAccessException {
+		return jdbcTemplate.queryForObject(buildPaginationCountSql(queryBuilder.getSql()), Integer.class, queryBuilder.getParam().toArray());
 	}
 	
 	/**
@@ -342,10 +342,10 @@ public class SqlExecutor implements InitializingBean {
 		
 		if ((selectedColumns.indexOf(" DISTINCT ") == -1 || selectedColumns.indexOf(" distinct ") == -1)
 				&& !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
-			countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(1) ");
+			countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(*) ");
 		} 
 		else {
-			countSql.insert(0, "SELECT COUNT(1) FROM (").append(')');
+			countSql.insert(0, "SELECT COUNT(*) FROM (").append(')');
 		}
 		
 		return countSql.toString();
