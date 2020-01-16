@@ -15,6 +15,7 @@ package com.nway.spring.jdbc;
 
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,8 +32,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
@@ -151,6 +157,25 @@ public class SqlExecutor implements InitializingBean {
 		InsertBuilder sqlBuilder = SQL.insert(obj.getClass());
 		sqlBuilder.use(obj);
 		return update(sqlBuilder);
+	}
+	
+	public <T> T insertAndGetKey(Object obj) {
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		InsertBuilder sqlBuilder = SQL.insert(obj.getClass());
+		sqlBuilder.use(obj);
+		PreparedStatementCreator psc = conn -> {
+			PreparedStatement pstmt = conn.prepareStatement(sqlBuilder.getSql());
+			List<Object> params = sqlBuilder.getParam();
+			if (params != null && params.size() > 0) {
+				for (int i = 0; i < params.size(); i++) {
+					StatementCreatorUtils.setParameterValue(pstmt, i, SqlTypeValue.TYPE_UNKNOWN, params.get(i));
+				}
+			}
+			return pstmt;
+		};
+		Object key = sqlBuilder.getKeyValue();
+		int count = jdbcTemplate.update(psc, keyHolder);
+		return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
 	}
 	
 	public int[] batchInsert(List<Object> objs) {

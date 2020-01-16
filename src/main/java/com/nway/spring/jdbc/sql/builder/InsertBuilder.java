@@ -54,4 +54,24 @@ public class InsertBuilder implements SqlBuilder {
 	public List<Object> getParam() {
 		return this.param;
 	}
+	
+	public Object getKeyValue() {
+		int keyIdx = -1;
+		Object keyVal = null;
+		String idName = SqlBuilderUtils.getIdName(getBeanClass());
+		for (int i = 0; i < columns.size(); i++) {
+			String columnName = columns.get(i);
+			if (columnName.equals(idName)) {
+				keyIdx = i;
+				break;
+			}
+		}
+		if (keyIdx != -1) {
+			keyVal = getParam().get(keyIdx);
+		}
+		if (Long.valueOf(0).equals(keyVal) || Integer.valueOf(0).equals(keyVal)) {
+			keyVal = null;
+		}
+		return keyVal;
+	}
 }
