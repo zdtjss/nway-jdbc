@@ -79,7 +79,6 @@
                     <docencoding>UTF-8</docencoding>
                     <failOnError>false</failOnError>
                     <doclint>none</doclint>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
@@ -94,9 +93,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
