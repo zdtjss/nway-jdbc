@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -69,6 +71,8 @@ import com.nway.spring.jdbc.sql.builder.SqlBuilder;
  */
 public class SqlExecutor implements InitializingBean {
 
+	protected final Log logger = LogFactory.getLog(SqlExecutor.class);
+
 	private PaginationSupport paginationSupport;
 	
 	private JdbcTemplate jdbcTemplate;
@@ -97,7 +101,11 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 */
 	public int update(SqlBuilder sqlBuilder) {
-		return jdbcTemplate.update(sqlBuilder.getSql(), sqlBuilder.getParam().toArray());
+		String sql = sqlBuilder.getSql();
+		Object[] params = sqlBuilder.getParam().toArray();
+		logger.debug("sql = " + sql);
+		logger.debug("params = " + params);
+		return jdbcTemplate.update(sql, params);
 	}
 	
 	/**
@@ -106,8 +114,11 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 */
 	public int[] batchUpdate(SqlBuilder sqlBuilder) {
-		List<Object> params = sqlBuilder.getParam();
-		return jdbcTemplate.batchUpdate(sqlBuilder.getSql(), params.stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList()));
+		List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
+		String sql = sqlBuilder.getSql();
+		logger.debug("sql = " + sql);
+		logger.debug("params = " + params);
+		return jdbcTemplate.batchUpdate(sql, params);
 	}
 	
 	/**
@@ -174,6 +185,8 @@ public class SqlExecutor implements InitializingBean {
 			return pstmt;
 		};
 		Object key = sqlBuilder.getKeyValue();
+		logger.debug(sqlBuilder.getSql());
+		logger.debug(sqlBuilder.getParam().toArray());
 		int count = jdbcTemplate.update(psc, keyHolder);
 		return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
 	}
@@ -213,6 +226,8 @@ public class SqlExecutor implements InitializingBean {
 	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
+		logger.debug("sql = " + sql);
+		logger.debug("params = " + args);
 		return jdbcTemplate.query(sql, new BeanHandler<T>(type), args);
 	}
 
@@ -244,6 +259,8 @@ public class SqlExecutor implements InitializingBean {
 	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> List<T> queryBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
+		logger.debug("sql = " + sql);
+		logger.debug("params = " + args);
 		return jdbcTemplate.query(sql, new BeanListHandler<T>(type), args);
 	}
 
@@ -268,7 +285,6 @@ public class SqlExecutor implements InitializingBean {
 	 * @param <T>
 	 * @param sql
 	 * @param params
-	 * @param argTypes
 	 * @param page
 	 * @param pageSize
 	 * @param beanClass
@@ -331,6 +347,8 @@ public class SqlExecutor implements InitializingBean {
 
 		if (totalCount != 0) {
 			String paginationSql = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
+			logger.debug("sql = " + paginationSql);
+			logger.debug("params = " + params);
 			item = jdbcTemplate.queryForList(paginationSql, params);
 		}
 		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
@@ -345,7 +363,11 @@ public class SqlExecutor implements InitializingBean {
 	 * @throws DataAccessException 详见 {@link JdbcTemplate#queryForObject(String, Class, Object...)}
 	 */
 	public int count(SqlBuilder queryBuilder) throws DataAccessException {
-		return jdbcTemplate.queryForObject(buildPaginationCountSql(queryBuilder.getSql()), Integer.class, queryBuilder.getParam().toArray());
+		String sql = buildPaginationCountSql(queryBuilder.getSql());
+		Object[] params = queryBuilder.getParam().toArray();
+		logger.debug("sql = " + sql);
+		logger.debug("params = " + params);
+		return jdbcTemplate.queryForObject(sql, Integer.class, params);
 	}
 	
 	/**
@@ -404,6 +426,8 @@ public class SqlExecutor implements InitializingBean {
 	}
 	
 	private int queryCount(String countSql, Object[] params) {
+		logger.debug("sql = " + countSql);
+		logger.debug("params = " + params);
 		return jdbcTemplate.query(countSql, params, new IntegerResultSetExtractor(countSql));
 	}
 
