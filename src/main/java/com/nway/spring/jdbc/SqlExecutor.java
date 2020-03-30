@@ -18,10 +18,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -53,6 +50,7 @@ import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import org.springframework.util.ObjectUtils;
 
 /**
  * 注意：
@@ -104,7 +102,7 @@ public class SqlExecutor implements InitializingBean {
 		String sql = sqlBuilder.getSql();
 		Object[] params = sqlBuilder.getParam().toArray();
 		logger.debug("sql = " + sql);
-		logger.debug("params = " + params);
+		logger.debug("params = " + objToStr(params));
 		return jdbcTemplate.update(sql, params);
 	}
 	
@@ -117,7 +115,7 @@ public class SqlExecutor implements InitializingBean {
 		List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
 		String sql = sqlBuilder.getSql();
 		logger.debug("sql = " + sql);
-		logger.debug("params = " + params);
+		logger.debug("params = " + objToStr(params));
 		return jdbcTemplate.batchUpdate(sql, params);
 	}
 	
@@ -138,7 +136,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @param objs beans
 	 * @return
 	 */
-	public int[] batchUpdateById(List<Object> objs) {
+	public int[] batchUpdateById(List<?> objs) {
 		if (objs == null || objs.size() == 0) {
 			return new int[] {};
 		}
@@ -191,7 +189,7 @@ public class SqlExecutor implements InitializingBean {
 		return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
 	}
 	
-	public int[] batchInsert(List<Object> objs) {
+	public int[] batchInsert(List<?> objs) {
 		if (objs == null || objs.size() == 0) {
 			return new int[] {};
 		}
@@ -227,7 +225,7 @@ public class SqlExecutor implements InitializingBean {
 	 */
 	public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		logger.debug("sql = " + sql);
-		logger.debug("params = " + args);
+		logger.debug("params = " + objToStr(args));
 		return jdbcTemplate.query(sql, new BeanHandler<T>(type), args);
 	}
 
@@ -260,7 +258,7 @@ public class SqlExecutor implements InitializingBean {
 	 */
 	public <T> List<T> queryBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		logger.debug("sql = " + sql);
-		logger.debug("params = " + args);
+		logger.debug("params = " + objToStr(args));
 		return jdbcTemplate.query(sql, new BeanListHandler<T>(type), args);
 	}
 
@@ -348,7 +346,7 @@ public class SqlExecutor implements InitializingBean {
 		if (totalCount != 0) {
 			String paginationSql = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
 			logger.debug("sql = " + paginationSql);
-			logger.debug("params = " + params);
+			logger.debug("params = " + objToStr(params));
 			item = jdbcTemplate.queryForList(paginationSql, params);
 		}
 		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
@@ -366,7 +364,7 @@ public class SqlExecutor implements InitializingBean {
 		String sql = buildPaginationCountSql(queryBuilder.getSql());
 		Object[] params = queryBuilder.getParam().toArray();
 		logger.debug("sql = " + sql);
-		logger.debug("params = " + params);
+		logger.debug("params = " + objToStr(params));
 		return jdbcTemplate.queryForObject(sql, Integer.class, params);
 	}
 	
@@ -427,7 +425,7 @@ public class SqlExecutor implements InitializingBean {
 	
 	private int queryCount(String countSql, Object[] params) {
 		logger.debug("sql = " + countSql);
-		logger.debug("params = " + params);
+		logger.debug("params = " + objToStr(params));
 		return jdbcTemplate.query(countSql, params, new IntegerResultSetExtractor(countSql));
 	}
 
@@ -481,6 +479,16 @@ public class SqlExecutor implements InitializingBean {
 			fromIndex = firstFromIndex(sql, fromIndex + 4);
 		}
 		return fromIndex;
+	}
+
+	private String objToStr(Object obj) {
+		if (ObjectUtils.isArray(obj)) {
+			return Arrays.deepToString((Object[]) obj);
+		}
+		else if (obj instanceof List) {
+			return Arrays.deepToString(((List) obj).toArray());
+		}
+		return ObjectUtils.nullSafeToString(obj);
 	}
 	
 }

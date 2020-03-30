@@ -24,10 +24,10 @@ public class BatchUpdateByIdBuilder implements SqlBuilder {
 		this.beanClass = beanClass;
 	}
 	
-	public SqlBuilder use(List<Object> params) {
+	public SqlBuilder use(List<?> params) {
 		List<List<Object>> batchParam = new ArrayList<>(params.size());
 		for(int i = 0;i < params.size(); i++) {
-			batchParam.add(new ArrayList<Object>());
+			batchParam.add(new ArrayList<>());
 		}
 		try {
 			for (Field field : getBeanClass().getDeclaredFields()) {

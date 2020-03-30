@@ -3,18 +3,18 @@ package com.nway.spring.jdbc;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -25,6 +25,7 @@ import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import org.springframework.util.ObjectUtils;
 
 /**
  * 初始化测试表 可以执行initTable()方法
@@ -217,7 +218,7 @@ public class SqlExecutorTest extends BaseTest {
 
 			exampleEntityList.add(example);
 		}
-		
+
 		SqlBuilder sqlBuilder = SQL.batchInsert(ExampleEntity.class).use(exampleEntityList);
 
 		System.out.println(sqlExecutor.batchUpdate(sqlBuilder));
@@ -228,7 +229,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void lambdaQueryOneTest() {
 		
-		System.out.println(sqlExecutor.queryBean(922, ExampleEntity.class));
+		System.out.println(sqlExecutor.queryBean(406, ExampleEntity.class));
 	}
 
 	@Test
@@ -282,7 +283,6 @@ public class SqlExecutorTest extends BaseTest {
 				.like(example::getString).notLike(example::getString)
 				.or(e -> e.eq(example::getId).eq(example::getpByte))
 				.and(e -> e.eq(example::getpLong).or().eq(example::getwDouble));
-
 		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
 
 		System.out.println(ee);
@@ -335,7 +335,16 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void listAll() {
 		List<ExampleEntity> list = sqlExecutor.queryBeanList(SQL.query(ExampleEntity.class));
-		System.out.println(list);
+		System.out.println(JSONObject.toJSONString(list));
+	}
+
+	@Test
+	public void toStrTest() {
+		String[] obj = new String[]{"11"};
+		if (ObjectUtils.isArray(obj)) {
+			System.out.println(Arrays.deepToString((Object[]) obj));
+		}
+		System.out.println(ObjectUtils.nullSafeToString(obj));
 	}
 
 	@Test
@@ -399,5 +408,7 @@ public class SqlExecutorTest extends BaseTest {
 		}
 
 		transaction.commit();
+
+        listAll();
 	}
 }
