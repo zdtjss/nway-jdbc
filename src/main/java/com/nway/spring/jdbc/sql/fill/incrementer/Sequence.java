@@ -13,12 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.nway.spring.jdbc.sql.fill;
+package com.nway.spring.jdbc.sql.fill.incrementer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;

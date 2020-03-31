@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.sql.fill;
+package com.nway.spring.jdbc.sql.fill.incrementer;
 
 
 import java.sql.Timestamp;

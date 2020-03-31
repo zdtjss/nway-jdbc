@@ -13,7 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.nway.spring.jdbc.sql.fill;
+package com.nway.spring.jdbc.sql.fill.incrementer;
+
+import com.nway.spring.jdbc.sql.fill.incrementer.DefaultIdentifierGenerator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,27 +29,54 @@ import java.util.concurrent.ThreadLocalRandom;
  * </p>
  *
  * @author hubin
- * @author zhangdetao
  * @since 2016-08-01
  */
-class IdWorker {
+public class IdWorker {
 
 	/**
 	 * 主机和进程的机器码
 	 */
-	private static Sequence WORKER = new Sequence();
+	private static IdentifierGenerator IDENTIFIER_GENERATOR = new DefaultIdentifierGenerator();
 
 	/**
 	 * 毫秒格式化时间
 	 */
 	public static final DateTimeFormatter MILLISECOND = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
+	/**
+	 * 获取唯一ID
+	 *
+	 * @return id
+	 */
 	public static long getId() {
-		return WORKER.nextId();
+		return getId(new Object());
 	}
 
+	/**
+	 * 获取唯一ID
+	 *
+	 * @return id
+	 */
+	public static long getId(Object entity) {
+		return IDENTIFIER_GENERATOR.nextId(entity).longValue();
+	}
+
+	/**
+	 * 获取唯一ID
+	 *
+	 * @return id
+	 */
 	public static String getIdStr() {
-		return String.valueOf(WORKER.nextId());
+		return getIdStr(new Object());
+	}
+
+	/**
+	 * 获取唯一ID
+	 *
+	 * @return id
+	 */
+	public static String getIdStr(Object entity) {
+		return IDENTIFIER_GENERATOR.nextId(entity).toString();
 	}
 
 	/**
@@ -59,22 +88,30 @@ class IdWorker {
 
 	/**
 	 * 时间 ID = Time + ID
-	 * <p>
-	 * 例如：可用于商品订单 ID
-	 * </p>
+	 * <p>例如：可用于商品订单 ID</p>
 	 */
 	public static String getTimeId() {
-		return getMillisecond() + getId();
+		return getMillisecond() + getIdStr();
 	}
 
 	/**
 	 * 有参构造器
 	 *
 	 * @param workerId     工作机器 ID
-	 * @param datacenterId 序列号
+	 * @param dataCenterId 序列号
+	 * @see #setIdentifierGenerator(IdentifierGenerator)
 	 */
-	public static void initSequence(long workerId, long datacenterId) {
-		WORKER = new Sequence(workerId, datacenterId);
+	public static void initSequence(long workerId, long dataCenterId) {
+		IDENTIFIER_GENERATOR = new DefaultIdentifierGenerator(workerId, dataCenterId);
+	}
+
+	/**
+	 * 自定义id 生成方式
+	 *
+	 * @param identifierGenerator id 生成器
+	 */
+	public static void setIdentifierGenerator(IdentifierGenerator identifierGenerator) {
+		IDENTIFIER_GENERATOR = identifierGenerator;
 	}
 
 	/**
