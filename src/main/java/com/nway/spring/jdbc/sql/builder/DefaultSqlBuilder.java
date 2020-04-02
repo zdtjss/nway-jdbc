@@ -182,6 +182,13 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 
+	public <T, R> DefaultSqlBuilder like(SFunction<T, R> column, Supplier<String> val) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" like ?");
+		param.add("%" + val.get() + "%");
+		return this;
+	}
+
 	public DefaultSqlBuilder notLike(SSupplier<String> val) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(" not like ?");
@@ -203,6 +210,13 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 
+	public <T, R> DefaultSqlBuilder notLike(SFunction<T, R> column, Supplier<String> val) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not like ?");
+		param.add("%" + val.get() + "%");
+		return this;
+	}
+
 	public <T> DefaultSqlBuilder likeLeft(SSupplier<T> val) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(" like ?");
@@ -217,10 +231,17 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 	
-	public <T, R> DefaultSqlBuilder likeLeft(SFunction<T, R> column, Object val) {
+	public <T, R> DefaultSqlBuilder likeLeft(SFunction<T, R> column, String val) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" like ?");
 		param.add("%" + val);
+		return this;
+	}
+
+	public <T, R> DefaultSqlBuilder likeLeft(SFunction<T, R> column, SSupplier<T> val) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" like ?");
+		param.add("%" + val.get());
 		return this;
 	}
 
@@ -238,14 +259,30 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 	
-	public <T, R> DefaultSqlBuilder likeRight(SFunction<T, R> column, Object val) {
+	public <T, R> DefaultSqlBuilder likeRight(SFunction<T, R> column, String val) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" like ?");
 		param.add(val + "%");
 		return this;
 	}
 
-	public <T> DefaultSqlBuilder between(SSupplier<T> column, Supplier<T> leftVal, Supplier<T> rightVal) {
+	public <T, X> DefaultSqlBuilder between(SSupplier<T> column, Supplier<X> leftVal, Supplier<X> rightVal) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+		param.add(leftVal.get());
+		param.add(rightVal.get());
+		return this;
+	}
+
+	public <T, R> DefaultSqlBuilder between(SFunction<T, R> column, Object leftVal, Object rightVal) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+		param.add(leftVal);
+		param.add(rightVal);
+		return this;
+	}
+
+	public <T, R, X> DefaultSqlBuilder between(SFunction<T, R> column, Supplier<X> leftVal, Supplier<X> rightVal) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
 		param.add(leftVal.get());
@@ -260,16 +297,16 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		param.add(rightVal);
 		return this;
 	}
-	
-	public <T, R> DefaultSqlBuilder between(SFunction<T, R> column, Object leftVal, Object rightVal) {
+
+	public <T, X> DefaultSqlBuilder between(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
 		appendAnd();
-		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
-		param.add(leftVal);
-		param.add(rightVal);
+		sql.append(column).append(" between").append(" ? and ?");
+		param.add(leftVal.get());
+		param.add(rightVal.get());
 		return this;
 	}
 
-	public <T> DefaultSqlBuilder notBetween(SSupplier<T> column, Supplier<T> leftVal, Supplier<T> rightVal) {
+	public <T, X> DefaultSqlBuilder notBetween(SSupplier<T> column, Supplier<X> leftVal, Supplier<X> rightVal) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
 		param.add(leftVal.get());
@@ -277,7 +314,7 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 	
-	public <T> DefaultSqlBuilder notBetween(String column, Supplier<T> leftVal, Supplier<T> rightVal) {
+	public <T, X> DefaultSqlBuilder notBetween(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
 		appendAnd();
 		sql.append(column).append(" not between").append(" ? and ?");
 		param.add(leftVal.get());
@@ -293,11 +330,19 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 	
-	public <T, R> DefaultSqlBuilder notBetween(SFunction<T, R> column, Supplier<T> leftVal, Supplier<T> rightVal) {
+	public <T, R, X> DefaultSqlBuilder notBetween(SFunction<T, R> column, Supplier<X> leftVal, Supplier<X> rightVal) {
 		appendAnd();
 		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
 		param.add(leftVal.get());
 		param.add(rightVal.get());
+		return this;
+	}
+
+	public <T, R> DefaultSqlBuilder notBetween(SFunction<T, R> column, Object leftVal, Object rightVal) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+		param.add(leftVal);
+		param.add(rightVal);
 		return this;
 	}
 
@@ -325,19 +370,16 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 
-	public <T> DefaultSqlBuilder in(SSupplier<T> val) {
-		T cls = val.get();
-		if (cls instanceof Collection<?>) {
-			appendAnd();
-			Collection values = (Collection) cls;
-			sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(" in (");
-			values.stream().forEach(e -> param.add(e));
-			for (int i = 0; i < values.size(); i++) {
-				sql.append("?").append(",");
-			}
-			if (!values.isEmpty()) {
-				sql.setCharAt(sql.length() - 1, ')');
-			}
+	public <T extends Collection<?>> DefaultSqlBuilder in(SSupplier<T> val) {
+		appendAnd();
+		Collection<?> values = val.get();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(" in (");
+		values.stream().forEach(e -> param.add(e));
+		for (int i = 0; i < values.size(); i++) {
+			sql.append("?").append(",");
+		}
+		if (!values.isEmpty()) {
+			sql.setCharAt(sql.length() - 1, ')');
 		}
 		return this;
 	}
@@ -368,19 +410,16 @@ public class DefaultSqlBuilder implements SqlBuilder {
 		return this;
 	}
 
-	public DefaultSqlBuilder notIn(SSupplier<?> val) {
-		Object cls = val.get();
-		if (cls instanceof Collection<?>) {
-			appendAnd();
-			Collection values = (Collection) cls;
-			sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(" not in (");
-			values.stream().forEach(e -> param.add(e));
-			for (int i = 0; i < values.size(); i++) {
-				sql.append("?").append(",");
-			}
-			if (!values.isEmpty()) {
-				sql.setCharAt(sql.length() - 1, ')');
-			}
+	public <T extends Collection<?>> DefaultSqlBuilder notIn(SSupplier<T> val) {
+		appendAnd();
+		Collection<?> values = val.get();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(" not in (");
+		values.stream().forEach(e -> param.add(e));
+		for (int i = 0; i < values.size(); i++) {
+			sql.append("?").append(",");
+		}
+		if (!values.isEmpty()) {
+			sql.setCharAt(sql.length() - 1, ')');
 		}
 		return this;
 	}
@@ -388,6 +427,19 @@ public class DefaultSqlBuilder implements SqlBuilder {
 	public DefaultSqlBuilder notIn(String column, Collection<?> val) {
 		appendAnd();
 		sql.append(column).append(" not in (");
+		val.stream().forEach(e -> param.add(e));
+		for (int i = 0; i < val.size(); i++) {
+			sql.append("?").append(",");
+		}
+		if (!val.isEmpty()) {
+			sql.setCharAt(sql.length() - 1, ')');
+		}
+		return this;
+	}
+
+	public <T, R> DefaultSqlBuilder notIn(SFunction<T, R> column, Collection<?> val) {
+		appendAnd();
+		sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
 		val.stream().forEach(e -> param.add(e));
 		for (int i = 0; i < val.size(); i++) {
 			sql.append("?").append(",");
