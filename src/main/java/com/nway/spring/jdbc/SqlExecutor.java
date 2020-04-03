@@ -49,7 +49,7 @@ import com.nway.spring.jdbc.sql.builder.BeanUpdateBuilder;
 import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
-import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -95,12 +95,12 @@ public class SqlExecutor implements InitializingBean {
 	
 	/**
 	 * 
-	 * @param sqlBuilder sqlBuilder
+	 * @param ISqlBuilder sqlBuilder
 	 * @return
 	 */
-	public int update(SqlBuilder sqlBuilder) {
-		String sql = sqlBuilder.getSql();
-		Object[] params = sqlBuilder.getParam().toArray();
+	public int update(ISqlBuilder ISqlBuilder) {
+		String sql = ISqlBuilder.getSql();
+		Object[] params = ISqlBuilder.getParam().toArray();
 		logger.debug("sql = " + sql);
 		logger.debug("params = " + objToStr(params));
 		return jdbcTemplate.update(sql, params);
@@ -108,12 +108,12 @@ public class SqlExecutor implements InitializingBean {
 	
 	/**
 	 * 
-	 * @param sqlBuilder sqlBuilder
+	 * @param ISqlBuilder sqlBuilder
 	 * @return
 	 */
-	public int[] batchUpdate(SqlBuilder sqlBuilder) {
-		List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
-		String sql = sqlBuilder.getSql();
+	public int[] batchUpdate(ISqlBuilder ISqlBuilder) {
+		List<Object[]> params = ISqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
+		String sql = ISqlBuilder.getSql();
 		logger.debug("sql = " + sql);
 		logger.debug("params = " + objToStr(params));
 		return jdbcTemplate.batchUpdate(sql, params);
@@ -199,7 +199,7 @@ public class SqlExecutor implements InitializingBean {
 	}
 	
 	public <T> T queryBean(Serializable id, Class<T> type) {
-		SqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
+		ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
 		return queryBean(queryBuilder);
 	}
 	
@@ -210,7 +210,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @return queryBuilder描述的beanClass类型的对象
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> T queryBean(SqlBuilder queryBuilder) throws DataAccessException {
+	public <T> T queryBean(ISqlBuilder queryBuilder) throws DataAccessException {
 		return queryBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
@@ -237,12 +237,12 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> List<T> queryBeanList(SqlBuilder queryBuilder) throws DataAccessException {
+	public <T> List<T> queryBeanList(ISqlBuilder queryBuilder) throws DataAccessException {
 		return queryBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
 	public <T> List<T> queryBeanList(List<? extends Serializable> ids, Class<T> type) {
-		SqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
+		ISqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
 		return queryBeanList(queryBuilder);
 	}
 	
@@ -272,7 +272,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> Pagination<T> queryBeanPage(SqlBuilder queryBuilder, int page, int pageSize)
+	public <T> Pagination<T> queryBeanPage(ISqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
 		return queryBeanPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
 	}
@@ -315,7 +315,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @throws DataAccessException
 	 */
 	public Pagination<Map<String, Object>> queryMapPage(QueryBuilder queryBuilder, int page,
-			int pageSize) throws DataAccessException {
+														int pageSize) throws DataAccessException {
 		return queryMapPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
 	}
 	
@@ -360,7 +360,7 @@ public class SqlExecutor implements InitializingBean {
 	 * 
 	 * @throws DataAccessException 详见 {@link JdbcTemplate#queryForObject(String, Class, Object...)}
 	 */
-	public int count(SqlBuilder queryBuilder) throws DataAccessException {
+	public int count(ISqlBuilder queryBuilder) throws DataAccessException {
 		String sql = buildPaginationCountSql(queryBuilder.getSql());
 		Object[] params = queryBuilder.getParam().toArray();
 		logger.debug("sql = " + sql);

@@ -17,9 +17,9 @@ import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.entity.Mouse;
 import com.nway.spring.jdbc.performance.entity.Software;
 import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
-import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 
 @Service("nwayLambdaPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
@@ -33,13 +33,13 @@ public class NwayLambdaPerformance implements Performance {
 	@Override
 	public Computer getComputerById(int id) {
 
-		SqlBuilder computerSql = SQL.query(Computer.class).eq(Computer::getId, id);
+		ISqlBuilder computerSql = SQL.query(Computer.class).eq(Computer::getId, id);
 		QueryBuilder mainframeSql = SQL.query(Mainframe.class);
 		QueryBuilder monitorSql = SQL.query(Monitor.class);
 		QueryBuilder mouseSql = SQL.query(Mouse.class);
 		QueryBuilder keyboardSql = SQL.query(Keyboard.class);
 		QueryBuilder softwareSql = SQL.query(Software.class);
-		DefaultSqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, id);
+		SqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, id);
 		
 		Computer computer = sqlExecutor.queryBean(computerSql);
 
@@ -74,7 +74,7 @@ public class NwayLambdaPerformance implements Performance {
 			computer.setMouse(sqlExecutor.queryBean(mouseSql.eq(Mouse::getId, computer.getMouseId())));
 			computer.setKeyboard(sqlExecutor.queryBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
 			
-			DefaultSqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, computer.getId());
+			SqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, computer.getId());
 			List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryBeanList(somputerSoftwareSql);
 			List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
 			computer.setSoftware(sqlExecutor.queryBeanList(softwareSql.in(Software::getId, softwareIdList)));

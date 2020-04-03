@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 
-public class InsertBuilder implements SqlBuilder {
+public class InsertBuilder implements ISqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	

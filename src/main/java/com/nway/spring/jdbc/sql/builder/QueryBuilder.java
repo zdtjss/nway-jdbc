@@ -7,7 +7,7 @@ import java.util.List;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.function.SFunction;
 
-public class QueryBuilder extends DefaultSqlBuilder {
+public class QueryBuilder extends SqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	

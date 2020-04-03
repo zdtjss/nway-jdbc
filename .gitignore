@@ -19,3 +19,6 @@ hs_err_pid*
 
 *.iml
 /.idea/
+
+/nway/
+derby.log

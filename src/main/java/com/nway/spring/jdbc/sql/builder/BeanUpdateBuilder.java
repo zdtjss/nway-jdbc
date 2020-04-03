@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.annotation.Column;
-import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 
-public class BeanUpdateBuilder extends DefaultSqlBuilder {
+public class BeanUpdateBuilder extends SqlBuilder {
 
 	private List<String> sets = new ArrayList<>();
 	private List<Object> setsParam = new ArrayList<>();

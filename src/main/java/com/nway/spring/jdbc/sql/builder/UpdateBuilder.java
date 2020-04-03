@@ -12,7 +12,7 @@ import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 
-public class UpdateBuilder extends DefaultSqlBuilder {
+public class UpdateBuilder extends SqlBuilder {
 
 	private List<String> sets = new ArrayList<>();
 	
@@ -20,7 +20,7 @@ public class UpdateBuilder extends DefaultSqlBuilder {
 		super(beanClass);
 	}
 	
-	public <T> DefaultSqlBuilder set(SSupplier<T> val) {
+	public <T> SqlBuilder set(SSupplier<T> val) {
 		sets.add(SqlBuilderUtils.getColumn(beanClass, val) + " = ?");
 		param.add(val.get());
 		return this;

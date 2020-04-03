@@ -1,31 +1,30 @@
 package com.nway.spring.jdbc;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialException;
-
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.sql.SQL;
+import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
+import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.builder.DefaultSqlBuilder;
-import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 import org.springframework.util.ObjectUtils;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * 初始化测试表 可以执行initTable()方法
@@ -51,15 +50,84 @@ public class SqlExecutorTest extends BaseTest {
 	}
 
 	@Test
+	public void sqlTest() {
+
+		ExampleEntity exampleEntity = new ExampleEntity();
+
+		exampleEntity.setString("strcolumn");
+
+		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
+				.eq(ExampleEntity::getId, 1)
+				.eq(exampleEntity::getId)
+				.eq("pk_id", exampleEntity.getId())
+				.ne(ExampleEntity::getString, "ne")
+				.ne(exampleEntity::getString)
+				.ne("string", "str")
+				.ge(ExampleEntity::getId, 11)
+				.ge(exampleEntity::getId)
+				.ge("pk_id", exampleEntity.getId())
+				.gt(ExampleEntity::getId, 11)
+				.gt(exampleEntity::getId)
+				.gt("pk_id", exampleEntity.getId())
+				.lt(ExampleEntity::getId, 11)
+				.lt(exampleEntity::getId)
+				.lt("pk_id", exampleEntity.getId())
+				.le(ExampleEntity::getId, 11)
+				.le(exampleEntity::getId)
+				.le("pk_id", exampleEntity.getId())
+				.between(ExampleEntity::getString, exampleEntity::getpLong, exampleEntity::getpDouble)
+				.between(ExampleEntity::getpDouble, exampleEntity.getpDouble(), exampleEntity.getpDouble())
+				.between("p_double", 1, 2)
+				.between("p_double", exampleEntity::getpDouble, exampleEntity::getpDouble)
+				.notBetween(ExampleEntity::getpDouble, exampleEntity::getpLong, exampleEntity::getpLong)
+				.notBetween(ExampleEntity::getpDouble, exampleEntity.getpDouble(), exampleEntity.getpDouble())
+				.notBetween("p_double", 1, 2)
+				.notBetween("p_double", exampleEntity::getpDouble, exampleEntity::getpDouble)
+				.like(exampleEntity::getString)
+				.like("string", exampleEntity.getString())
+				.like(ExampleEntity::getString, exampleEntity::getString)
+				.like(ExampleEntity::getString, exampleEntity.getString())
+				.notLike(exampleEntity::getString)
+				.notLike("string", exampleEntity.getString())
+				.notLike(ExampleEntity::getString, exampleEntity::getString)
+				.notLike(ExampleEntity::getString, exampleEntity.getString())
+				.likeLeft(exampleEntity::getString)
+				.likeLeft("string", exampleEntity.getString())
+				.likeLeft(ExampleEntity::getString, exampleEntity::getString)
+				.likeLeft(ExampleEntity::getString, exampleEntity.getString())
+				.likeRight(exampleEntity::getString)
+				.likeRight("string", exampleEntity.getString())
+				.likeRight(ExampleEntity::getString, exampleEntity::getString)
+				.likeRight(ExampleEntity::getString, exampleEntity.getString())
+				.in(ExampleEntity::getString, Collections.singletonList("aa"))
+				.in("string", Collections.singletonList("aa"))
+				.notIn(ExampleEntity::getString, Collections.singletonList("aa"))
+				.notIn("string", Collections.singletonList("aa"))
+				.or()
+				.eq(exampleEntity::getId)
+				.or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
+//				.groupBy(ExampleEntity::getString, ExampleEntity::getpDouble)
+//				.groupBy("string", "p_double")
+//				.having(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
+//				.orderBy(ExampleEntity::getString, ExampleEntity::getpDouble)
+//				.appendOrderBy("string", "p_double")
+				.orderByDesc(ExampleEntity::getString, ExampleEntity::getpDouble)
+				.appendOrderByDesc("string", "p_double")
+				.appendOrderBy(ExampleEntity::getString, ExampleEntity::getpDouble)
+				;
+
+		sqlExecutor.queryBean(builder);
+	}
+
+	@Test
 	public void testQueryForBeanLambda() {
 
 		Computer computer = new Computer();
 		computer.setBrand("p");
 
-		DefaultSqlBuilder builder = SQL.query(Computer.class).where().like(computer::getBrand).ge(Computer::getPrice, 1).or().ne(Computer::getPrice, 1000);
-
-		System.out.println(builder.getSql());
-		System.out.println(builder.getParam());
+		ISqlBuilder builder = SQL.query(Computer.class)
+				.where().like(computer::getBrand).ge(Computer::getPrice, 1)
+				.or().ne(Computer::getPrice, 1000);
 
 		Computer c = sqlExecutor.queryBean(builder);
 
@@ -219,9 +287,9 @@ public class SqlExecutorTest extends BaseTest {
 			exampleEntityList.add(example);
 		}
 
-		SqlBuilder sqlBuilder = SQL.batchInsert(ExampleEntity.class).use(exampleEntityList);
+		ISqlBuilder ISqlBuilder = SQL.batchInsert(ExampleEntity.class).use(exampleEntityList);
 
-		System.out.println(sqlExecutor.batchUpdate(sqlBuilder));
+		System.out.println(sqlExecutor.batchUpdate(ISqlBuilder));
 		
 		listAll();
 	}
@@ -245,13 +313,13 @@ public class SqlExecutorTest extends BaseTest {
 		example2.setId(11);
 		example2.setUtilDate(new Date());
 
-		SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
+		ISqlBuilder ISqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
 		sqlExecutor.updateById(example);
 		
 		sqlExecutor.batchUpdateById(Arrays.asList(example, example2));
 		
-		System.out.println(sqlExecutor.update(sqlBuilder));
+		System.out.println(sqlExecutor.update(ISqlBuilder));
 	}
 
 	@Test
@@ -261,13 +329,13 @@ public class SqlExecutorTest extends BaseTest {
 
 		example.setId(0);
 
-		SqlBuilder sqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
+		ISqlBuilder ISqlBuilder = SQL.delete(ExampleEntity.class).where().eq(example::getId);
 
 		sqlExecutor.deleteById(0, ExampleEntity.class);
 		
 		sqlExecutor.batchDeleteById(Arrays.asList(0), ExampleEntity.class);
 		
-		System.out.println(sqlExecutor.update(sqlBuilder));
+		System.out.println(sqlExecutor.update(ISqlBuilder));
 	}
 
 	@Test
@@ -277,13 +345,13 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(1);
 		example.setwDouble(10.d);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
+		ISqlBuilder ISqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
 				.ge(example::getpFloat).le(example::getpDouble).lt(example::getpLong).gt(example::getpDouble)
 				.between(example::getId, example::getId, example::getpLong).notBetween(example::getId, example::getId, example::getId)
 				.like(example::getString).notLike(example::getString)
 				.or(e -> e.eq(example::getId).eq(example::getpByte))
 				.and(e -> e.eq(example::getpLong).or().eq(example::getwDouble));
-		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
+		ExampleEntity ee = sqlExecutor.queryBean(ISqlBuilder);
 
 		System.out.println(ee);
 		
@@ -303,7 +371,7 @@ public class SqlExecutorTest extends BaseTest {
 		ExampleEntity example = new ExampleEntity();
 		example.setId(1);
 
-		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
 		List<ExampleEntity> ee = sqlExecutor.queryBeanList(sqlBuilder);
 		
 		sqlExecutor.queryBeanList(Arrays.asList(100), ExampleEntity.class);
@@ -317,7 +385,7 @@ public class SqlExecutorTest extends BaseTest {
 		ExampleEntity example = new ExampleEntity();
 		example.setId(10);
 
-		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
 		Pagination<ExampleEntity> ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 1);
 		System.out.println(ee);
 		
@@ -328,7 +396,7 @@ public class SqlExecutorTest extends BaseTest {
 	
 	@Test
 	public void countTest() {
-		DefaultSqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
 		System.out.println(sqlExecutor.count(sqlBuilder));
 	}
 	
@@ -360,7 +428,7 @@ public class SqlExecutorTest extends BaseTest {
 
 			DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
 
-			example.setpBoolean(1 == ((Math.random() * 10) % 2));
+			example.setpBoolean(0 == ((Math.random() * 10000) % 2));
 
 			example.setpByte((byte) (Math.random() * 100));
 
@@ -376,7 +444,7 @@ public class SqlExecutorTest extends BaseTest {
 
 			example.setpByteArr("nway-jdbc".getBytes());
 
-			example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
+			example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10000) % 2)));
 
 			example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
 
@@ -401,6 +469,10 @@ public class SqlExecutorTest extends BaseTest {
 			example.setClob(new SerialClob("nway".toCharArray()));
 
 			example.setBlob(new SerialBlob("nway".getBytes()));
+
+			example.setBigDecimal(BigDecimal.valueOf(Math.random() * 10000));
+			example.setLocalDate(LocalDate.now());
+			example.setLocalDateTime(LocalDateTime.now());
 
 //			example.setInputStream(Hibernate.getLobCreator(session).createBlob("nway".getBytes()).getBinaryStream());
 

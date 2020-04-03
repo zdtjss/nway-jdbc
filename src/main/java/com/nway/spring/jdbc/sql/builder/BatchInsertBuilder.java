@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 
-public class BatchInsertBuilder implements SqlBuilder {
+public class BatchInsertBuilder implements ISqlBuilder {
 
 	private List<String> columns = new ArrayList<>();
 	

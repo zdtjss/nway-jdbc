@@ -1,20 +1,15 @@
 package com.nway.spring.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
@@ -56,8 +51,17 @@ public class ExampleEntity {
 	@com.nway.spring.jdbc.annotation.Column(name = "b_blob")
 	private Blob blob;
 
+	private LocalDate localDate;
+
+	private LocalDateTime localDateTime;
+
+	private BigDecimal bigDecimal;
+
+	@Transient
+	private List<String> list = Collections.singletonList("aa");
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "pk_id")
 	public int getId() {
 		return id;
@@ -257,6 +261,41 @@ public class ExampleEntity {
 
 	public void setBlob(Blob blob) {
 		this.blob = blob;
+	}
+
+	@Column(name = "local_date")
+	public LocalDate getLocalDate() {
+		return localDate;
+	}
+
+	public void setLocalDate(LocalDate localDate) {
+		this.localDate = localDate;
+	}
+
+	@Column(name = "local_date_time")
+	public LocalDateTime getLocalDateTime() {
+		return localDateTime;
+	}
+
+	public void setLocalDateTime(LocalDateTime localDateTime) {
+		this.localDateTime = localDateTime;
+	}
+
+	public BigDecimal getBigDecimal() {
+		return bigDecimal;
+	}
+
+	public void setBigDecimal(BigDecimal bigDecimal) {
+		this.bigDecimal = bigDecimal;
+	}
+
+	@Transient
+	public List<String> getList() {
+		return list;
+	}
+
+	public void setList(List<String> list) {
+		this.list = list;
 	}
 
 	@Override
