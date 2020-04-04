@@ -356,7 +356,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 				if (pd != null) {
 					try {
 						Object value = getColumnValue(rs, index, pd);
-						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
+						logger.trace("Mapping column '" + column + "' to property '" + pd.getName() +
 								"' of type '" + ClassUtils.getQualifiedName(pd.getType()) + "'");
 						try {
 							bw.setPropertyValue(pd.getName(), value);

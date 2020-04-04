@@ -47,9 +47,9 @@ public class NwayLambdaPerformance implements Performance {
 		computer.setMonitor(sqlExecutor.queryBean(monitorSql.eq(Monitor::getId, computer.getMonitorId())));
 		computer.setMouse(sqlExecutor.queryBean(mouseSql.eq(Mouse::getId, computer.getMouseId())));
 		computer.setKeyboard(sqlExecutor.queryBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
-		List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryBeanList(somputerSoftwareSql);
+		List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryList(somputerSoftwareSql);
 		List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
-		computer.setSoftware(sqlExecutor.queryBeanList(softwareSql.in(Software::getId, softwareIdList)));
+		computer.setSoftware(sqlExecutor.queryList(softwareSql.in(Software::getId, softwareIdList)));
 		
 		return computer;
 	}
@@ -65,7 +65,7 @@ public class NwayLambdaPerformance implements Performance {
 		QueryBuilder softwareSql = SQL.query(Software.class);
 		
 
-		List<Computer> computers = sqlExecutor.queryBeanList(computerSql);
+		List<Computer> computers = sqlExecutor.queryList(computerSql);
 
 		for (Computer computer : computers) {
 
@@ -75,9 +75,9 @@ public class NwayLambdaPerformance implements Performance {
 			computer.setKeyboard(sqlExecutor.queryBean(keyboardSql.eq(Keyboard::getId, computer.getKeyboardId())));
 			
 			SqlBuilder somputerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, computer.getId());
-			List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryBeanList(somputerSoftwareSql);
+			List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryList(somputerSoftwareSql);
 			List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
-			computer.setSoftware(sqlExecutor.queryBeanList(softwareSql.in(Software::getId, softwareIdList)));
+			computer.setSoftware(sqlExecutor.queryList(softwareSql.in(Software::getId, softwareIdList)));
 		}
 
 		return computers;
@@ -92,7 +92,7 @@ public class NwayLambdaPerformance implements Performance {
 	@Override
 	public List<Monitor> listMonitor() {
 
-	    return sqlExecutor.queryBeanList(SQL.query(Monitor.class));
+	    return sqlExecutor.queryList(SQL.query(Monitor.class));
 	}
 
 }

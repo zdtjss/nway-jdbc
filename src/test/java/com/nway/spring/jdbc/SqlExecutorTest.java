@@ -1,11 +1,11 @@
 package com.nway.spring.jdbc;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
-import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -122,16 +121,31 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void testQueryForBeanLambda() {
 
-		Computer computer = new Computer();
-		computer.setBrand("p");
+		ExampleEntity computer = new ExampleEntity();
+		computer.setId(1);
+		computer.setString("a87ba");
 
-		ISqlBuilder builder = SQL.query(Computer.class)
-				.where().like(computer::getBrand).ge(Computer::getPrice, 1)
-				.or().ne(Computer::getPrice, 1000);
+		SqlBuilder builder = SQL.query(ExampleEntity.class)
+				.where().like(computer::getString).ge(ExampleEntity::getpInt, 1)
+				.or().ne(ExampleEntity::getwInt, 1000);
 
-		Computer c = sqlExecutor.queryBean(builder);
+		ExampleEntity c = sqlExecutor.queryBean(builder);
 
 		System.out.println(c);
+	}
+
+	@Test
+	public void likeTest() {
+		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
+				.likeLeft(ExampleEntity::getString, "2f79");
+		System.out.println(sqlExecutor.queryBean(builder).toString());
+	}
+
+	@Test
+	public void inTest() {
+		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
+				.notIn(ExampleEntity::getId, Arrays.asList(1, 3));
+		sqlExecutor.queryList(builder).forEach(e -> System.out.println(e));
 	}
 
 	@Test
@@ -139,7 +153,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		String sql = "select a.*,'from' from( select * from t_nway limit 2) a";
 
-		List<ExampleEntity> users = sqlExecutor.queryBeanList(sql, ExampleEntity.class);
+		List<ExampleEntity> users = sqlExecutor.queryList(sql, ExampleEntity.class);
 
 		System.out.println(users);
 	}
@@ -148,7 +162,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void testQueryBeanPagination() {
 		String sql = "select * from t_nway order by c_p_int";
 
-		Pagination<ExampleEntity> users = sqlExecutor.queryBeanPage(sql, null, 1, 5, ExampleEntity.class);
+		Page<ExampleEntity> users = sqlExecutor.queryPage(sql, null, 1, 5, ExampleEntity.class);
 
 		System.out.println(users);
 	}
@@ -157,7 +171,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void testQueryMapListPagination() {
 		String sql = "select * from t_nway order by c_int";
 
-		Pagination<Map<String, Object>> users = sqlExecutor.queryMapPage(sql, null, 1, 3);
+		Page<Map<String, Object>> users = sqlExecutor.queryPage(sql, null, 1, 3);
 
 		System.out.println(users);
 	}
@@ -372,9 +386,9 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(1);
 
 		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId);
-		List<ExampleEntity> ee = sqlExecutor.queryBeanList(sqlBuilder);
+		List<ExampleEntity> ee = sqlExecutor.queryList(sqlBuilder);
 		
-		sqlExecutor.queryBeanList(Arrays.asList(100), ExampleEntity.class);
+		sqlExecutor.queryList(Arrays.asList(100), ExampleEntity.class);
 
 		System.out.println(ee);
 	}
@@ -386,11 +400,11 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(10);
 
 		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
-		Pagination<ExampleEntity> ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 1);
+		Page<ExampleEntity> ee = sqlExecutor.queryPage(sqlBuilder, 1, 2);
 		System.out.println(ee);
 		
 		sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
-		ee = sqlExecutor.queryBeanPage(sqlBuilder, 1, 1);
+		ee = sqlExecutor.queryPage(sqlBuilder, 1, 10);
 		System.out.println(ee);
 	}
 	
@@ -402,7 +416,7 @@ public class SqlExecutorTest extends BaseTest {
 	
 	@Test
 	public void listAll() {
-		List<ExampleEntity> list = sqlExecutor.queryBeanList(SQL.query(ExampleEntity.class));
+		List<ExampleEntity> list = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
 		System.out.println(JSONObject.toJSONString(list));
 	}
 

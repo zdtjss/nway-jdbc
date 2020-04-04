@@ -15,8 +15,17 @@ public class QueryBuilder extends SqlBuilder {
 		super(beanClass);
 	}
 	
-	public <T, R> QueryBuilder withColumn(SFunction<T, R> field) {
-		columns.add(SqlBuilderUtils.getColumn(beanClass, field));
+	public <T, R> QueryBuilder withColumn(SFunction<T, R>... fields) {
+		for(SFunction<T, R> field : fields) {
+			columns.add(SqlBuilderUtils.getColumn(beanClass, field));
+		}
+		return this;
+	}
+
+	public <T, R> QueryBuilder withColumn(String... columnNames) {
+		for(String column : columnNames) {
+			columns.add(column);
+		}
 		return this;
 	}
 

@@ -40,7 +40,7 @@ public class NwayPerformance implements Performance {
 		computer.setMonitor(sqlExecutor.queryBean(monitorSql, Monitor.class, computer.getMonitorId()));
 		computer.setMouse(sqlExecutor.queryBean(mouseSql, Mouse.class, computer.getMouseId()));
 		computer.setKeyboard(sqlExecutor.queryBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
-		computer.setSoftware(sqlExecutor.queryBeanList(softwareSql, Software.class, computer.getId()));
+		computer.setSoftware(sqlExecutor.queryList(softwareSql, Software.class, computer.getId()));
 		
 		return computer;
 	}
@@ -55,7 +55,7 @@ public class NwayPerformance implements Performance {
 		String keyboardSql = "select * from t_keyboard where id = ?";
 	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
-		List<Computer> computers = sqlExecutor.queryBeanList(computerSql, Computer.class);
+		List<Computer> computers = sqlExecutor.queryList(computerSql, Computer.class);
 
 		for (Computer computer : computers) {
 
@@ -63,7 +63,7 @@ public class NwayPerformance implements Performance {
 			computer.setMonitor(sqlExecutor.queryBean(monitorSql, Monitor.class, computer.getMonitorId()));
 			computer.setMouse(sqlExecutor.queryBean(mouseSql, Mouse.class, computer.getMouseId()));
 			computer.setKeyboard(sqlExecutor.queryBean(keyboardSql, Keyboard.class, computer.getKeyboardId()));
-			computer.setSoftware(sqlExecutor.queryBeanList(softwareSql, Software.class, computer.getId()));
+			computer.setSoftware(sqlExecutor.queryList(softwareSql, Software.class, computer.getId()));
 		}
 
 		return computers;
@@ -78,7 +78,7 @@ public class NwayPerformance implements Performance {
 	@Override
 	public List<Monitor> listMonitor() {
 
-	    return sqlExecutor.queryBeanList("select * from t_monitor", Monitor.class);
+	    return sqlExecutor.queryList("select * from t_monitor", Monitor.class);
 	}
 
 }

@@ -98,7 +98,7 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
         
         if (jdbcSql.getSql().length() != 0)
         {
-            monitors = sqlExecutor.queryBeanList(jdbcSql.getSql().toString(), Monitor.class, jdbcSql.getCondition().toArray());
+            monitors = sqlExecutor.queryList(jdbcSql.getSql().toString(), Monitor.class, jdbcSql.getCondition().toArray());
         }
         
         return monitors;

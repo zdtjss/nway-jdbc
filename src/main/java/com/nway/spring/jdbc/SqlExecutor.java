@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import com.nway.spring.jdbc.pagination.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -237,13 +238,13 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> List<T> queryBeanList(ISqlBuilder queryBuilder) throws DataAccessException {
-		return queryBeanList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+	public <T> List<T> queryList(ISqlBuilder queryBuilder) throws DataAccessException {
+		return queryList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
 	}
 	
-	public <T> List<T> queryBeanList(List<? extends Serializable> ids, Class<T> type) {
+	public <T> List<T> queryList(List<? extends Serializable> ids, Class<T> type) {
 		ISqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
-		return queryBeanList(queryBuilder);
+		return queryList(queryBuilder);
 	}
 	
 	/**
@@ -256,7 +257,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> List<T> queryBeanList(String sql, Class<T> type, Object... args) throws DataAccessException {
+	public <T> List<T> queryList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		logger.debug("sql = " + sql);
 		logger.debug("params = " + objToStr(args));
 		return jdbcTemplate.query(sql, new BeanListHandler<T>(type), args);
@@ -272,9 +273,9 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> Pagination<T> queryBeanPage(ISqlBuilder queryBuilder, int page, int pageSize)
+	public <T> Page<T> queryPage(ISqlBuilder queryBuilder, int page, int pageSize)
 			throws DataAccessException {
-		return queryBeanPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
+		return queryPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
 	}
 
 	/**
@@ -289,7 +290,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException 数据访问异常
 	 */
-	public <T> Pagination<T> queryBeanPage(String sql, Object[] params, int page, int pageSize, Class<T> beanClass)
+	public <T> Page<T> queryPage(String sql, Object[] params, int page, int pageSize, Class<T> beanClass)
 			throws DataAccessException {
 
 		List<T> item = new ArrayList<T>();
@@ -298,11 +299,15 @@ public class SqlExecutor implements InitializingBean {
 		int totalCount = queryCount(countSql, params);
 		
 		if (totalCount != 0) {
-			String paginationSql = paginationSupport.buildPaginationSql(sql, page, pageSize);
-			item = queryBeanList(paginationSql, beanClass, params);
+			PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, page, pageSize);
+			Object[] realParam = new Object[params.length + 2];
+			System.arraycopy(params, 0, realParam, 0, params.length);
+			realParam[realParam.length - 2] = pageDialect.getFirstParam();
+			realParam[realParam.length - 1] = pageDialect.getSecondParam();
+			item = queryList(pageDialect.getSql(), beanClass, realParam);
 		}
 
-		return new Pagination<T>(item, totalCount, page, pageSize);
+		return new Page<T>(item, totalCount, page, pageSize);
 	}
 
 	/**
@@ -314,9 +319,9 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Pagination<Map<String, Object>> queryMapPage(QueryBuilder queryBuilder, int page,
-														int pageSize) throws DataAccessException {
-		return queryMapPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
+	public Page<Map<String, Object>> queryPage(QueryBuilder queryBuilder, int page,
+											   int pageSize) throws DataAccessException {
+		return queryPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
 	}
 	
 	/**
@@ -333,7 +338,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Pagination<Map<String, Object>> queryMapPage(String sql, Object[] params, int page, int pageSize)
+	public Page<Map<String, Object>> queryPage(String sql, Object[] params, int page, int pageSize)
 			throws DataAccessException {
 
 		List<Map<String, Object>> item = new ArrayList<>();
@@ -344,12 +349,16 @@ public class SqlExecutor implements InitializingBean {
 		int totalCount = queryCount(countSql, params);
 
 		if (totalCount != 0) {
-			String paginationSql = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
-			logger.debug("sql = " + paginationSql);
-			logger.debug("params = " + objToStr(params));
-			item = jdbcTemplate.queryForList(paginationSql, params);
+			PageDialect pageDialect = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
+			Object[] realParam = new Object[params.length + 2];
+			System.arraycopy(params, 0, realParam, 0, params.length);
+			realParam[realParam.length - 2] = pageDialect.getFirstParam();
+			realParam[realParam.length - 1] = pageDialect.getSecondParam();
+			logger.debug("sql = " + pageDialect.getSql());
+			logger.debug("params = " + objToStr(realParam));
+			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam);
 		}
-		return new Pagination<Map<String, Object>>(item, totalCount, page, pageSize);
+		return new Page<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
 
 	/**
