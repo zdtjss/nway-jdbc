@@ -116,7 +116,7 @@ public class HibernatePerformance implements Performance {
 			mouse.setColor("black");
 			mouse.setModel("M-1");
 			mouse.setType(1);
-			mouse.setWireless(false);
+			mouse.setIsWireless(false);
 			mouse.setProductionDate(new Date());
 
 			Keyboard keyboard = new Keyboard();
@@ -126,7 +126,7 @@ public class HibernatePerformance implements Performance {
 			keyboard.setType(1);
 			keyboard.setPrice(1.1f);
 			keyboard.setInterfaceType(1);
-			keyboard.setWireless(false);
+			keyboard.setIsWireless(false);
 			keyboard.setPhoto(null);
 			keyboard.setProductionDate(new Date());
 

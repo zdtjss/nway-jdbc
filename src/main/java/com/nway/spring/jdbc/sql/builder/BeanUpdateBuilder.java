@@ -30,7 +30,7 @@ public class BeanUpdateBuilder extends SqlBuilder {
 				}
 				Object value = SqlBuilderUtils.getColumnValue(field, obj, SqlType.UPDATE);
 				field.setAccessible(true);
-				if (value != null && !value.equals(field.get(getBeanClass().newInstance()))) {
+				if (value != null && !value.equals(field.get(getBeanClass().getDeclaredConstructor().newInstance()))) {
 					sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
 					setsParam.add(value);
 				}

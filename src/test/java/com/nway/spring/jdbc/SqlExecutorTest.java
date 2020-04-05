@@ -359,13 +359,13 @@ public class SqlExecutorTest extends BaseTest {
 		example.setId(1);
 		example.setwDouble(10.d);
 
-		ISqlBuilder ISqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
 				.ge(example::getpFloat).le(example::getpDouble).lt(example::getpLong).gt(example::getpDouble)
 				.between(example::getId, example::getId, example::getpLong).notBetween(example::getId, example::getId, example::getId)
 				.like(example::getString).notLike(example::getString)
 				.or(e -> e.eq(example::getId).eq(example::getpByte))
 				.and(e -> e.eq(example::getpLong).or().eq(example::getwDouble));
-		ExampleEntity ee = sqlExecutor.queryBean(ISqlBuilder);
+		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
 
 		System.out.println(ee);
 		

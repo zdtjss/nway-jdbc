@@ -79,7 +79,7 @@ Map对象集分页：
 		
         Pagination<Map<String, Object>> users = sqlExecutor.queryForMapPage("select * from user_name where id <> ? order by id", new Object[]{ "abc", 1 }, 1, 10);
         users使用同queryForBeanPage
-		分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
+		分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.pagination.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
 
 自动填充数据和数据权限支持：
 

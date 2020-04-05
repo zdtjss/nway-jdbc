@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class PerformenceMonitor {
 
-	@Around("execution(* com.nway.spring.jdbc.performance.*Performance.*(..))")
-	public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+    @Around("execution(* com.nway.spring.jdbc.performance.*Performance.*(..))")
+    public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
 
-		long begin = System.currentTimeMillis();
+        long begin = System.currentTimeMillis();
 
-		Object retVal = pjp.proceed();
+        Object retVal = pjp.proceed();
 
-		System.out.println(String.format("%d     %s     %s", System.currentTimeMillis() - begin,
-				 pjp.getSignature().toShortString(), Thread.currentThread().getName()));
+        System.out.println(String.format("%d\t%s\t%s", System.currentTimeMillis() - begin,
+                pjp.getSignature().toShortString(), Thread.currentThread().getName()));
 
-		return retVal;
-	}
+        return retVal;
+    }
 }

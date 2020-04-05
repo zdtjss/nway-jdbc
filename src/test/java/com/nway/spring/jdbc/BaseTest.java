@@ -1,7 +1,5 @@
 package com.nway.spring.jdbc;
 
-import javax.sql.DataSource;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -13,37 +11,39 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.sql.DataSource;
+
 @RunWith(SpringRunner.class)
-@ContextConfiguration({ "/spring.xml" })
+@ContextConfiguration(locations = {"/spring.xml"})
 public class BaseTest {
 
-	private static DataSource dataSource;
+    private static DataSource dataSource;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
 
-		Resource resource = new ClassPathResource("spring.xml");
+        Resource resource = new ClassPathResource("spring.xml");
 
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-		XmlBeanDefinitionReader xmlBeanReader = new XmlBeanDefinitionReader(beanFactory);
+        XmlBeanDefinitionReader xmlBeanReader = new XmlBeanDefinitionReader(beanFactory);
 
-		xmlBeanReader.loadBeanDefinitions(resource);
+        xmlBeanReader.loadBeanDefinitions(resource);
 
-		dataSource = beanFactory.getBean(DataSource.class);
+        dataSource = beanFactory.getBean(DataSource.class);
 
-		SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+        SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
 
-		builder.bind("java:comp/env/jdbc/nway", dataSource);
-		builder.activate();
-	}
+        builder.bind("java:comp/env/jdbc/nway", dataSource);
+        builder.activate();
+    }
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
 
-		if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+        if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 
-			((org.apache.tomcat.jdbc.pool.DataSource) dataSource).close();
-		}
-	}
+            ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).close();
+        }
+    }
 }

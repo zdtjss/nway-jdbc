@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-	xsi:schemaLocation="http://www.springframework.org/schema/tx
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jee="http://www.springframework.org/schema/jee" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/tx
      	http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
@@ -12,118 +12,118 @@
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
 		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-	<context:component-scan base-package="com.nway.spring.jdbc" />
+    <context:component-scan base-package="com.nway.spring.jdbc"/>
 
-	<jpa:repositories base-package="com.nway.spring.jdbc.performance.repositories"/>
+    <jpa:repositories base-package="com.nway.spring.jdbc.performance.repositories"/>
 
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
-	<bean id="jdbcTxManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
+    <bean id="jdbcTxManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
-	<bean id="entityManagerFactory"
-		class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
-		<property name="persistenceUnitName" value="nway.perfomance.jpa" />
-	</bean> 
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="nway.perfomance.jpa"/>
+    </bean>
 
-	<bean id="jpaTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
-	</bean>
+    <bean id="jpaTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
 
-	<bean id="sessionFactory"
-		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="packagesToScan">
-			<list>
-				<value>com.nway.spring.jdbc</value>
-			</list>
-		</property>
-		<property name="hibernateProperties">
-			<value>
-				hibernate.hbm2ddl.auto=update
-			</value>
-		</property>
-	</bean>
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan">
+            <list>
+                <value>com.nway.spring.jdbc</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <value>
+                hibernate.hbm2ddl.auto=update
+            </value>
+        </property>
+    </bean>
 
-	<bean id="hibernateTxManager"
-		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
-		<property name="sessionFactory" ref="sessionFactory" />
-	</bean>
+    <bean id="hibernateTxManager"
+          class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
 
-	<tx:annotation-driven transaction-manager="jdbcTxManager" />
+    <tx:annotation-driven transaction-manager="jdbcTxManager"/>
 
-	<tx:annotation-driven transaction-manager="jpaTxManager" />
+    <tx:annotation-driven transaction-manager="jpaTxManager"/>
 
-	<tx:annotation-driven transaction-manager="hibernateTxManager" />
+    <tx:annotation-driven transaction-manager="hibernateTxManager"/>
 
-	<bean id="sqlExecutor" class="com.nway.spring.jdbc.SqlExecutor">
-		<property name="dataSource" ref="dataSource" />
-		<property name="paginationSupport">
-			<bean class="com.nway.spring.jdbc.HsqldbPaginationSupport"/>
-		</property>
-	</bean>
+    <bean id="sqlExecutor" class="com.nway.spring.jdbc.SqlExecutor">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="paginationSupport">
+            <bean class="com.nway.spring.jdbc.DerbyPaginationSupport"/>
+        </property>
+    </bean>
 
-	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="configurationProperties">
-			<map>
-				<entry key="logImpl" value="LOG4J" />
-			</map>
-		</property>
-		<property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity" />
-		<property name="mapperLocations"
-			value="classpath*:com/nway/spring/jdbc/performance/mapper/*-mapper.xml" />
-		<property name="databaseIdProvider">
-			<bean class="org.apache.ibatis.mapping.VendorDatabaseIdProvider">
-				<property name="properties">
-					<map>
-						<entry key="Oracle" value="oracle" />
-					</map>
-				</property>
-			</bean>
-		</property>
-	</bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configurationProperties">
+            <map>
+                <entry key="logImpl" value="LOG4J"/>
+            </map>
+        </property>
+        <property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity"/>
+        <property name="mapperLocations"
+                  value="classpath*:mapper/mybatis/*.xml"/>
+        <property name="databaseIdProvider">
+            <bean class="org.apache.ibatis.mapping.VendorDatabaseIdProvider">
+                <property name="properties">
+                    <map>
+                        <entry key="Oracle" value="oracle"/>
+                    </map>
+                </property>
+            </bean>
+        </property>
+    </bean>
 
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="basePackage" value="com.nway.spring.jdbc.performance.mapper" />
-		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
-	</bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.nway.spring.jdbc.performance.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
 
-	<bean id="sqlSessionFactoryMybatisPlus"
-		class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="mapperLocations" value="classpath*:com/nway/spring/jdbc/performance/mybatisplus/*.xml"/>
-	</bean>
+    <bean id="sqlSessionFactoryMybatisPlus"
+          class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath*:mapper/mybatisplus/*.xml" />
+    </bean>
 
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryMybatisPlus" />
-		<property name="basePackage" value="com.nway.spring.jdbc.performance.mybatisplus" />
-	</bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryMybatisPlus"/>
+        <property name="basePackage" value="com.nway.spring.jdbc.performance.mybatisplus"/>
+    </bean>
 
-	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
-		<constructor-arg index="0" ref="sqlSessionFactory" />
-	</bean>
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
 
-	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource">
-		<constructor-arg>
-			<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
+    <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource">
+        <constructor-arg>
+            <bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
 
-				<property name="username" value="SA" />
-				<property name="password" value="" />
+                <!--<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+                <property name="url" value="jdbc:hsqldb:file:nwaydb/db;shutdown=true;create=true;write_delay=false;full_log_replay=true"/>-->
 
-				<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
-				<property name="url" value="jdbc:hsqldb:file:nwaydb/db;shutdown=true;create=true;write_delay=false;full_log_replay=true" />
-
-				<property name="initialSize" value="3" />
-				<property name="maxActive" value="150" />
-			</bean>
-		</constructor-arg>
-	</bean>
+                <property name="driverClassName" value="org.apache.derby.iapi.jdbc.AutoloadedDriver"/>
+                <property name="url" value="jdbc:derby:nway;create=true"/>
+                
+                <property name="initialSize" value="3"/>
+                <property name="maxActive" value="150"/>
+            </bean>
+        </constructor-arg>
+    </bean>
 
 </beans>

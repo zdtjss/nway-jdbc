@@ -1,5 +1,7 @@
 package com.nway.spring.jdbc.performance.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.util.Arrays;
 import java.util.Date;
 
@@ -18,6 +20,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "t_mainframe")
+@TableName("t_mainframe")
 @com.nway.spring.jdbc.annotation.Table("t_mainframe")
 public class Mainframe {
 

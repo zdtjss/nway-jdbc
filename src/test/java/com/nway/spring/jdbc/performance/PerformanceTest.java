@@ -15,107 +15,107 @@ import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
 @Service
 public class PerformanceTest extends BaseTest {
 
-	@Autowired
-	@Qualifier("nwayPerformance")
-	private NwayPerformance nwayPerformance;
-	
-	@Autowired
-	@Qualifier("nwayLambdaPerformance")
-	private NwayLambdaPerformance nwayLambdaPerformance;
+    @Autowired
+    @Qualifier("nwayPerformance")
+    private NwayPerformance nwayPerformance;
 
-	@Autowired
-	@Qualifier("springJdbcPerformance")
-	private SpringJdbcPerformance springJdbcPerformance;
+    @Autowired
+    @Qualifier("nwayLambdaPerformance")
+    private NwayLambdaPerformance nwayLambdaPerformance;
 
-	@Autowired
-	@Qualifier("hibernatePerformance")
-	private HibernatePerformance hibernatePerformance;
-	
-	@Autowired
+    @Autowired
+    @Qualifier("springJdbcPerformance")
+    private SpringJdbcPerformance springJdbcPerformance;
+
+    @Autowired
+    @Qualifier("hibernatePerformance")
+    private HibernatePerformance hibernatePerformance;
+
+    @Autowired
     @Qualifier("hibernateJpaPerformance")
-	private HibernateJpaPerformance jpaPerformance;
-	
-	@Autowired
-	private SpringDataJpaPerformance springDataJpaPerformance;
-	
-	@Autowired
-	@Qualifier("myBatisPerformance")
-	private MyBatisPerformance myBatisPerformance;
-	
-	@Autowired
-	@Qualifier("myBatisPlusPerformance")
-	private MyBatisPlusPerformance myBatisPlusPerformance;
-	
-	@Autowired
-	@Qualifier("jdbcPerformance")
-	private JdbcPerformance jdbcPerformance;
-	
-	@Autowired
-	@Qualifier("scriptSolutionPerformance")
-	private ScriptSolutionPerformance scriptPerformance;
+    private HibernateJpaPerformance jpaPerformance;
 
-	@Test
-	public void testGetMonitor() {
+    @Autowired
+    private SpringDataJpaPerformance springDataJpaPerformance;
 
-		List<Monitor> monitorList = nwayPerformance.listMonitor();
-		
-		for (Monitor monitor:monitorList) {
+    @Autowired
+    @Qualifier("myBatisPerformance")
+    private MyBatisPerformance myBatisPerformance;
 
-			nwayPerformance.getMonitorById(monitor.getId());
-			
-			nwayLambdaPerformance.getMonitorById(monitor.getId());
+    @Autowired
+    @Qualifier("myBatisPlusPerformance")
+    private MyBatisPlusPerformance myBatisPlusPerformance;
 
-			hibernatePerformance.getMonitorById(monitor.getId());
-			
-			jpaPerformance.getMonitorById(monitor.getId());
-			
-			springDataJpaPerformance.getMonitorById(monitor.getId());
+    @Autowired
+    @Qualifier("jdbcPerformance")
+    private JdbcPerformance jdbcPerformance;
 
-			springJdbcPerformance.getMonitorById(monitor.getId());
-			
-			myBatisPerformance.getMonitorById(monitor.getId());
-			
-			myBatisPlusPerformance.getMonitorById(monitor.getId());
+    @Autowired
+    @Qualifier("scriptSolutionPerformance")
+    private ScriptSolutionPerformance scriptPerformance;
 
-			System.out.println();
-		}
-	}
+    @Test
+    public void testGetMonitor() {
 
-	@Test
-	public void testListMonitor() {
+        List<Monitor> monitorList = nwayPerformance.listMonitor();
 
-		for (int i = 0; i < 30; i++) {
+        for (Monitor monitor : monitorList) {
 
-			nwayPerformance.listMonitor();
-			
-			nwayLambdaPerformance.listMonitor();
-			
-			jdbcPerformance.listMonitor();
+            nwayPerformance.getMonitorById(monitor.getId());
 
-			hibernatePerformance.listMonitor();
-			
-			jpaPerformance.listMonitor();
-			
-			springDataJpaPerformance.listMonitor();
+            nwayLambdaPerformance.getMonitorById(monitor.getId());
 
-			springJdbcPerformance.listMonitor();
-			
-			myBatisPerformance.listMonitor();
-			
-			myBatisPlusPerformance.listMonitor();
-			
-			scriptPerformance.listMonitor();
+            hibernatePerformance.getMonitorById(monitor.getId());
 
-			System.out.println();
-		}
-	}
-	
-	@Test
-	public void testQueryMonitorJsonList() {
-	    
-	    for (int i = 0; i < 10; i++) {
-	        
-	        jdbcPerformance.queryMonitorJsonList();
+            jpaPerformance.getMonitorById(monitor.getId());
+
+            springDataJpaPerformance.getMonitorById(monitor.getId());
+
+            springJdbcPerformance.getMonitorById(monitor.getId());
+
+//			myBatisPerformance.getMonitorById(monitor.getId());
+
+            myBatisPlusPerformance.getMonitorById(monitor.getId());
+
+            System.out.println();
+        }
+    }
+
+    @Test
+    public void testListMonitor() {
+
+        for (int i = 0; i < 30; i++) {
+
+            nwayPerformance.listMonitor();
+
+            nwayLambdaPerformance.listMonitor();
+
+            jdbcPerformance.listMonitor();
+
+            hibernatePerformance.listMonitor();
+
+            jpaPerformance.listMonitor();
+
+            springDataJpaPerformance.listMonitor();
+
+            springJdbcPerformance.listMonitor();
+
+//			myBatisPerformance.listMonitor();
+
+            myBatisPlusPerformance.listMonitor();
+
+            scriptPerformance.listMonitor();
+
+            System.out.println();
+        }
+    }
+
+    @Test
+    public void testQueryMonitorJsonList() {
+
+        for (int i = 0; i < 10; i++) {
+
+            jdbcPerformance.queryMonitorJsonList();
 
 	        /*hibernatePerformance.listMonitor();
 			
@@ -123,72 +123,108 @@ public class PerformanceTest extends BaseTest {
 			
 			springDataJpaPerformance.listMonitor();*/
 
-	        springJdbcPerformance.queryMonitorJsonList();
-	        
-			myBatisPerformance.queryMonitorJsonList();
-	        
-	        scriptPerformance.queryMonitorJsonList();
-	        
-	        System.out.println();
-	    }
-	}
+            springJdbcPerformance.queryMonitorJsonList();
 
-	@Test
-	public void testGetComputer() {
+            myBatisPerformance.queryMonitorJsonList();
 
-		final int id = 11;
+            scriptPerformance.queryMonitorJsonList();
 
-		for (int i = 0; i < 10; i++) {
+            System.out.println();
+        }
+    }
+
+    @Test
+    public void testGetComputer() {
+
+        final int id = 11;
+
+        for (int i = 0; i < 10; i++) {
 
 //			nwayPerformance.getComputerById(id);
 
 //			hibernatePerformance.getComputerById(id);
-			
+
 //			jpaPerformance.getComputerById(id);
-			
+
 //			springDataJpaPerformance.getComputerById(id);
 
 //			springJdbcPerformance.getComputerById(id);
-			
-		    Computer computer = myBatisPerformance.getComputerById(id);
-		    
-		    // System.out.println(computer.getSoftware());
 
-			System.out.println();
+            Computer computer = myBatisPerformance.getComputerById(id);
+
+            // System.out.println(computer.getSoftware());
+
+            System.out.println();
+        }
+    }
+
+    @Test
+    public void testListComputer() {
+
+        List<Computer> cs = null;
+
+        for (int i = 0; i < 10; i++) {
+
+            nwayPerformance.listComputer();
+
+            nwayLambdaPerformance.listComputer();
+
+            cs = hibernatePerformance.listComputer();
+
+            cs = jpaPerformance.listComputer();
+
+            cs = springDataJpaPerformance.listComputer();
+
+//			System.out.println(cs.get(0));
+
+            springJdbcPerformance.listComputer();
+
+//			cs = myBatisPerformance.listComputer();
+
+            cs = myBatisPlusPerformance.listComputer();
+
+//			System.out.println(cs.get(0));
+
+            System.out.println();
+        }
+    }
+
+	@Test
+	public void listComputerVsTest() {
+
+		for (int i = 0; i < 50; i++) {
+			myBatisPerformance.listComputer();
+		}
+		System.out.println();
+		for (int i = 0; i < 50; i++) {
+			nwayLambdaPerformance.listComputer();
+		}
+		System.out.println();
+		for (int i = 0; i < 50; i++) {
+			myBatisPlusPerformance.listComputer();
 		}
 	}
 
 	@Test
-	public void testListComputer() {
+	public void listMonitorVsTest() {
 
-		List<Computer> cs = null;
-		
-		for (int i = 0; i < 10; i++) {
-
-			nwayPerformance.listComputer();
-
-			cs = hibernatePerformance.listComputer();
-			
-			cs = jpaPerformance.listComputer();
-			
-			cs = springDataJpaPerformance.listComputer();
-
-//			System.out.println(cs.get(0));
-			
-			springJdbcPerformance.listComputer();
-			
-			cs = myBatisPerformance.listComputer();
-			
-//			System.out.println(cs.get(0));
-			
-			System.out.println();
+		for (int i = 0; i < 50; i++) {
+			myBatisPerformance.listMonitor();
+		}
+		System.out.println();
+		for (int i = 0; i < 50; i++) {
+			nwayLambdaPerformance.listMonitor();
+		}
+		System.out.println();
+		for (int i = 0; i < 50; i++) {
+			myBatisPlusPerformance.listMonitor();
 		}
 	}
-	
-	@Test
-	public void initDB() {
 
-		((HibernatePerformance) this.hibernatePerformance).initDB();
-	}
-	
+    @Test
+    public void initDB() {
+
+        ((HibernatePerformance) this.hibernatePerformance).initDB();
+    }
+
 }

@@ -26,7 +26,7 @@ public class SqlBuilderUtils {
      * 字段映射
      */
     private static final Map<Class<?>, Map<String, String>> FIELD_COLUMN_MAP = new ConcurrentHashMap<>();
-    
+
     private static final Map<Class<?>, FillStrategy> FILL_STRATEGY = new ConcurrentHashMap<>();
     private static final Map<Class<?>, PermissionStrategy> PERMISSION_STRATEGY = new ConcurrentHashMap<>();
 
@@ -70,13 +70,13 @@ public class SqlBuilderUtils {
 
 		return (SerializedLambda) writeReplace.invoke(lambda);
 	}
-	
+
 	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) throws NoSuchMethodException,
 			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
 		writeReplace.setAccessible(true);
-		
+
 		return (SerializedLambda) writeReplace.invoke(lambda);
 	}
 	
@@ -110,15 +110,15 @@ public class SqlBuilderUtils {
 	
 	public static String getWhereCondition(Field field) {
 		Column column = field.getAnnotation(Column.class);
-		if(column == null ||NonePermissionStrategy.class.equals(column.permissionStrategy())) {
+		if (column == null || NonePermissionStrategy.class.equals(column.permissionStrategy())) {
 			return "";
 		}
 		Class<? extends PermissionStrategy> permissionStrategyClass = column.permissionStrategy();
 		PermissionStrategy permissionStrategy = PERMISSION_STRATEGY.get(permissionStrategyClass);
 		if(permissionStrategy == null) {
 			try {
-				permissionStrategy = permissionStrategyClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				permissionStrategy = permissionStrategyClass.getDeclaredConstructor().newInstance();
+			} catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
 				throw new SqlBuilderException(e);
 			}
 			PERMISSION_STRATEGY.put(permissionStrategyClass, permissionStrategy);

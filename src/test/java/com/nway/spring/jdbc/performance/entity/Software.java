@@ -1,5 +1,8 @@
 package com.nway.spring.jdbc.performance.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "t_software")
+@TableName("t_software")
 @com.nway.spring.jdbc.annotation.Table("t_software")
 public class Software {
 
@@ -16,6 +20,8 @@ public class Software {
 	private String vender;
 	private String name;
 	private String version;
+	@TableField(value = "file_size")
+	@com.nway.spring.jdbc.annotation.Column("file_size")
 	private long size;
 
 	@Id

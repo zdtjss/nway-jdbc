@@ -1,5 +1,8 @@
 package com.nway.spring.jdbc.performance.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.util.Arrays;
 import java.util.Date;
 
@@ -15,6 +18,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "t_keyboard")
+@TableName("t_keyboard")
 @com.nway.spring.jdbc.annotation.Table("t_keyboard")
 public class Keyboard {
 
@@ -31,6 +35,8 @@ public class Keyboard {
 	/** 接口类型 **/
 	private int interfaceType;
 	/** 是否是无线 **/
+	@TableField(value = "is_wireless")
+	@com.nway.spring.jdbc.annotation.Column("is_wireless")
 	private boolean isWireless;
 	/** 颜色 **/
 	private String color;
@@ -94,12 +100,12 @@ public class Keyboard {
 		this.interfaceType = interfaceType;
 	}
 
-	@Column
-	public boolean isWireless() {
+	@Column(name = "is_wireless")
+	public boolean getIsWireless() {
 		return isWireless;
 	}
 
-	public void setWireless(boolean isWireless) {
+	public void setIsWireless(boolean isWireless) {
 		this.isWireless = isWireless;
 	}
 

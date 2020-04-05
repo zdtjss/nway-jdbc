@@ -14,6 +14,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
 
 @Entity
 @Table(name = "t_monitor")
@@ -22,6 +23,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 public class Monitor {
 
 	/** 编号 **/
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.ID)
 	private int id;
 	/** 品牌 **/
 	private String brand;

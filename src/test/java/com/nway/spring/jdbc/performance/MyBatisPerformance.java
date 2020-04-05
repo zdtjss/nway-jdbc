@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.performance;
 
 import java.util.List;
 
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ public class MyBatisPerformance implements Performance , JsonQueryPerformance {
     
 	@Autowired
 	private ComputerMapper computerMapper;
-	
+
 	@Override
 	public Computer getComputerById(int id) {
 		
@@ -28,7 +29,7 @@ public class MyBatisPerformance implements Performance , JsonQueryPerformance {
 
 	@Override
 	public List<Computer> listComputer() {
-		
+
 		return computerMapper.listComputer();
 	}
 

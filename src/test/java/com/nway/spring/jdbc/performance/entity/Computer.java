@@ -21,6 +21,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -42,24 +43,29 @@ public class Computer {
 	/** 主机编号，nway或spring jdbc使用 **/
 	private int mainframeId;
 	/** 主机 **/
+	@TableField(exist = false)
 	private Mainframe mainframe;
 	/** 显示器编号，nway或spring jdbc使用 **/
 	private int monitorId;
 	/** 显示器 **/
+	@TableField(exist = false)
 	private Monitor monitor;
 	/** 鼠标编号，nway或spring jdbc使用 **/
 	private int mouseId;
 	/** 鼠标 **/
+	@TableField(exist = false)
 	private Mouse mouse;
 	/** 键盘编号，nway或spring jdbc使用 **/
 	private int keyboardId;
 	/** 键盘 **/
+	@TableField(exist = false)
 	private Keyboard keyboard;
 	/** 生产日期 **/
 	private Date productionDate;
 	/** 设备图片 **/
 	private byte[] photo;
 	/** 预装软件 **/
+	@TableField(exist = false)
 	private List<Software> software;
 
 	@Id

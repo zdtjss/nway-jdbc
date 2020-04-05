@@ -1,6 +1,9 @@
 package com.nway.spring.jdbc.performance.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+
 @com.nway.spring.jdbc.annotation.Table("t_computer_software")
+@TableName("t_computer_software")
 public class ComputerSoftware {
 
 	private int softwareId;
