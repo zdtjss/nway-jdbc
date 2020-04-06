@@ -25,7 +25,7 @@ public class HibernateJpaPerformance implements Performance {
 
 	    EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-		Computer computer = (Computer) entityManager.find(Computer.class, id);
+		Computer computer = entityManager.find(Computer.class, id);
 
 		entityManager.close();
 

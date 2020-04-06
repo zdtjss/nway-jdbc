@@ -18,7 +18,7 @@ import com.nway.spring.jdbc.performance.entity.Software;
 
 @Service("springJdbcPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
-public class SpringJdbcPerformance implements Performance , JsonQueryPerformance {
+public class SpringJdbcPerformance implements Performance {
 
     private Gson gson = new Gson();
     
@@ -166,10 +166,4 @@ public class SpringJdbcPerformance implements Performance , JsonQueryPerformance
 		return jdbcTemplate.query("select * from t_monitor", BeanPropertyRowMapper.newInstance(Monitor.class));
 	}
 
-    @Override
-    public String queryMonitorJsonList()
-    {
-        return gson.toJson(listMonitor());
-    }
-	
 }

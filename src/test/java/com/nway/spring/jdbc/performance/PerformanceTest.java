@@ -111,29 +111,6 @@ public class PerformanceTest extends BaseTest {
     }
 
     @Test
-    public void testQueryMonitorJsonList() {
-
-        for (int i = 0; i < 10; i++) {
-
-            jdbcPerformance.queryMonitorJsonList();
-
-	        /*hibernatePerformance.listMonitor();
-			
-			jpaPerformance.listMonitor();
-			
-			springDataJpaPerformance.listMonitor();*/
-
-            springJdbcPerformance.queryMonitorJsonList();
-
-            myBatisPerformance.queryMonitorJsonList();
-
-            scriptPerformance.queryMonitorJsonList();
-
-            System.out.println();
-        }
-    }
-
-    @Test
     public void testGetComputer() {
 
         final int id = 11;
@@ -150,7 +127,7 @@ public class PerformanceTest extends BaseTest {
 
 //			springJdbcPerformance.getComputerById(id);
 
-            Computer computer = myBatisPerformance.getComputerById(id);
+            myBatisPerformance.getComputerById(id);
 
             // System.out.println(computer.getSoftware());
 
@@ -224,7 +201,7 @@ public class PerformanceTest extends BaseTest {
     @Test
     public void initDB() {
 
-        ((HibernatePerformance) this.hibernatePerformance).initDB();
+       hibernatePerformance.initDB();
     }
 
 }

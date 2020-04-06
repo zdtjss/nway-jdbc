@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +31,7 @@ public class HibernatePerformance implements Performance {
 
 		Session session = sessionFactory.openSession();
 
-		Computer computer = (Computer) session.get(Computer.class, id);
+		Computer computer = session.get(Computer.class, id);
 
 		session.close();
 
@@ -56,7 +56,7 @@ public class HibernatePerformance implements Performance {
 
 		Session session = sessionFactory.openSession();
 		
-		Monitor mouse = (Monitor) session.get(Monitor.class, id);
+		Monitor mouse = session.get(Monitor.class, id);
 		
 		session.close();
 		
@@ -142,7 +142,7 @@ public class HibernatePerformance implements Performance {
 			s1.setName("计算器");
 			s1.setSize(100);
 			s1.setVender("微软");
-			s1.setVender("1.0");
+			s1.setVersion("1.0");
 			
 			software.add(s1);
 			
@@ -151,7 +151,7 @@ public class HibernatePerformance implements Performance {
 			s2.setName("计算器");
 			s2.setSize(100);
 			s2.setVender("微软");
-			s2.setVender("1.0");
+			s2.setVersion("1.0");
 			
 			software.add(s2);
 			
@@ -160,7 +160,7 @@ public class HibernatePerformance implements Performance {
 			s3.setName("计算器");
 			s3.setSize(100);
 			s3.setVender("微软");
-			s3.setVender("1.0");
+			s3.setVersion("1.0");
 			
 			software.add(s3);
 			

@@ -19,8 +19,6 @@ import com.nway.spring.jdbc.performance.entity.Software;
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class NwayPerformance implements Performance {
 
-    private Gson gson = new Gson();
-    
 	@Autowired
 	private SqlExecutor sqlExecutor;
 

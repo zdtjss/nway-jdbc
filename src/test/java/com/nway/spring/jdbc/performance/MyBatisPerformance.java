@@ -14,10 +14,8 @@ import com.nway.spring.jdbc.performance.mapper.ComputerMapper;
 
 @Service("myBatisPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
-public class MyBatisPerformance implements Performance , JsonQueryPerformance {
+public class MyBatisPerformance implements Performance {
 
-    private Gson gson = new Gson();
-    
 	@Autowired
 	private ComputerMapper computerMapper;
 
@@ -44,11 +42,5 @@ public class MyBatisPerformance implements Performance , JsonQueryPerformance {
 		
 		return computerMapper.listMonitor();
 	}
-
-    @Override
-    public String queryMonitorJsonList()
-    {
-        return gson.toJson(listMonitor());
-    }
 
 }

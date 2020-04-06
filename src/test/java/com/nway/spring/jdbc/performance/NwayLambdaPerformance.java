@@ -25,8 +25,6 @@ import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class NwayLambdaPerformance implements Performance {
 
-    private Gson gson = new Gson();
-    
 	@Autowired
 	private SqlExecutor sqlExecutor;
 
