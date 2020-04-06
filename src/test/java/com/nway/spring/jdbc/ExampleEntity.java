@@ -13,6 +13,7 @@ import javax.persistence.*;
 
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
+import com.nway.spring.jdbc.sql.TestPermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 
 @Entity
@@ -42,6 +43,7 @@ public class ExampleEntity {
 	private Double wDouble;
 
 	private String string;
+	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
 	private Date utilDate;
 	private java.sql.Date sqlDate;
 	@com.nway.spring.jdbc.annotation.Column(name = "c_timestamp")

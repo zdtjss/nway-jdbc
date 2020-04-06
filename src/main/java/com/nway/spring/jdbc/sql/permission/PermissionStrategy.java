@@ -13,5 +13,5 @@ public interface PermissionStrategy {
 	 * @param column 字段名
 	 * @return 不支持时此表和字段时，请返回null
 	 */
-	String getSqlSegment(String column);
+	WhereCondition getSqlSegment(String column);
 }

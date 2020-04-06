@@ -19,6 +19,7 @@ import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.PermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.WhereCondition;
 
 public class SqlBuilderUtils {
 
@@ -90,16 +91,16 @@ public class SqlBuilderUtils {
 		}
 	}
 	
-	public static Object getColumnValue(Class<? extends FillStrategy> fillStrategyClass, SqlType sqlType) throws InstantiationException, IllegalAccessException {
+	public static Object getColumnValue(Class<? extends FillStrategy> fillStrategyClass, SqlType sqlType) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		FillStrategy fillStrategy = FILL_STRATEGY.get(fillStrategyClass);
 		if (fillStrategy == null) {
-			fillStrategy = fillStrategyClass.newInstance();
+			fillStrategy = fillStrategyClass.getDeclaredConstructor().newInstance();
 			FILL_STRATEGY.put(fillStrategyClass, fillStrategy);
 		}
 		return fillStrategy.getValue(sqlType);
 	}
 	
-	public static Object getColumnValue(Field field, Object obj, SqlType sqlType) throws InstantiationException, IllegalAccessException {
+	public static Object getColumnValue(Field field, Object obj, SqlType sqlType) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		Column column = field.getAnnotation(Column.class);
 		if(column == null || NoneFillStrategy.class.equals(column.fillStrategy())) {
 			field.setAccessible(true);
@@ -108,10 +109,10 @@ public class SqlBuilderUtils {
 		return getColumnValue(column.fillStrategy(), sqlType);
 	}
 	
-	public static String getWhereCondition(Field field) {
+	public static WhereCondition getWhereCondition(Field field) {
 		Column column = field.getAnnotation(Column.class);
 		if (column == null || NonePermissionStrategy.class.equals(column.permissionStrategy())) {
-			return "";
+			return null;
 		}
 		Class<? extends PermissionStrategy> permissionStrategyClass = column.permissionStrategy();
 		PermissionStrategy permissionStrategy = PERMISSION_STRATEGY.get(permissionStrategyClass);

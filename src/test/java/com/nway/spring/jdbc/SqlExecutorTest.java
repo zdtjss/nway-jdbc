@@ -55,7 +55,8 @@ public class SqlExecutorTest extends BaseTest {
 
 		exampleEntity.setString("strcolumn");
 
-		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
+		SqlBuilder builder = SQL.query(ExampleEntity.class);
+				builder.where()
 				.eq(ExampleEntity::getId, 1)
 				.eq(exampleEntity::getId)
 				.eq("pk_id", exampleEntity.getId())
@@ -399,8 +400,8 @@ public class SqlExecutorTest extends BaseTest {
 		ExampleEntity example = new ExampleEntity();
 		example.setId(10);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId);
-		Page<ExampleEntity> ee = sqlExecutor.queryPage(sqlBuilder, 1, 2);
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(example::getId).orderByDesc(ExampleEntity::getId);
+		Page<ExampleEntity> ee = sqlExecutor.queryPage(sqlBuilder, 1, 3);
 		System.out.println(ee);
 		
 		sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
