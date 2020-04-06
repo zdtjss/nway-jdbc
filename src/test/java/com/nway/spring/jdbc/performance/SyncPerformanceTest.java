@@ -346,16 +346,6 @@ public class SyncPerformanceTest extends BaseTest {
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
         springDataJpaPerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(jdbcTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
-        System.out.println("jdbc = " + (System.currentTimeMillis() - begin));
-        jdbcPerformance.listMonitor();
-
         /*begin = System.currentTimeMillis();
         futureList = executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));

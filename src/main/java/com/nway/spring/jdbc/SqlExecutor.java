@@ -388,7 +388,8 @@ public class SqlExecutor implements InitializingBean {
 		StringBuilder countSql = new StringBuilder(sql);
 
 		if (SQL_ORDER_BY_PATTERN.matcher(sql).matches()) {
-			countSql.delete(countSql.lastIndexOf(" ORDER "), countSql.length());
+			int orderIdx = countSql.lastIndexOf(" order ");
+			countSql.delete(orderIdx == -1 ? countSql.lastIndexOf(" ORDER ") : orderIdx, countSql.length());
 		}
 		
 		int firstFromIndex = firstFromIndex(countSql.toString(), 0);
