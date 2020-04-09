@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.performance.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +17,7 @@ import javax.persistence.Table;
 @com.nway.spring.jdbc.annotation.Table("t_software")
 public class Software {
 
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.ID)
 	private int id;
 	private String vender;
 	private String name;

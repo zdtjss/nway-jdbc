@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.performance.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -25,6 +26,7 @@ import javax.persistence.TemporalType;
 public class Mainframe {
 
 	/** 编号 **/
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.ID)
 	private int id;
 	/** 品牌 **/
 	private String brand;

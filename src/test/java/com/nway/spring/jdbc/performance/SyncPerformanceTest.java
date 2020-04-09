@@ -555,8 +555,8 @@ public class SyncPerformanceTest extends BaseTest {
     @Test
     public void testListComputer() throws InterruptedException {
 
-        int times = 10;
-        int nThread = 10;
+        int times = 300;
+        int nThread = 300;
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 

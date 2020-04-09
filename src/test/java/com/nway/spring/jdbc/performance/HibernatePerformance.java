@@ -89,7 +89,7 @@ public class HibernatePerformance implements Performance {
 
 			Computer computer = new Computer();
 
-			computer.setBrand("hp");
+			computer.setBrand("HP");
 			computer.setPrice(1.1f);
 			computer.setProductionDate(new Date());
 			
@@ -112,7 +112,7 @@ public class HibernatePerformance implements Performance {
 
 			Mouse mouse = new Mouse();
 
-			mouse.setBrand("ausu");
+			mouse.setBrand("AUSU");
 			mouse.setColor("black");
 			mouse.setModel("M-1");
 			mouse.setType(1);
@@ -121,7 +121,7 @@ public class HibernatePerformance implements Performance {
 
 			Keyboard keyboard = new Keyboard();
 
-			keyboard.setBrand("dell");
+			keyboard.setBrand("DELL");
 			keyboard.setModel("10-01");
 			keyboard.setType(1);
 			keyboard.setPrice(1.1f);
