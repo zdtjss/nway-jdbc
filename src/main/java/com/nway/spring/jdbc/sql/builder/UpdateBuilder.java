@@ -1,16 +1,15 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.nway.spring.jdbc.annotation.Column;
-import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SSupplier;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UpdateBuilder extends SqlBuilder {
 
@@ -37,14 +36,11 @@ public class UpdateBuilder extends SqlBuilder {
 	
 	private void initFilled() {
 		try {
-			for (Field field : getBeanClass().getDeclaredFields()) {
-				Column column = field.getAnnotation(Column.class);
-				if (column != null && ColumnType.ID.equals(column.type())) {
-					continue;
-				}
-				if (column != null && !column.fillStrategy().equals(NoneFillStrategy.class)) {
-					Object value = SqlBuilderUtils.getColumnValue(column.fillStrategy(), SqlType.UPDATE);
-					sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())) {
+					Object value = columnInfo.getFillStrategy().getValue(SqlType.UPDATE);
+					sets.add(columnInfo.getColumnName()  + " = ?");
 					param.add(value);
 				}
 			}

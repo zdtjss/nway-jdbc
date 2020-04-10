@@ -1,14 +1,13 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.nway.spring.jdbc.annotation.Column;
-import com.nway.spring.jdbc.annotation.enums.ColumnType;
-import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.SqlType;
 
 public class BatchUpdateBuilder extends SqlBuilder {
 
@@ -24,19 +23,16 @@ public class BatchUpdateBuilder extends SqlBuilder {
 			batchParam.add(new ArrayList<Object>());
 		}
 		try {
-			for (Field field : getBeanClass().getDeclaredFields()) {
-				Column column = field.getAnnotation(Column.class);
-				if (column != null && ColumnType.ID.equals(column.type())) {
-					continue;
-				}
-				sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
-				for (int i = 0; i < params.size(); i++) {
-					Object columnValue = SqlBuilderUtils.getColumnValue(field, params.get(i), SqlType.UPDATE);
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				sets.add(columnInfo.getColumnName() + " = ?");
+				for(int i = 0;i < params.size(); i++) {
+					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.UPDATE);
 					batchParam.get(i).add(columnValue);
 				}
 			}
 			getParam().addAll(batchParam);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
 		return this;

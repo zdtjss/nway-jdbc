@@ -1,12 +1,13 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.SqlType;
 
 public class InsertBuilder implements ISqlBuilder {
 
@@ -22,12 +23,13 @@ public class InsertBuilder implements ISqlBuilder {
 	
 	public InsertBuilder use(Object obj) {
 		try {
-			for (Field field : beanClass.getDeclaredFields()) {
-				columns.add(SqlBuilderUtils.getColumnName(field));
-				Object columnValue = SqlBuilderUtils.getColumnValue(field, obj, SqlType.INSERT);
-				param.add(columnValue);
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
+				columns.add(columnInfo.getColumnName());
+				param.add(value);
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
 		return this;

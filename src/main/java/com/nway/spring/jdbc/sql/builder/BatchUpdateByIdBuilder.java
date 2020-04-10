@@ -1,14 +1,13 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.nway.spring.jdbc.annotation.Column;
-import com.nway.spring.jdbc.annotation.enums.ColumnType;
-import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.SqlType;
 
 public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
@@ -29,28 +28,21 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 			batchParam.add(new ArrayList<>());
 		}
 		try {
-			for (Field field : getBeanClass().getDeclaredFields()) {
-				Column column = field.getAnnotation(Column.class);
-				if (column != null && ColumnType.ID.equals(column.type())) {
-					for(int i = 0;i < params.size(); i++) {
-						idVals.add(SqlBuilderUtils.getColumnValue(field, params.get(i), SqlType.UPDATE));
-					}
-					idName = SqlBuilderUtils.getColumnName(field);
-					continue;
-				}
-				Object value = SqlBuilderUtils.getColumnValue(field, params.get(0), SqlType.UPDATE);
-				field.setAccessible(true);
-				if (value == null || value.equals(field.get(getBeanClass().newInstance()))) {
-					continue;
-				}
-				sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
-				for (int i = 0; i < params.size(); i++) {
-					Object columnValue = SqlBuilderUtils.getColumnValue(field, params.get(i), SqlType.UPDATE);
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			idName = entityInfo.getId().getColumnName();
+			for(int i = 0;i < params.size(); i++) {
+				Object columnValue = SqlBuilderUtils.getColumnValue(entityInfo.getId(), params.get(i), SqlType.UPDATE);
+				idVals.add(columnValue);
+			}
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				sets.add(columnInfo.getColumnName() + " = ?");
+				for(int i = 0;i < params.size(); i++) {
+					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.INSERT);
 					batchParam.get(i).add(columnValue);
 				}
 			}
 			getParam().addAll(batchParam);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
 		return this;

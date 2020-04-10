@@ -1,12 +1,13 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.SqlType;
 
 public class BatchInsertBuilder implements ISqlBuilder {
 
@@ -26,15 +27,20 @@ public class BatchInsertBuilder implements ISqlBuilder {
 			batchParam.add(new ArrayList<Object>());
 		}
 		try {
-			for (Field field : beanClass.getDeclaredFields()) {
-				columns.add(SqlBuilderUtils.getColumnName(field));
-				field.setAccessible(true);
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			columns.add(entityInfo.getId().getColumnName());
+			for(int i = 0;i < objList.size(); i++) {
+				Object columnValue = SqlBuilderUtils.getColumnValue(entityInfo.getId(), objList.get(i), SqlType.INSERT);
+				batchParam.get(i).add(columnValue);
+			}
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				columns.add(columnInfo.getColumnName());
 				for(int i = 0;i < objList.size(); i++) {
-					Object columnValue = SqlBuilderUtils.getColumnValue(field, objList.get(i), SqlType.INSERT);
+					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, objList.get(i), SqlType.INSERT);
 					batchParam.get(i).add(columnValue);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
 		param.addAll(batchParam);

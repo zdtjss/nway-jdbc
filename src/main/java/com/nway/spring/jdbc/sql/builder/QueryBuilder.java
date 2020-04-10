@@ -1,17 +1,16 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class QueryBuilder extends SqlBuilder {
 
@@ -38,8 +37,9 @@ public class QueryBuilder extends SqlBuilder {
 	@Override
 	public String getSql() {
 		try {
-			for (Field field : getBeanClass().getDeclaredFields()) {
-				WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(field);
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo);
 				if (whereCondition != null && whereCondition.getColumn().trim().length() > 0) {
 					this.where().appendWhereCondition(whereCondition.getColumn() + whereCondition.getExpr());
 					if(whereCondition.getValue() instanceof Collection) {

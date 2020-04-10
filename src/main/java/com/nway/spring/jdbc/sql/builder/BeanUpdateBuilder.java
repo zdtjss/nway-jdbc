@@ -1,14 +1,13 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.lang.reflect.Field;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.nway.spring.jdbc.annotation.Column;
-import com.nway.spring.jdbc.annotation.enums.ColumnType;
-import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.SqlType;
 
 public class BeanUpdateBuilder extends SqlBuilder {
 
@@ -23,19 +22,16 @@ public class BeanUpdateBuilder extends SqlBuilder {
 	
 	private void init() {
 		try {
-			for (Field field : getBeanClass().getDeclaredFields()) {
-				Column column = field.getAnnotation(Column.class);
-				if (column != null && ColumnType.ID.equals(column.type())) {
-					continue;
-				}
-				Object value = SqlBuilderUtils.getColumnValue(field, obj, SqlType.UPDATE);
-				field.setAccessible(true);
-				if (value != null && !value.equals(field.get(getBeanClass().getDeclaredConstructor().newInstance()))) {
-					sets.add(SqlBuilderUtils.getColumnName(field) + " = ?");
+			Object obj = getBeanClass().getDeclaredConstructor().newInstance();
+			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
+				if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(obj))) {
+					sets.add(columnInfo.getColumnName() + " = ?");
 					setsParam.add(value);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
 	}
