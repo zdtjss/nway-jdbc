@@ -98,8 +98,10 @@ public class SqlExecutor implements InitializingBean {
 	public int update(ISqlBuilder ISqlBuilder) {
 		String sql = ISqlBuilder.getSql();
 		Object[] params = ISqlBuilder.getParam().toArray();
-		logger.debug("sql = " + sql);
-		logger.debug("params = " + objToStr(params));
+		if(logger.isDebugEnabled()) {
+			logger.debug("sql = " + sql);
+			logger.debug("params = " + objToStr(params));
+		}
 		return jdbcTemplate.update(sql, params);
 	}
 	
@@ -111,8 +113,10 @@ public class SqlExecutor implements InitializingBean {
 	public int[] batchUpdate(ISqlBuilder ISqlBuilder) {
 		List<Object[]> params = ISqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
 		String sql = ISqlBuilder.getSql();
-		logger.debug("sql = " + sql);
-		logger.debug("params = " + objToStr(params));
+		if(logger.isDebugEnabled()) {
+			logger.debug("sql = " + sql);
+			logger.debug("params = " + objToStr(params));
+		}
 		return jdbcTemplate.batchUpdate(sql, params);
 	}
 	
@@ -221,8 +225,10 @@ public class SqlExecutor implements InitializingBean {
 	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
-		logger.debug("sql = " + sql);
-		logger.debug("params = " + objToStr(args));
+		if(logger.isDebugEnabled()) {
+			logger.debug("sql = " + sql);
+			logger.debug("params = " + objToStr(args));
+		}
 		return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<T>(type));
 	}
 
@@ -254,8 +260,10 @@ public class SqlExecutor implements InitializingBean {
 	 * @throws DataAccessException 数据访问异常
 	 */
 	public <T> List<T> queryList(String sql, Class<T> type, Object... args) throws DataAccessException {
-		logger.debug("sql = " + sql);
-		logger.debug("params = " + objToStr(args));
+		if(logger.isDebugEnabled()) {
+			logger.debug("sql = " + sql);
+			logger.debug("params = " + objToStr(args));
+		}
 		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<T>(type));
 		logger.debug("total = " + retVal.size());
 		return retVal;
@@ -352,9 +360,11 @@ public class SqlExecutor implements InitializingBean {
 			System.arraycopy(params, 0, realParam, 0, params.length);
 			realParam[realParam.length - 2] = pageDialect.getFirstParam();
 			realParam[realParam.length - 1] = pageDialect.getSecondParam();
-			logger.debug("sql = " + pageDialect.getSql());
-			logger.debug("params = " + objToStr(realParam));
-			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(params));
+			if(logger.isDebugEnabled()) {
+				logger.debug("sql = " + pageDialect.getSql());
+				logger.debug("params = " + objToStr(realParam));
+				item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(params));
+			}
 		}
 		return new Page<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
@@ -370,8 +380,10 @@ public class SqlExecutor implements InitializingBean {
 	public int count(ISqlBuilder queryBuilder) throws DataAccessException {
 		String sql = buildPaginationCountSql(queryBuilder.getSql());
 		Object[] params = queryBuilder.getParam().toArray();
-		logger.debug("sql = " + sql);
-		logger.debug("params = " + objToStr(params));
+		if(logger.isDebugEnabled()) {
+			logger.debug("sql = " + sql);
+			logger.debug("params = " + objToStr(params));
+		}
 		return jdbcTemplate.queryForObject(sql, params, getSqlType(params), Integer.class);
 	}
 	
@@ -432,8 +444,10 @@ public class SqlExecutor implements InitializingBean {
 	}
 	
 	private int queryCount(String countSql, Object[] params) {
-		logger.debug("sql = " + countSql);
-		logger.debug("params = " + objToStr(params));
+		if(logger.isDebugEnabled()) {
+			logger.debug("sql = " + countSql);
+			logger.debug("params = " + objToStr(params));
+		}
 		return jdbcTemplate.query(countSql, params, getSqlType(params), new IntegerResultSetExtractor(countSql));
 	}
 

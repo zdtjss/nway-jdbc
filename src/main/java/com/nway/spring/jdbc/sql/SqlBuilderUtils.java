@@ -12,6 +12,7 @@ import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
+import com.nway.spring.jdbc.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandles;
@@ -26,19 +27,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SqlBuilderUtils {
 
-	/**
-     * 字段映射
-     */
-    private static final Map<Class<?>, EntityInfo> ENTITY_INFO_MAP = new ConcurrentHashMap<>(1600);
-    private static final Map<Class<?>, SerializedLambda> SERIALIZED_LAMBDA_MAP = new ConcurrentHashMap<>(1600);
-	private static final Map<Class, MethodAccess> METHOD_ACCESS_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, EntityInfo> ENTITY_INFO_MAP = new ConcurrentHashMap<>(256);
+    private static final Map<Class<?>, SerializedLambda> SERIALIZED_LAMBDA_MAP = new ConcurrentHashMap<>(256);
+	private static final Map<Class, MethodAccess> METHOD_ACCESS_MAP = new ConcurrentHashMap<>(256);
 
 	private static void initEntityInfo(Class<?> claszz) {
 		if (ENTITY_INFO_MAP.containsKey(claszz)) {
 			return;
 		}
 		try {
-			Field[] declaredFields = claszz.getDeclaredFields();
+			Field[] declaredFields = ReflectionUtils.getDeclaredFields(claszz);
 			EntityInfo entityInfo = new EntityInfo();
 			entityInfo.setTableName(getTableName(claszz));
 			entityInfo.setColumnList(new HashMap<>(declaredFields.length));
@@ -103,7 +101,7 @@ public class SqlBuilderUtils {
 	}
 
 	public static WhereCondition getWhereCondition(ColumnInfo columnInfo) {
-		if (columnInfo.getPermissionStrategy() instanceof NonePermissionStrategy) {
+		if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
 			return null;
 		}
 		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName());
@@ -152,7 +150,7 @@ public class SqlBuilderUtils {
 	}
 	
 	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) throws Throwable {
-		if (columnInfo.getPermissionStrategy() instanceof NonePermissionStrategy) {
+		if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
 			return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
 		}
 		return columnInfo.getFillStrategy().getValue(sqlType);
@@ -210,7 +208,6 @@ public class SqlBuilderUtils {
 	}
 
 	public static Object getIdValue(Class<?> beanClass, Object obj) {
-		Object value = null;
 		try {
 			ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
 			return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
