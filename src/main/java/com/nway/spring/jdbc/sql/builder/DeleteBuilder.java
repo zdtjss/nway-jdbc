@@ -11,7 +11,7 @@ public class DeleteBuilder extends SqlBuilder {
 	@Override
 	public String getSql() {
 		StringBuilder sql = new StringBuilder();
-		sql.append("delete from ").append(SqlBuilderUtils.getTableName(beanClass)).append(" ")
+		sql.append("delete from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" ")
 				.append(super.getSql());
 		return sql.toString();
 	}

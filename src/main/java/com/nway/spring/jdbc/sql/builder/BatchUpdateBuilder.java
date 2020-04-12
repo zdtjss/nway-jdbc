@@ -44,7 +44,7 @@ public class BatchUpdateBuilder extends SqlBuilder {
 			throw new SqlBuilderException("请明确where条件");
 		}
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableName(beanClass)).append(" set ")
+		sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
 		return sql.toString();
 	}

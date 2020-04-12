@@ -1,9 +1,14 @@
 package com.nway.spring.jdbc.bean;
 
+import com.esotericsoftware.reflectasm.ConstructorAccess;
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.nway.spring.jdbc.annotation.Column;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.*;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.NotWritablePropertyException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -14,23 +19,28 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class DefaultBeanProcessor implements BeanProcessor {
+
+	private static final ConcurrentMap<Class, BeanPropertyRowMapper> localCache = new ConcurrentHashMap<>();
 
 	@Override
 	public <T> List<T> toBeanList(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
-		BeanPropertyRowMapper<T> mapper = new BeanPropertyRowMapper<T>(mappedClass);
+		BeanPropertyRowMapper<T> mapper = Optional.ofNullable(localCache.get(mappedClass))
+				.orElseGet(() -> {
+					BeanPropertyRowMapper<T> rowMapper = new BeanPropertyRowMapper<>(mappedClass);
+					localCache.put(mappedClass, rowMapper);
+					return rowMapper;
+				});
 
 		final List<T> results = new ArrayList<T>();
 
@@ -44,8 +54,13 @@ public class DefaultBeanProcessor implements BeanProcessor {
 	@Override
 	public <T> T toBean(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
-		BeanPropertyRowMapper<T> mapper = new BeanPropertyRowMapper<T>(mappedClass);
-		
+		BeanPropertyRowMapper<T> mapper = Optional.ofNullable(localCache.get(mappedClass))
+				.orElseGet(() -> {
+					BeanPropertyRowMapper<T> rowMapper = new BeanPropertyRowMapper<>(mappedClass);
+					localCache.put(mappedClass, rowMapper);
+					return rowMapper;
+				});
+
 		return mapper.mapRow(rs);
 	}
 
@@ -118,10 +133,11 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		@Nullable
 		private Map<String, Field> mappedFields;
 
+		private Map<String, String> writerMethodMap;
+
 		/** Set of bean properties we provide mapping for. */
 		@Nullable
 		private Set<String> mappedProperties;
-
 
 		/**
 		 * Create a new {@code BeanPropertyRowMapper} for bean-style configuration.
@@ -247,33 +263,30 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		 *            the mapped class
 		 */
 		protected void initialize(Class<T> mappedClass) {
-
 			this.mappedClass = mappedClass;
 			this.mappedFields = new HashMap<String, Field>();
 			this.mappedProperties = new HashSet<String>();
-
 			Field[] fields = mappedClass.getDeclaredFields();
-
 			for (Field field : fields) {
-
 				String columnName = annotationName(field);
-
 				this.mappedFields.put(lowerCaseName(field.getName()), field);
-
 				if (columnName == null) {
-
 					columnName = underscoreName(field.getName());
-
 					if (!lowerCaseName(field.getName()).equals(columnName)) {
-
 						this.mappedFields.put(columnName, field);
 					}
 				} else if (!lowerCaseName(field.getName()).equals(columnName)) {
-
 					this.mappedFields.put(columnName, field);
 				}
-
 				this.mappedProperties.add(field.getName());
+			}
+
+			writerMethodMap = new HashMap<>();
+			PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
+			for (PropertyDescriptor pd : pds) {
+				if (pd.getWriteMethod() != null) {
+					this.writerMethodMap.put(pd.getName(), pd.getWriteMethod().getName());
+				}
 			}
 		}
 
@@ -333,6 +346,16 @@ public class DefaultBeanProcessor implements BeanProcessor {
 			return name.toLowerCase(Locale.US);
 		}
 
+		private ConcurrentMap<Class, MethodAccess> localCache = new ConcurrentHashMap<>();
+
+		private MethodAccess getMethodAccess() {
+			return Optional.ofNullable(localCache.get(mappedClass))
+					.orElseGet(() -> {
+						MethodAccess method = MethodAccess.get(mappedClass);
+						localCache.put(mappedClass, method);
+						return method;
+					});
+		}
 
 		/**
 		 * Extract the values for all columns in the current row.
@@ -341,13 +364,14 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		 */
 		public T mapRow(ResultSet rs) throws SQLException {
 			Assert.state(this.mappedClass != null, "Mapped class was not specified");
-			T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
-			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
-			initBeanWrapper(bw);
 
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
 			Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<>() : null);
+
+			T mappedObject = ConstructorAccess.get(mappedClass).newInstance();
+
+			MethodAccess methodAccess = getMethodAccess();
 
 			for (int index = 1; index <= columnCount; index++) {
 				String column = JdbcUtils.lookupColumnName(rsmd, index);
@@ -359,7 +383,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 						logger.trace("Mapping column '" + column + "' to property '" + pd.getName() +
 								"' of type '" + ClassUtils.getQualifiedName(pd.getType()) + "'");
 						try {
-							bw.setPropertyValue(pd.getName(), value);
+							methodAccess.invoke(mappedObject, writerMethodMap.get(pd.getName()), value);
 						} catch (TypeMismatchException ex) {
 							if (value == null && this.primitivesDefaultedForNullValue) {
 								logger.debug("Intercepted TypeMismatchException for column '" + column + "' with null value when setting property '" +

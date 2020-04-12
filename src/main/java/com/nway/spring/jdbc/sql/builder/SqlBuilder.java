@@ -386,7 +386,7 @@ public class SqlBuilder implements ISqlBuilder {
         sql.append(column).append(" in (");
         val.stream().forEach(e -> param.add(e));
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?").append(",");
+            sql.append("?,");
         }
         if (!val.isEmpty()) {
             sql.setCharAt(sql.length() - 1, ')');
@@ -399,7 +399,7 @@ public class SqlBuilder implements ISqlBuilder {
         sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
         val.stream().forEach(e -> param.add(e));
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?").append(",");
+            sql.append("?,");
         }
         if (!val.isEmpty()) {
             sql.setCharAt(sql.length() - 1, ')');
@@ -412,7 +412,7 @@ public class SqlBuilder implements ISqlBuilder {
         sql.append(column).append(" not in (");
         val.stream().forEach(e -> param.add(e));
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?").append(",");
+            sql.append("?,");
         }
         if (!val.isEmpty()) {
             sql.setCharAt(sql.length() - 1, ')');
@@ -425,7 +425,7 @@ public class SqlBuilder implements ISqlBuilder {
         sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
         val.stream().forEach(e -> param.add(e));
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?").append(",");
+            sql.append("?,");
         }
         if (!val.isEmpty()) {
             sql.setCharAt(sql.length() - 1, ')');

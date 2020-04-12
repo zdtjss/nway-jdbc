@@ -51,7 +51,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 	@Override
 	public String getSql() {
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableName(beanClass)).append(" set ")
+		sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(",")));
 		sql.append(" where ").append(idName).append(" = ?");
 		for (int i = 0; i < getParam().size(); i++) {

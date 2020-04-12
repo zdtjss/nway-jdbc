@@ -38,7 +38,7 @@ public class InsertBuilder implements ISqlBuilder {
 	@Override
 	public String getSql() {
 		sql.append("insert into ")
-			.append(SqlBuilderUtils.getTableName(beanClass)).append(" (")
+			.append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" (")
 			.append(columns.stream().collect(Collectors.joining(",")))
 			.append(") values (")
 			.append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))

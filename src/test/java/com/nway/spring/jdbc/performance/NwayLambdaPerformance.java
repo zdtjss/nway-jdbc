@@ -60,12 +60,7 @@ public class NwayLambdaPerformance implements Performance {
 	public List<Computer> listComputer() {
 
 		QueryBuilder computerSql = SQL.query(Computer.class);
-		QueryBuilder mainframeSql = SQL.query(Mainframe.class);
-		QueryBuilder monitorSql = SQL.query(Monitor.class);
-		QueryBuilder mouseSql = SQL.query(Mouse.class);
-		QueryBuilder keyboardSql = SQL.query(Keyboard.class);
-		QueryBuilder softwareSql = SQL.query(Software.class);
-		
+
 		List<Computer> computers = sqlExecutor.queryList(computerSql);
 
 		List<Integer> mainframeIds = computers.stream().map(e -> e.getMainframeId()).collect(Collectors.toList());

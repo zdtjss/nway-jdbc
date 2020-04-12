@@ -26,7 +26,7 @@ public class BeanUpdateBuilder extends SqlBuilder {
 			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
 			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
 				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
-				if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(obj))) {
+				if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex()))) {
 					sets.add(columnInfo.getColumnName() + " = ?");
 					setsParam.add(value);
 				}
@@ -40,7 +40,7 @@ public class BeanUpdateBuilder extends SqlBuilder {
 	public String getSql() {
 		init();
 		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableName(beanClass)).append(" set ")
+		sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
 				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
 		return sql.toString();
 	}

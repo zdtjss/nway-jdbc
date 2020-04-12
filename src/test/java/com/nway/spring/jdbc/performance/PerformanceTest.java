@@ -47,6 +47,10 @@ public class PerformanceTest extends BaseTest {
     private MyBatisPlusPerformance myBatisPlusPerformance;
 
     @Autowired
+    @Qualifier("myBatisGePerformance")
+    private MyBatisGePerformance myBatisGePerformance;
+
+    @Autowired
     @Qualifier("jdbcPerformance")
     private JdbcPerformance jdbcPerformance;
 
@@ -77,6 +81,8 @@ public class PerformanceTest extends BaseTest {
 
             myBatisPlusPerformance.getMonitorById(monitor.getId());
 
+            myBatisGePerformance.getMonitorById(monitor.getId());
+
             System.out.println();
         }
     }
@@ -100,9 +106,11 @@ public class PerformanceTest extends BaseTest {
 
             springJdbcPerformance.listMonitor();
 
-//			myBatisPerformance.listMonitor();
+			myBatisPerformance.listMonitor();
 
             myBatisPlusPerformance.listMonitor();
+
+            myBatisGePerformance.listMonitor();
 
             scriptPerformance.listMonitor();
 
@@ -117,7 +125,7 @@ public class PerformanceTest extends BaseTest {
 
         for (int i = 0; i < 10; i++) {
 
-//			nwayPerformance.getComputerById(id);
+			nwayPerformance.getComputerById(id);
 
 //			hibernatePerformance.getComputerById(id);
 
@@ -128,6 +136,8 @@ public class PerformanceTest extends BaseTest {
 //			springJdbcPerformance.getComputerById(id);
 
             myBatisPerformance.getComputerById(id);
+
+            myBatisGePerformance.getComputerById(id);
 
             // System.out.println(computer.getSoftware());
 
@@ -160,6 +170,8 @@ public class PerformanceTest extends BaseTest {
 
             cs = myBatisPlusPerformance.listComputer();
 
+            myBatisGePerformance.listComputer();
+
 //			System.out.println(cs.get(0));
 
             System.out.println();
@@ -180,6 +192,10 @@ public class PerformanceTest extends BaseTest {
 		for (int i = 0; i < 50; i++) {
 			myBatisPlusPerformance.listComputer();
 		}
+		System.out.println();
+		for (int i = 0; i < 50; i++) {
+			myBatisGePerformance.listComputer();
+		}
 	}
 
 	@Test
@@ -195,6 +211,10 @@ public class PerformanceTest extends BaseTest {
 		System.out.println();
 		for (int i = 0; i < 50; i++) {
 			myBatisPlusPerformance.listMonitor();
+		}
+		System.out.println();
+		for (int i = 0; i < 50; i++) {
+			myBatisGePerformance.listMonitor();
 		}
 	}
 

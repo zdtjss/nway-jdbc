@@ -31,11 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -178,7 +174,7 @@ public class SqlExecutor implements InitializingBean {
 			List<Object> params = sqlBuilder.getParam();
 			if (params != null && params.size() > 0) {
 				for (int i = 0; i < params.size(); i++) {
-					StatementCreatorUtils.setParameterValue(pstmt, i, SqlTypeValue.TYPE_UNKNOWN, params.get(i));
+					StatementCreatorUtils.setParameterValue(pstmt, i, StatementCreatorUtils.javaTypeToSqlParameterType(params.get(i).getClass()), params.get(i));
 				}
 			}
 			return pstmt;
@@ -227,7 +223,7 @@ public class SqlExecutor implements InitializingBean {
 	public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
 		logger.debug("sql = " + sql);
 		logger.debug("params = " + objToStr(args));
-		return jdbcTemplate.query(sql, new BeanHandler<T>(type), args);
+		return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<T>(type));
 	}
 
 	/**
@@ -260,7 +256,9 @@ public class SqlExecutor implements InitializingBean {
 	public <T> List<T> queryList(String sql, Class<T> type, Object... args) throws DataAccessException {
 		logger.debug("sql = " + sql);
 		logger.debug("params = " + objToStr(args));
-		return jdbcTemplate.query(sql, new BeanListHandler<T>(type), args);
+		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<T>(type));
+		logger.debug("total = " + retVal.size());
+		return retVal;
 	}
 
 	/**
@@ -356,7 +354,7 @@ public class SqlExecutor implements InitializingBean {
 			realParam[realParam.length - 1] = pageDialect.getSecondParam();
 			logger.debug("sql = " + pageDialect.getSql());
 			logger.debug("params = " + objToStr(realParam));
-			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam);
+			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(params));
 		}
 		return new Page<Map<String, Object>>(item, totalCount, page, pageSize);
 	}
@@ -374,7 +372,7 @@ public class SqlExecutor implements InitializingBean {
 		Object[] params = queryBuilder.getParam().toArray();
 		logger.debug("sql = " + sql);
 		logger.debug("params = " + objToStr(params));
-		return jdbcTemplate.queryForObject(sql, Integer.class, params);
+		return jdbcTemplate.queryForObject(sql, params, getSqlType(params), Integer.class);
 	}
 	
 	/**
@@ -436,7 +434,7 @@ public class SqlExecutor implements InitializingBean {
 	private int queryCount(String countSql, Object[] params) {
 		logger.debug("sql = " + countSql);
 		logger.debug("params = " + objToStr(params));
-		return jdbcTemplate.query(countSql, params, new IntegerResultSetExtractor(countSql));
+		return jdbcTemplate.query(countSql, params, getSqlType(params), new IntegerResultSetExtractor(countSql));
 	}
 
 	@Override
@@ -500,5 +498,15 @@ public class SqlExecutor implements InitializingBean {
 		}
 		return ObjectUtils.nullSafeToString(obj);
 	}
-	
+
+	private int[] getSqlType(Object[] objs) {
+		if (objs != null) {
+			int[] types = new int[objs.length];
+			for (int i = 0; i < objs.length; i++) {
+				types[i] = StatementCreatorUtils.javaTypeToSqlParameterType(objs[i].getClass());
+			}
+			return types;
+		}
+		return new int[0];
+	}
 }

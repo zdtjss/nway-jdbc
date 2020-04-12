@@ -5,6 +5,8 @@ import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -13,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class QueryBuilder extends SqlBuilder {
+
+	protected final Log logger = LogFactory.getLog(QueryBuilder.class);
 
 	private List<String> columns = new ArrayList<>();
 	
@@ -36,11 +40,12 @@ public class QueryBuilder extends SqlBuilder {
 
 	@Override
 	public String getSql() {
+		logger.debug("开始构建sql 。。。");
 		try {
 			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
 			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
 				WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo);
-				if (whereCondition != null && whereCondition.getColumn().trim().length() > 0) {
+				if (whereCondition != null && whereCondition.getColumn().length() > 0) {
 					this.where().appendWhereCondition(whereCondition.getColumn() + whereCondition.getExpr());
 					if(whereCondition.getValue() instanceof Collection) {
 						getParam().addAll((Collection) whereCondition.getValue());
@@ -56,7 +61,9 @@ public class QueryBuilder extends SqlBuilder {
 		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
-		return getSelectStmt() + super.getSql();
+		String sql = getSelectStmt() + super.getSql();
+		logger.debug("构建sql完成 。。。");
+		return sql;
 	}
 	
 	private String getSelectStmt() {
@@ -66,10 +73,10 @@ public class QueryBuilder extends SqlBuilder {
 			for(String column : columns) {
 				sql.append(column).append(',');
 			}
-			sql.deleteCharAt(sql.length() - 1).append(" from ").append(SqlBuilderUtils.getTableName(beanClass));
+			sql.deleteCharAt(sql.length() - 1).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
 		}
 		else {
-			sql.append("select * from ").append(SqlBuilderUtils.getTableName(beanClass));
+			sql.append("select * from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
 		}
 		return sql.toString();
 	}
