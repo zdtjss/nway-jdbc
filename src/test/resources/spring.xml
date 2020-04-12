@@ -61,7 +61,7 @@
     <bean id="sqlExecutor" class="com.nway.spring.jdbc.SqlExecutor">
         <property name="dataSource" ref="dataSource"/>
         <property name="paginationSupport">
-            <bean class="com.nway.spring.jdbc.DerbyPaginationSupport"/>
+            <bean class="com.nway.spring.jdbc.pagination.MysqlPaginationSupport"/>
         </property>
     </bean>
 
@@ -77,8 +77,12 @@
             </map>
         </property>
         <property name="typeAliasesPackage" value="com.nway.spring.jdbc.performance.entity"/>
-        <property name="mapperLocations"
-                  value="classpath*:mapper/mybatis/*.xml"/>
+        <property name="mapperLocations">
+            <array>
+                <value>classpath*:mapper/mybatis/*.xml</value>
+                <value>classpath*:mybatis/mapper/*.xml</value>
+            </array>
+        </property>
         <property name="databaseIdProvider">
             <bean class="org.apache.ibatis.mapping.VendorDatabaseIdProvider">
                 <property name="properties">
@@ -106,24 +110,75 @@
         <property name="basePackage" value="com.nway.spring.jdbc.performance.mybatisplus"/>
     </bean>
 
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <property name="basePackage" value="com.nway.spring.jdbc.performance.dal.mapper"/>
+    </bean>
+
     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
         <constructor-arg index="0" ref="sqlSessionFactory"/>
     </bean>
 
-    <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource">
+    <!--<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
         <constructor-arg>
             <bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
 
-                <!--<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
-                <property name="url" value="jdbc:hsqldb:file:nwaydb/db;shutdown=true;create=true;write_delay=false;full_log_replay=true"/>-->
+                <property name="username" value="lab"/>
+                <property name="password" value="123456"/>
+                <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false"/>
 
-                <property name="driverClassName" value="org.apache.derby.iapi.jdbc.AutoloadedDriver"/>
-                <property name="url" value="jdbc:derby:nway;create=true"/>
-                
-                <property name="initialSize" value="3"/>
-                <property name="maxActive" value="150"/>
+                &lt;!&ndash;<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+                <property name="url" value="jdbc:hsqldb:file:nwaydb/db;shutdown=true;create=true;write_delay=false;full_log_replay=true"/>&ndash;&gt;
+
+                &lt;!&ndash;<property name="driverClassName" value="org.apache.derby.iapi.jdbc.AutoloadedDriver"/>
+                <property name="url" value="jdbc:derby:nway;create=true"/>&ndash;&gt;
+
+                <property name="initialSize" value="50"/>
+                <property name="maxActive" value="50"/>
             </bean>
         </constructor-arg>
+    </bean>-->
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false" />
+        <property name="username" value="lab" />
+        <property name="password" value="123456" />
+
+        <property name="maxActive" value="50" />
+        <property name="initialSize" value="50" />
+        <property name="maxWait" value="60000" />
+        <property name="minIdle" value="1" />
+
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxOpenPreparedStatements" value="20" />
+
+        <property name="asyncInit" value="true" />
     </bean>
 
+    <!--<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <constructor-arg>
+            <bean class="com.zaxxer.hikari.HikariConfig">
+                <property name="poolName" value="springHikariCP" />
+                <property name="maximumPoolSize" value="300"/>
+                <property name="minimumIdle" value="300"/>
+                <property name="connectionTestQuery" value="SELECT 1" />
+                <property name="dataSourceClassName" value="com.mysql.cj.jdbc.MysqlDataSource" />
+                <property name="dataSourceProperties">
+                    <props>
+                        <prop key="user">lab</prop>
+                        <prop key="password">123456</prop>
+                        <prop key="url">jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false</prop>
+                    </props>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>-->
 </beans>
