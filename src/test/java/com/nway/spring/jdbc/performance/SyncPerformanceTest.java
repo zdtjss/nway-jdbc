@@ -84,152 +84,62 @@ public class SyncPerformanceTest extends BaseTest {
 
         for (int i = 0; i < times; i++) {
 
-            nwayTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return nwayPerformance.getMonitorById(id);
-                }
-            });
+            nwayTask.add(() -> nwayPerformance.getMonitorById(id));
 
-            nwayLambdaTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return nwayLambdaPerformance.getMonitorById(id);
-                }
-            });
+            nwayLambdaTask.add(() -> nwayLambdaPerformance.getMonitorById(id));
 
-            mybatisGeTask.add(new Callable<MonitorPoEntity>() {
-                @Override
-                public MonitorPoEntity call() throws Exception {
-                    return myBatisGePerformance.getMonitorById(id);
-                }
-            });
+            mybatisGeTask.add(() -> myBatisGePerformance.getMonitorById(id));
 
-            springTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return springJdbcPerformance.getMonitorById(id);
-                }
-            });
+            springTask.add(() -> springJdbcPerformance.getMonitorById(id));
 
-            hibernateTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return hibernatePerformance.getMonitorById(id);
-                }
-            });
+            hibernateTask.add(() -> hibernatePerformance.getMonitorById(id));
 
-            jpaTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return jpaPerformance.getMonitorById(id);
-                }
-            });
+            jpaTask.add(() -> jpaPerformance.getMonitorById(id));
 
-            springDataJpaTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return springDataJpaPerformance.getMonitorById(id);
-                }
-            });
+            springDataJpaTask.add(() -> springDataJpaPerformance.getMonitorById(id));
 
-            mybatisTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return myBatisPerformance.getMonitorById(id);
-                }
-            });
+            mybatisTask.add(() -> myBatisPerformance.getMonitorById(id));
 
-            mybatisPlusTask.add(new Callable<Monitor>() {
-                @Override
-                public Monitor call() throws Exception {
-                    return myBatisPlusPerformance.getMonitorById(id);
-                }
-            });
+            mybatisPlusTask.add(() -> myBatisPlusPerformance.getMonitorById(id));
         }
 
         long begin = System.currentTimeMillis();
 
         nwayPerformance.getMonitorById(id);
 
-       /* List<Future<Monitor>> futureList = nway.invokeAll(nwayTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+       /* nway.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
 
         begin = System.currentTimeMillis();
-        List<Future<Monitor>> futureList = executorService.invokeAll(nwayLambdaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(nwayLambdaTask);
         System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
         List<Future<MonitorPoEntity>> futureListGe = executorService.invokeAll(mybatisGeTask);
-        while (true) {
-            if(futureListGe.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
         System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springTask);
         System.out.println("spring = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(hibernateTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(hibernateTask);
         System.out.println("hibernate = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(hibernateTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(hibernateTask);
         System.out.println("jpa = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springDataJpaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springDataJpaTask);
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisTask);
         System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisPlusTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisPlusTask);
         System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
     }
@@ -256,82 +166,27 @@ public class SyncPerformanceTest extends BaseTest {
 
         for (int i = 0; i < times; i++) {
 
-            nwayTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return nwayPerformance.listMonitor();
-                }
-            });
+            nwayTask.add(() -> nwayPerformance.listMonitor());
 
-            nwayLambdaTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return nwayLambdaPerformance.listMonitor();
-                }
-            });
+            nwayLambdaTask.add(() -> nwayLambdaPerformance.listMonitor());
 
-            mybatisGeTask.add(new Callable<List<MonitorPoEntity>>() {
-                @Override
-                public List<MonitorPoEntity> call() throws Exception {
-                    return myBatisGePerformance.listMonitor();
-                }
-            });
+            mybatisGeTask.add(() -> myBatisGePerformance.listMonitor());
 
-            springTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return springJdbcPerformance.listMonitor();
-                }
-            });
+            springTask.add(() -> springJdbcPerformance.listMonitor());
 
-            hibernateTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return hibernatePerformance.listMonitor();
-                }
-            });
+            hibernateTask.add(() -> hibernatePerformance.listMonitor());
 
-            jpaTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return jpaPerformance.listMonitor();
-                }
-            });
+            jpaTask.add(() -> jpaPerformance.listMonitor());
 
-            springDataJpaTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return springDataJpaPerformance.listMonitor();
-                }
-            });
+            springDataJpaTask.add(() -> springDataJpaPerformance.listMonitor());
 
-            mybatisTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return myBatisPerformance.listMonitor();
-                }
-            });
+            mybatisTask.add(() -> myBatisPerformance.listMonitor());
 
-            mybatisPlusTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return myBatisPlusPerformance.listMonitor();
-                }
-            });
+            mybatisPlusTask.add(() -> myBatisPlusPerformance.listMonitor());
 
-            jdbcTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return jdbcPerformance.listMonitor();
-                }
-            });
+            jdbcTask.add(() -> jdbcPerformance.listMonitor());
 
-            scriptTask.add(new Callable<List<Monitor>>() {
-                @Override
-                public List<Monitor> call() throws Exception {
-                    return scriptPerformance.listMonitor();
-                }
-            });
+            scriptTask.add(() -> scriptPerformance.listMonitor());
         }
 
         nwayPerformance.listMonitor();
@@ -347,97 +202,52 @@ public class SyncPerformanceTest extends BaseTest {
 
         long begin = System.currentTimeMillis();
 
-        List<Future<List<Monitor>>> futureList = executorService.invokeAll(springTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springTask);
         System.out.println("spring = " + (System.currentTimeMillis() - begin));
         springJdbcPerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(hibernateTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(hibernateTask);
         System.out.println("hibernate = " + (System.currentTimeMillis() - begin));
         hibernatePerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(jpaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(jpaTask);
         System.out.println("jpa = " + (System.currentTimeMillis() - begin));
         jpaPerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springDataJpaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springDataJpaTask);
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
         springDataJpaPerformance.listMonitor();
 
         /*begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(nwayTask);
+        executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));
         nwayPerformance.listMonitor();*/
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(nwayLambdaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(nwayLambdaTask);
         System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
         nwayLambdaPerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        List<Future<List<MonitorPoEntity>>> futureListGe = executorService.invokeAll(mybatisGeTask);
-        while (true) {
-            if(futureListGe.stream().filter(e -> e.isDone()).count() == mybatisGeTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisGeTask);
         System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
         myBatisGePerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisTask);
         System.out.println("mybatis = "+(System.currentTimeMillis() - begin));
         myBatisPerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisPlusTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisPlusTask);
         System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
         myBatisPlusPerformance.listMonitor();
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(scriptTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(scriptTask);
         System.out.println("script = " + (System.currentTimeMillis() - begin));
     }
 
@@ -462,68 +272,23 @@ public class SyncPerformanceTest extends BaseTest {
 
         for (int i = 0; i < times; i++) {
 
-            nwayTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return nwayPerformance.getComputerById(id);
-                }
-            });
+            nwayTask.add(() -> nwayPerformance.getComputerById(id));
 
-            nwayLambdaTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return nwayLambdaPerformance.getComputerById(id);
-                }
-            });
+            nwayLambdaTask.add(() -> nwayLambdaPerformance.getComputerById(id));
 
-            mybatisGeTask.add(new Callable<ComputerPoEntity>() {
-                @Override
-                public ComputerPoEntity call() throws Exception {
-                    return myBatisGePerformance.getComputerById(id);
-                }
-            });
+            mybatisGeTask.add(() -> myBatisGePerformance.getComputerById(id));
 
-            springTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return springJdbcPerformance.getComputerById(id);
-                }
-            });
+            springTask.add(() -> springJdbcPerformance.getComputerById(id));
 
-            hibernateTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return hibernatePerformance.getComputerById(id);
-                }
-            });
+            hibernateTask.add(() -> hibernatePerformance.getComputerById(id));
 
-            jpaTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return jpaPerformance.getComputerById(id);
-                }
-            });
+            jpaTask.add(() -> jpaPerformance.getComputerById(id));
 
-            springDataJpaTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return springDataJpaPerformance.getComputerById(id);
-                }
-            });
+            springDataJpaTask.add(() -> springDataJpaPerformance.getComputerById(id));
 
-            mybatisTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return myBatisPerformance.getComputerById(id);
-                }
-            });
+            mybatisTask.add(() -> myBatisPerformance.getComputerById(id));
 
-            mybatisPlusTask.add(new Callable<Computer>() {
-                @Override
-                public Computer call() throws Exception {
-                    return myBatisPlusPerformance.getComputerById(id);
-                }
-            });
+            mybatisPlusTask.add(() -> myBatisPlusPerformance.getComputerById(id));
         }
 
 		myBatisPerformance.getComputerById(id);
@@ -537,84 +302,39 @@ public class SyncPerformanceTest extends BaseTest {
         myBatisPlusPerformance.getComputerById(id);
 
        /* begin = System.currentTimeMillis();
-        List<Future<Computer>> futureList = executorService.invokeAll(nwayTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
 
 		begin = System.currentTimeMillis();
-        List<Future<Computer>> futureList = executorService.invokeAll(nwayLambdaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(nwayLambdaTask);
         System.out.println("lambdaNway = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        List<Future<ComputerPoEntity>> futureListGe = executorService.invokeAll(mybatisGeTask);
-        while (true) {
-            if(futureListGe.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisGeTask);
         System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springTask);
         System.out.println("spring = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(hibernateTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(hibernateTask);
         System.out.println("hibernate = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(hibernateTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(hibernateTask);
         System.out.println("jpa = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springDataJpaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springDataJpaTask);
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-             break;
-            }
-        }
+        executorService.invokeAll(mybatisTask);
         System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisPlusTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisPlusTask);
         System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
     }
@@ -622,8 +342,8 @@ public class SyncPerformanceTest extends BaseTest {
     @Test
     public void testListComputer() throws InterruptedException {
 
-        int times = 30;
-        int nThread = 30;
+        int times = 300;
+        int nThread = 300;
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 
@@ -639,68 +359,23 @@ public class SyncPerformanceTest extends BaseTest {
 
         for (int i = 0; i < times; i++) {
 
-            nwayTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return nwayPerformance.listComputer();
-                }
-            });
+            nwayTask.add(() -> nwayPerformance.listComputer());
 
-            nwayLambdaTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return nwayLambdaPerformance.listComputer();
-                }
-            });
+            nwayLambdaTask.add(() -> nwayLambdaPerformance.listComputer());
 
-            mybatisGeTask.add(new Callable<List<ComputerPoEntity>>() {
-                @Override
-                public List<ComputerPoEntity> call() throws Exception {
-                    return myBatisGePerformance.listComputer();
-                }
-            });
+            mybatisGeTask.add(() -> myBatisGePerformance.listComputer());
 
-            springTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return springJdbcPerformance.listComputer();
-                }
-            });
+            springTask.add(() -> springJdbcPerformance.listComputer());
 
-            hibernateTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return hibernatePerformance.listComputer();
-                }
-            });
+            hibernateTask.add(() -> hibernatePerformance.listComputer());
 
-            jpaTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return jpaPerformance.listComputer();
-                }
-            });
+            jpaTask.add(() -> jpaPerformance.listComputer());
 
-            springDataJpaTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return springDataJpaPerformance.listComputer();
-                }
-            });
+            springDataJpaTask.add(() -> springDataJpaPerformance.listComputer());
 
-            mybatisTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return myBatisPerformance.listComputer();
-                }
-            });
+            mybatisTask.add(() -> myBatisPerformance.listComputer());
 
-            mybatisPlusTask.add(new Callable<List<Computer>>() {
-                @Override
-                public List<Computer> call() throws Exception {
-                    return myBatisPlusPerformance.listComputer();
-                }
-            });
+            mybatisPlusTask.add(() -> myBatisPlusPerformance.listComputer());
         }
 
 //        nwayPerformance.listComputer();
@@ -708,8 +383,6 @@ public class SyncPerformanceTest extends BaseTest {
 //        IntStream.range(1, 30).forEach(e -> {
 //            nwayLambdaPerformance.listComputer();
 //        });
-
-        System.out.println("******************************");
 
         nwayLambdaPerformance.listComputer();
 
@@ -721,23 +394,12 @@ public class SyncPerformanceTest extends BaseTest {
 
         myBatisPlusPerformance.listComputer();
 
-        List<Future<List<Computer>>> futureList = null;
         /*begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(nwayTask);
-        while (true) {
-            if (futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(nwayLambdaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == nwayLambdaTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(nwayLambdaTask);
         System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
 
         /*begin = System.currentTimeMillis();
@@ -746,20 +408,10 @@ public class SyncPerformanceTest extends BaseTest {
 
         begin = System.currentTimeMillis();
         List<Future<List<ComputerPoEntity>>> futureListGe = executorService.invokeAll(mybatisGeTask);
-        while (true) {
-            if(futureListGe.stream().filter(e -> e.isDone()).count() == mybatisGeTask.size()) {
-                break;
-            }
-        }
         System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));*/
 
        /* begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == springTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springTask);
         System.out.println("spring = " + (System.currentTimeMillis() - begin));*/
 
         /*begin = System.currentTimeMillis();
@@ -767,12 +419,7 @@ public class SyncPerformanceTest extends BaseTest {
         System.out.println("springJdbcPerformance = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(hibernateTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == hibernateTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(hibernateTask);
         System.out.println("hibernate = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -780,12 +427,7 @@ public class SyncPerformanceTest extends BaseTest {
         System.out.println("hibernatePerformance = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(jpaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == jpaTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(jpaTask);
         System.out.println("jpa = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -793,30 +435,15 @@ public class SyncPerformanceTest extends BaseTest {
         System.out.println("jpaPerformance = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(springDataJpaTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == springDataJpaTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(springDataJpaTask);
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));*/
 
         begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisPlusTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisPlusTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisPlusTask);
         System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
 		begin = System.currentTimeMillis();
-        futureList = executorService.invokeAll(mybatisTask);
-        while (true) {
-            if(futureList.stream().filter(e -> e.isDone()).count() == mybatisTask.size()) {
-                break;
-            }
-        }
+        executorService.invokeAll(mybatisTask);
         System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
 
     }
