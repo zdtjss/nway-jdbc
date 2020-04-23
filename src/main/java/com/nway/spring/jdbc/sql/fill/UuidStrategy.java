@@ -6,10 +6,15 @@ import com.nway.spring.jdbc.sql.SqlType;
 
 public class UuidStrategy implements FillStrategy {
 
-	@Override
-	public Object getValue(SqlType sqlType) {
+    @Override
+    public boolean isSupport(SqlType sqlType) {
+        return SqlType.INSERT.equals(sqlType);
+    }
 
-		return UUID.randomUUID().toString().replace("-", "");
-	}
+    @Override
+    public Object getValue(SqlType sqlType) {
+
+        return UUID.randomUUID().toString().replace("-", "");
+    }
 
 }

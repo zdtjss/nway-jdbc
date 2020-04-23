@@ -5,10 +5,15 @@ import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
 
 public class NumberIdStrategy implements FillStrategy {
 
-	@Override
-	public Object getValue(SqlType sqlType) {
-		
-		return IdWorker.getId();
-	}
+    @Override
+    public boolean isSupport(SqlType sqlType) {
+        return SqlType.INSERT.equals(sqlType);
+    }
+
+    @Override
+    public Object getValue(SqlType sqlType) {
+
+        return IdWorker.getId();
+    }
 
 }

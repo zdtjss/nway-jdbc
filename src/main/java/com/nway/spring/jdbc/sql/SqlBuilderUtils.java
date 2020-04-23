@@ -148,12 +148,12 @@ public class SqlBuilderUtils {
 			return fieldNameToColumn(field.getName());
 		}
 	}
-	
+
 	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) throws Throwable {
-		if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
-			return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
+		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
+			return columnInfo.getFillStrategy().getValue(sqlType);
 		}
-		return columnInfo.getFillStrategy().getValue(sqlType);
+		return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
 	}
 	
 	public static String getTableNameFromCache(Class<?> entityClass) {

@@ -4,6 +4,8 @@ import com.nway.spring.jdbc.sql.SqlType;
 
 public interface FillStrategy {
 
+	boolean isSupport(SqlType sqlType);
+
 	/**
 	 * 如果返回null，会被忽略 
 	 * 
