@@ -13,8 +13,8 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
 	protected StringBuilder sql = new StringBuilder();
 	protected List<Object> param = new ArrayList<>();
-	private List<String> sets = new ArrayList<>();
-	private List<Object> idVals = new ArrayList<>();
+	private final List<String> sets = new ArrayList<>();
+	private final List<Object> idVals = new ArrayList<>();
 	protected Class beanClass;
 	private String idName = "";
 	
@@ -37,12 +37,12 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
 				sets.add(columnInfo.getColumnName() + " = ?");
 				for(int i = 0;i < params.size(); i++) {
-					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.INSERT);
+					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.UPDATE);
 					batchParam.get(i).add(columnValue);
 				}
 			}
 			getParam().addAll(batchParam);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 		return this;

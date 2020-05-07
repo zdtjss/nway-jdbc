@@ -7,10 +7,11 @@ public interface FillStrategy {
 	boolean isSupport(SqlType sqlType);
 
 	/**
-	 * 如果返回null，会被忽略 
-	 * 
+	 *
+	 *
+	 * @param fieldValue {@link NoneValue} 表示没有初始值
 	 * @param sqlType
 	 * @return
 	 */
-	Object getValue(SqlType sqlType);
+	Object getValue(Object fieldValue, SqlType sqlType);
 }

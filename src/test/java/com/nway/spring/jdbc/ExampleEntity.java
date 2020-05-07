@@ -6,7 +6,6 @@ import java.sql.Clob;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import javax.persistence.*;
@@ -14,7 +13,6 @@ import javax.persistence.*;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
 import com.nway.spring.jdbc.sql.TestPermissionStrategy;
-import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 
 @Entity
 @Table(name = "t_nway")
@@ -23,24 +21,37 @@ public class ExampleEntity {
 
 	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID)
 	private int id;
-	private boolean pBoolean;
-	private byte pByte;
-	private short pShort;
-	private int pInt;
-	private long pLong;
-	private float pFloat;
-	private double pDouble;
-	private byte[] pByteArr;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Boolean")
+	private boolean ppBoolean;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Byte")
+	private byte ppByte;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Short")
+	private short ppShort;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Int")
+	private int ppInt;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Long")
+	private long ppLong;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Float")
+	private float ppFloat;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Double")
+	private double ppDouble;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_ByteArr")
+	private byte[] ppByteArr;
 
-	private Boolean wBoolean;
-	private Byte wByte;
-	private Short wShort;
-	@com.nway.spring.jdbc.annotation.Column(fillStrategy = TestFillStrategy.class)
-	private Integer wInt;
-	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = NonePermissionStrategy.class)
-	private Long wLong;
-	private Float wFloat;
-	private Double wDouble;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Boolean")
+	private Boolean wwBoolean;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Byte")
+	private Byte wwByte;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Short")
+	private Short wwShort;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Int", fillStrategy = TestFillStrategy.class)
+	private Integer wwInt;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Long")
+	private Long wwLong;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Float")
+	private Float wwFloat;
+	@com.nway.spring.jdbc.annotation.Column(name = "w_Double")
+	private Double wwDouble;
 
 	private String string;
 	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
@@ -74,138 +85,138 @@ public class ExampleEntity {
 	}
 
 	@Column(name = "p_boolean")
-	public boolean ispBoolean() {
-		return pBoolean;
+	public boolean isPpBoolean() {
+		return ppBoolean;
 	}
 
-	public void setpBoolean(boolean pBoolean) {
-		this.pBoolean = pBoolean;
+	public void setPpBoolean(boolean pBoolean) {
+		this.ppBoolean = pBoolean;
 	}
 
 	@Column(name = "p_byte")
-	public byte getpByte() {
-		return pByte;
+	public byte getPpByte() {
+		return ppByte;
 	}
 
-	public void setpByte(byte pByte) {
-		this.pByte = pByte;
+	public void setPpByte(byte ppByte) {
+		this.ppByte = ppByte;
 	}
 
 	@Column(name = "p_short")
-	public short getpShort() {
-		return pShort;
+	public short getPpShort() {
+		return ppShort;
 	}
 
-	public void setpShort(short pShort) {
-		this.pShort = pShort;
+	public void setPpShort(short ppShort) {
+		this.ppShort = ppShort;
 	}
 
 	@Column(name = "p_int")
-	public int getpInt() {
-		return pInt;
+	public int getPpInt() {
+		return ppInt;
 	}
 
-	public void setpInt(int pInt) {
-		this.pInt = pInt;
+	public void setPpInt(int pInt) {
+		this.ppInt = pInt;
 	}
 
 	@Column(name = "p_long")
-	public long getpLong() {
-		return pLong;
+	public long getPpLong() {
+		return ppLong;
 	}
 
-	public void setpLong(long pLong) {
-		this.pLong = pLong;
+	public void setPpLong(long ppLong) {
+		this.ppLong = ppLong;
 	}
 
 	@Column(name = "p_float")
-	public float getpFloat() {
-		return pFloat;
+	public float getPpFloat() {
+		return ppFloat;
 	}
 
-	public void setpFloat(float pFloat) {
-		this.pFloat = pFloat;
+	public void setPpFloat(float pFloat) {
+		this.ppFloat = pFloat;
 	}
 
 	@Column(name = "p_double")
-	public double getpDouble() {
-		return pDouble;
+	public double getPpDouble() {
+		return ppDouble;
 	}
 
-	public void setpDouble(double pDouble) {
-		this.pDouble = pDouble;
+	public void setPpDouble(double pDouble) {
+		this.ppDouble = pDouble;
 	}
 
 	@Column(name = "p_byte_arr")
-	public byte[] getpByteArr() {
-		return pByteArr;
+	public byte[] getPpByteArr() {
+		return ppByteArr;
 	}
 
-	public void setpByteArr(byte[] pByteArr) {
-		this.pByteArr = pByteArr;
+	public void setPpByteArr(byte[] pByteArr) {
+		this.ppByteArr = pByteArr;
 	}
 
 	@Column(name = "w_boolean")
-	public Boolean getwBoolean() {
-		return wBoolean;
+	public Boolean getWwBoolean() {
+		return wwBoolean;
 	}
 
-	public void setwBoolean(Boolean wBoolean) {
-		this.wBoolean = wBoolean;
+	public void setWwBoolean(Boolean wwBoolean) {
+		this.wwBoolean = wwBoolean;
 	}
 
 	@Column(name = "w_byte")
-	public Byte getwByte() {
-		return wByte;
+	public Byte getWwByte() {
+		return wwByte;
 	}
 
-	public void setwByte(Byte wByte) {
-		this.wByte = wByte;
+	public void setWwByte(Byte wwByte) {
+		this.wwByte = wwByte;
 	}
 
 	@Column(name = "w_short")
-	public Short getwShort() {
-		return wShort;
+	public Short getWwShort() {
+		return wwShort;
 	}
 
-	public void setwShort(Short wShort) {
-		this.wShort = wShort;
+	public void setWwShort(Short wwShort) {
+		this.wwShort = wwShort;
 	}
 
 	@Column(name = "w_int")
-	public Integer getwInt() {
-		return wInt;
+	public Integer getWwInt() {
+		return wwInt;
 	}
 
-	public void setwInt(Integer wInt) {
-		this.wInt = wInt;
+	public void setWwInt(Integer wwInt) {
+		this.wwInt = wwInt;
 	}
 
 	@Column(name = "w_long")
-	public Long getwLong() {
-		return wLong;
+	public Long getWwLong() {
+		return wwLong;
 	}
 
-	public void setwLong(Long wLong) {
-		this.wLong = wLong;
+	public void setWwLong(Long wwLong) {
+		this.wwLong = wwLong;
 	}
 
 	@Column(name = "w_float")
-	public Float getwFloat() {
-		return wFloat;
+	public Float getWwFloat() {
+		return wwFloat;
 	}
 
-	public void setwFloat(Float wFloat) {
-		this.wFloat = wFloat;
+	public void setWwFloat(Float wwFloat) {
+		this.wwFloat = wwFloat;
 	}
 
 	@Column(name = "w_double")
-	public Double getwDouble() {
-		return wDouble;
+	public Double getWwDouble() {
+		return wwDouble;
 	}
 
-	public void setwDouble(Double wDouble) {
-		this.wDouble = wDouble;
+	public void setWwDouble(Double wwDouble) {
+		this.wwDouble = wwDouble;
 	}
 
 	@Column(name = "string")
@@ -306,35 +317,35 @@ public class ExampleEntity {
 		builder.append("ExampleEntity [id=");
 		builder.append(id);
 		builder.append(", pBoolean=");
-		builder.append(pBoolean);
+		builder.append(ppBoolean);
 		builder.append(", pByte=");
-		builder.append(pByte);
+		builder.append(ppByte);
 		builder.append(", pShort=");
-		builder.append(pShort);
+		builder.append(ppShort);
 		builder.append(", pInt=");
-		builder.append(pInt);
+		builder.append(ppInt);
 		builder.append(", pLong=");
-		builder.append(pLong);
+		builder.append(ppLong);
 		builder.append(", pFloat=");
-		builder.append(pFloat);
+		builder.append(ppFloat);
 		builder.append(", pDouble=");
-		builder.append(pDouble);
+		builder.append(ppDouble);
 		builder.append(", pByteArr=");
-		builder.append(Arrays.toString(pByteArr));
+		builder.append(Arrays.toString(ppByteArr));
 		builder.append(", wBoolean=");
-		builder.append(wBoolean);
+		builder.append(wwBoolean);
 		builder.append(", wByte=");
-		builder.append(wByte);
+		builder.append(wwByte);
 		builder.append(", wShort=");
-		builder.append(wShort);
+		builder.append(wwShort);
 		builder.append(", wInt=");
-		builder.append(wInt);
+		builder.append(wwInt);
 		builder.append(", wLong=");
-		builder.append(wLong);
+		builder.append(wwLong);
 		builder.append(", wFloat=");
-		builder.append(wFloat);
+		builder.append(wwFloat);
 		builder.append(", wDouble=");
-		builder.append(wDouble);
+		builder.append(wwDouble);
 		builder.append(", string=");
 		builder.append(string);
 		builder.append(", utilDate=");

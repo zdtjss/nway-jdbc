@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class BatchUpdateBuilder extends SqlBuilder {
 
-	private List<String> sets = new ArrayList<>();
+	private final List<String> sets = new ArrayList<>();
 
 	public BatchUpdateBuilder(Class<?> beanClass) {
 		super(beanClass);

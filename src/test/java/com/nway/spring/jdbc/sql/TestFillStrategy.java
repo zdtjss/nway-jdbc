@@ -6,11 +6,11 @@ public class TestFillStrategy implements FillStrategy {
 
     @Override
     public boolean isSupport(SqlType sqlType) {
-        return true;
+        return SqlType.INSERT.equals(sqlType);
     }
 
     @Override
-    public Object getValue(SqlType sqlType) {
+    public Object getValue(Object fieldVal, SqlType sqlType) {
         return Integer.MAX_VALUE;
     }
 

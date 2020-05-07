@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.fill.NoneValue;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
@@ -19,6 +20,8 @@ public class QueryBuilder extends SqlBuilder {
 	protected final Log logger = LogFactory.getLog(QueryBuilder.class);
 
 	private List<String> columns = new ArrayList<>();
+
+	private Object rowVal;
 	
 	public QueryBuilder(Class<?> beanClass) {
 		super(beanClass);
@@ -38,15 +41,25 @@ public class QueryBuilder extends SqlBuilder {
 		return this;
 	}
 
+	public QueryBuilder use(Object obj) {
+		this.rowVal = obj;
+		this.beanClass = obj.getClass();
+		return this;
+	}
+
 	@Override
 	public String getSql() {
 		logger.debug("开始构建sql 。。。");
 		try {
 			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
 			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo);
-				if (whereCondition != null && whereCondition.getColumn().length() > 0) {
-					this.where().appendWhereCondition(whereCondition.getColumn() + whereCondition.getExpr());
+				Object fieldValue = NoneValue.getInstance();
+				if(this.rowVal != null) {
+					fieldValue = columnInfo.getMethodHandle().invoke(this.rowVal, columnInfo.getReadIndex());
+				}
+				WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo, fieldValue);
+				if (whereCondition != null && whereCondition.getExpr().length() > 0) {
+					this.where().appendWhereCondition(whereCondition.getExpr());
 					if(whereCondition.getValue() instanceof Collection) {
 						getParam().addAll((Collection) whereCondition.getValue());
 					}

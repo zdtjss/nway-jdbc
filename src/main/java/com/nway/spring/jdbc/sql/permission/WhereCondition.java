@@ -2,25 +2,15 @@ package com.nway.spring.jdbc.sql.permission;
 
 public class WhereCondition {
 
-    private String column;
     private Object value;
     private String expr;
 
     public WhereCondition() {
     }
 
-    public WhereCondition(String column, Object value, String expr) {
-        this.column = column;
+    public WhereCondition( String expr, Object value) {
         this.value = value;
         this.expr = expr;
-    }
-
-    public String getColumn() {
-        return column;
-    }
-
-    public void setColumn(String column) {
-        this.column = column;
     }
 
     public Object getValue() {

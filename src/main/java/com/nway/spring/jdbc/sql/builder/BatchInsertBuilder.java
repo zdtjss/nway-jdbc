@@ -11,11 +11,10 @@ import java.util.stream.Collectors;
 
 public class BatchInsertBuilder implements ISqlBuilder {
 
-	private List<String> columns = new ArrayList<>();
-	
-	private StringBuilder sql = new StringBuilder();
-	private List<Object> param = new ArrayList<>();
-	private Class beanClass;
+	private final List<String> columns = new ArrayList<>();
+	private final StringBuilder sql = new StringBuilder();
+	private final List<Object> param = new ArrayList<>();
+	private final Class beanClass;
 	
 	public BatchInsertBuilder(Class<?> beanClass) {
 		this.beanClass = beanClass;
@@ -40,7 +39,7 @@ public class BatchInsertBuilder implements ISqlBuilder {
 					batchParam.get(i).add(columnValue);
 				}
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 		param.addAll(batchParam);
@@ -51,7 +50,7 @@ public class BatchInsertBuilder implements ISqlBuilder {
 	public String getSql() {
 		sql.append("insert into ")
 			.append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" (")
-			.append(columns.stream().collect(Collectors.joining(",")))
+			.append(String.join(",", columns))
 			.append(") values (")
 			.append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))
 			.append(")");

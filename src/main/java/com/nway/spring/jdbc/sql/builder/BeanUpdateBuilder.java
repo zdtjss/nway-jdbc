@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 
 public class BeanUpdateBuilder extends SqlBuilder {
 
-	private List<String> sets = new ArrayList<>();
-	private List<Object> setsParam = new ArrayList<>();
-	private Object obj;
+	private final List<String> sets = new ArrayList<>();
+	private final List<Object> setsParam = new ArrayList<>();
+	private final Object obj;
 	
 	public BeanUpdateBuilder(Object obj) {
 		super(obj.getClass());
@@ -22,16 +22,19 @@ public class BeanUpdateBuilder extends SqlBuilder {
 	
 	private void init() {
 		try {
-			Object obj = getBeanClass().getDeclaredConstructor().newInstance();
+			Object defaultObj = getBeanClass().getDeclaredConstructor().newInstance();
 			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
 			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
-				if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex()))) {
+				if(columnInfo == entityInfo.getId()) {
+					continue;
+				}
+				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
+				if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(defaultObj, columnInfo.getReadIndex()))) {
 					sets.add(columnInfo.getColumnName() + " = ?");
 					setsParam.add(value);
 				}
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 	}
@@ -41,7 +44,7 @@ public class BeanUpdateBuilder extends SqlBuilder {
 		init();
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
-				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
+				.append(String.join(",", sets)).append(super.getSql());
 		return sql.toString();
 	}
 	

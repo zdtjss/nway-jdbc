@@ -29,7 +29,7 @@ public class InsertBuilder implements ISqlBuilder {
 				columns.add(columnInfo.getColumnName());
 				param.add(value);
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 		return this;

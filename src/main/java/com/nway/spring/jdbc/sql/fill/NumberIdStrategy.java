@@ -11,7 +11,7 @@ public class NumberIdStrategy implements FillStrategy {
     }
 
     @Override
-    public Object getValue(SqlType sqlType) {
+    public Object getValue(Object fieldValue, SqlType sqlType) {
 
         return IdWorker.getId();
     }

@@ -100,11 +100,11 @@ public class SqlBuilderUtils {
 		}
 	}
 
-	public static WhereCondition getWhereCondition(ColumnInfo columnInfo) {
+	public static WhereCondition getWhereCondition(ColumnInfo columnInfo, Object fieldVal) {
 		if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
 			return null;
 		}
-		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName());
+		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName(), fieldVal);
 	}
 
 	public static <T> SerializedLambda getSerializedLambda(SSupplier<T> lambda) {
@@ -149,11 +149,12 @@ public class SqlBuilderUtils {
 		}
 	}
 
-	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) throws Throwable {
+	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) {
+		Object fieldValue = columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
-			return columnInfo.getFillStrategy().getValue(sqlType);
+			fieldValue = columnInfo.getFillStrategy().getValue(fieldValue, sqlType);
 		}
-		return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
+		return fieldValue;
 	}
 	
 	public static String getTableNameFromCache(Class<?> entityClass) {
@@ -211,7 +212,7 @@ public class SqlBuilderUtils {
 		try {
 			ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
 			return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 	}

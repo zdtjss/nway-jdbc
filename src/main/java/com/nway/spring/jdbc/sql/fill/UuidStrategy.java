@@ -12,7 +12,7 @@ public class UuidStrategy implements FillStrategy {
     }
 
     @Override
-    public Object getValue(SqlType sqlType) {
+    public Object getValue(Object fieldValue, SqlType sqlType) {
 
         return UUID.randomUUID().toString().replace("-", "");
     }

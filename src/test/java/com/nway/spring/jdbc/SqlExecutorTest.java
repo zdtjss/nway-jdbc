@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
@@ -75,14 +74,14 @@ public class SqlExecutorTest extends BaseTest {
 				.le(ExampleEntity::getId, 11)
 				.le(exampleEntity::getId)
 				.le("pk_id", exampleEntity.getId())
-				.between(ExampleEntity::getString, exampleEntity::getpLong, exampleEntity::getpDouble)
-				.between(ExampleEntity::getpDouble, exampleEntity.getpDouble(), exampleEntity.getpDouble())
+				.between(ExampleEntity::getString, exampleEntity::getPpLong, exampleEntity::getPpDouble)
+				.between(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
 				.between("p_double", 1, 2)
-				.between("p_double", exampleEntity::getpDouble, exampleEntity::getpDouble)
-				.notBetween(ExampleEntity::getpDouble, exampleEntity::getpLong, exampleEntity::getpLong)
-				.notBetween(ExampleEntity::getpDouble, exampleEntity.getpDouble(), exampleEntity.getpDouble())
+				.between("p_double", exampleEntity::getPpDouble, exampleEntity::getPpDouble)
+				.notBetween(ExampleEntity::getPpDouble, exampleEntity::getPpLong, exampleEntity::getPpLong)
+				.notBetween(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
 				.notBetween("p_double", 1, 2)
-				.notBetween("p_double", exampleEntity::getpDouble, exampleEntity::getpDouble)
+				.notBetween("p_double", exampleEntity::getPpDouble, exampleEntity::getPpDouble)
 				.like(exampleEntity::getString)
 				.like("string", exampleEntity.getString())
 				.like(ExampleEntity::getString, exampleEntity::getString)
@@ -106,14 +105,14 @@ public class SqlExecutorTest extends BaseTest {
 				.or()
 				.eq(exampleEntity::getId)
 				.or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-//				.groupBy(ExampleEntity::getString, ExampleEntity::getpDouble)
+//				.groupBy(ExampleEntity::getString, ExampleEntity::getPDouble)
 //				.groupBy("string", "p_double")
 //				.having(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-//				.orderBy(ExampleEntity::getString, ExampleEntity::getpDouble)
+//				.orderBy(ExampleEntity::getString, ExampleEntity::getPDouble)
 //				.appendOrderBy("string", "p_double")
-				.orderByDesc(ExampleEntity::getString, ExampleEntity::getpDouble)
+				.orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
 				.appendOrderByDesc("string", "p_double")
-				.appendOrderBy(ExampleEntity::getString, ExampleEntity::getpDouble)
+				.appendOrderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
 				;
 
 		sqlExecutor.queryBean(builder);
@@ -127,8 +126,8 @@ public class SqlExecutorTest extends BaseTest {
 		computer.setString("a87ba");
 
 		SqlBuilder builder = SQL.query(ExampleEntity.class)
-				.where().like(computer::getString).ge(ExampleEntity::getpInt, 1)
-				.or().ne(ExampleEntity::getwInt, 1000);
+				.where().like(computer::getString).ge(ExampleEntity::getPpInt, 1)
+				.or().ne(ExampleEntity::getWwInt, 1000);
 
 		ExampleEntity c = sqlExecutor.queryBean(builder);
 
@@ -257,35 +256,35 @@ public class SqlExecutorTest extends BaseTest {
 
 			example.setId((int) (Math.random() * 1000));
 
-			example.setpBoolean(1 == ((Math.random() * 10) % 2));
+			example.setPpBoolean(1 == ((Math.random() * 10) % 2));
 
-			example.setpByte((byte) (Math.random() * 100));
+			example.setPpByte((byte) (Math.random() * 100));
 
-			example.setpShort((short) (Math.random() * 100));
+			example.setPpShort((short) (Math.random() * 100));
 
-			example.setpInt((int) (Math.random() * 1000000));
+			example.setPpInt((int) (Math.random() * 1000000));
 
-			example.setpLong((long) (Math.random() * 10000000));
+			example.setPpLong((long) (Math.random() * 10000000));
 
-			example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
+			example.setPpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
 
-			example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
+			example.setPpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
 
-			example.setpByteArr("nway-jdbc".getBytes());
+			example.setPpByteArr("nway-jdbc".getBytes());
 
-			example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10) % 2)));
+			example.setWwBoolean(1 == ((Math.random() * 10) % 2));
 
-			example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
+			example.setWwByte((byte) (Math.random() * 100));
 
-			example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
+			example.setWwShort(((short) (Math.random() * 100)));
 
-			example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
+			example.setWwInt(((int) (Math.random() * 100000)));
 
-			example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
+			example.setWwLong((long) (Math.random() * 10000000));
 
-			example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
+			example.setWwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
 
-			example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
+			example.setWwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
 
 			example.setString(UUID.randomUUID().toString());
 
@@ -358,20 +357,20 @@ public class SqlExecutorTest extends BaseTest {
 
 		ExampleEntity example = new ExampleEntity();
 		example.setId(1);
-		example.setwDouble(10.d);
+		example.setWwDouble(10.d);
 
-		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getpInt)
-				.ge(example::getpFloat).le(example::getpDouble).lt(example::getpLong).gt(example::getpDouble)
-				.between(example::getId, example::getId, example::getpLong).notBetween(example::getId, example::getId, example::getId)
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().eq(example::getId).ne(example::getPpInt)
+				.ge(example::getPpFloat).le(example::getPpDouble).lt(example::getPpLong).gt(example::getPpDouble)
+				.between(example::getId, example::getId, example::getPpLong).notBetween(example::getId, example::getId, example::getId)
 				.like(example::getString).notLike(example::getString)
-				.or(e -> e.eq(example::getId).eq(example::getpByte))
-				.and(e -> e.eq(example::getpLong).or().eq(example::getwDouble));
+				.or(e -> e.eq(example::getId).eq(example::getPpByte))
+				.and(e -> e.eq(example::getPpLong).or().eq(example::getWwDouble));
 		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
 
 		System.out.println(ee);
 		
 		ee = sqlExecutor.queryBean(SQL.query(ExampleEntity.class)
-				.withColumn(ExampleEntity::getwInt)
+				.withColumn(ExampleEntity::getWwInt)
 				.withColumn(ExampleEntity::getId)
 				.where().eq(ExampleEntity::getId, 136));
 		System.out.println(ee);
@@ -422,6 +421,13 @@ public class SqlExecutorTest extends BaseTest {
 	}
 
 	@Test
+	public void fillTest() {
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getId, 10);
+
+
+	}
+
+	@Test
 	public void toStrTest() {
 		String[] obj = new String[]{"11"};
 		if (ObjectUtils.isArray(obj)) {
@@ -443,35 +449,35 @@ public class SqlExecutorTest extends BaseTest {
 
 			DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
 
-			example.setpBoolean(0 == ((Math.random() * 10000) % 2));
+			example.setPpBoolean(0 == ((Math.random() * 10000) % 2));
 
-			example.setpByte((byte) (Math.random() * 100));
+			example.setPpByte((byte) (Math.random() * 100));
 
-			example.setpShort((short) (Math.random() * 100));
+			example.setPpShort((short) (Math.random() * 100));
 
-			example.setpInt((int) (Math.random() * 1000000));
+			example.setPpInt((int) (Math.random() * 1000000));
 
-			example.setpLong((long) (Math.random() * 10000000));
+			example.setPpLong((long) (Math.random() * 10000000));
 
-			example.setpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
+			example.setPpFloat(Float.parseFloat(numberFormat.format((Math.random() * 1000000000))));
 
-			example.setpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
+			example.setPpDouble(Double.parseDouble(numberFormat.format((Math.random() * 1000000000))));
 
-			example.setpByteArr("nway-jdbc".getBytes());
+			example.setPpByteArr("nway-jdbc".getBytes());
 
-			example.setwBoolean(Boolean.valueOf(1 == ((Math.random() * 10000) % 2)));
+			example.setWwBoolean(Boolean.valueOf(1 == ((Math.random() * 10000) % 2)));
 
-			example.setwByte(Byte.valueOf((byte) (Math.random() * 100)));
+			example.setWwByte(Byte.valueOf((byte) (Math.random() * 100)));
 
-			example.setwShort(Short.valueOf(((short) (Math.random() * 100))));
+			example.setWwShort(Short.valueOf(((short) (Math.random() * 100))));
 
-			example.setwInt(Integer.valueOf(((int) (Math.random() * 100000))));
+			example.setWwInt(Integer.valueOf(((int) (Math.random() * 100000))));
 
-			example.setwLong(Long.valueOf((long) (Math.random() * 10000000)));
+			example.setWwLong(Long.valueOf((long) (Math.random() * 10000000)));
 
-			example.setwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
+			example.setWwFloat(Float.valueOf(numberFormat.format((Math.random() * 1000000000))));
 
-			example.setwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
+			example.setWwDouble(Double.valueOf(numberFormat.format((Math.random() * 1000000000))));
 
 			example.setString(UUID.randomUUID().toString());
 
