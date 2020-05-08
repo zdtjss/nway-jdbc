@@ -16,61 +16,33 @@ public class UpdateBuilder extends SqlBuilder {
 
 	private final List<String> sets = new ArrayList<>();
 
-	private Object rowVal;
-	
 	public UpdateBuilder(Class<?> beanClass) {
 		super(beanClass);
 	}
 	
+	@Override
 	public <T> SqlBuilder set(SSupplier<T> val) {
 		sets.add(SqlBuilderUtils.getColumn(beanClass, val) + " = ?");
 		param.add(val.get());
 		return this;
 	}
 
-	public UpdateBuilder use(Object obj) {
-		this.rowVal = obj;
-		this.beanClass = obj.getClass();
-		try {
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				if(columnInfo == entityInfo.getId()) {
-					continue;
-				}
-				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
-				sets.add(columnInfo.getColumnName()  + " = ?");
-				param.add(value);
-			}
-		} catch (RuntimeException e) {
-			throw new SqlBuilderException(e);
-		}
-		return this;
-	}
-	
 	@Override
 	public String getSql() {
 		initFilled();
-		StringBuilder sql = new StringBuilder();
-		sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
-				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
-		return sql.toString();
+		String sql = "update " + SqlBuilderUtils.getTableNameFromCache(beanClass) + " set " +
+				String.join(",", sets) + super.getSql();
+		return sql;
 	}
-	
+
 	private void initFilled() {
-		if(this.rowVal == null) {
-			return;
-		}
-		try {
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())) {
-					Object value = columnInfo.getFillStrategy().getValue(NoneValue.getInstance(), SqlType.UPDATE);
-					sets.add(columnInfo.getColumnName()  + " = ?");
-					param.add(value);
-				}
+		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+			if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())) {
+				Object value = columnInfo.getFillStrategy().getValue(SqlType.INSERT);
+				sets.add(columnInfo.getColumnName() + " = ?");
+				param.add(value);
 			}
-		} catch (Exception e) {
-			throw new SqlBuilderException(e);
 		}
 	}
 }

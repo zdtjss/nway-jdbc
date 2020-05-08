@@ -32,7 +32,7 @@ public class BatchUpdateBuilder extends SqlBuilder {
 				}
 			}
 			getParam().addAll(batchParam);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 		return this;
@@ -45,7 +45,7 @@ public class BatchUpdateBuilder extends SqlBuilder {
 		}
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
-				.append(sets.stream().collect(Collectors.joining(","))).append(super.getSql());
+				.append(String.join(",", sets)).append(super.getSql());
 		return sql.toString();
 	}
 }

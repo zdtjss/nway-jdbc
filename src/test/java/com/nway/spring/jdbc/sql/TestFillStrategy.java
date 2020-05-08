@@ -10,7 +10,7 @@ public class TestFillStrategy implements FillStrategy {
     }
 
     @Override
-    public Object getValue(Object fieldVal, SqlType sqlType) {
+    public Object getValue(SqlType sqlType) {
         return Integer.MAX_VALUE;
     }
 

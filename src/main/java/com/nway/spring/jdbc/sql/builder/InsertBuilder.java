@@ -11,26 +11,21 @@ import java.util.stream.Collectors;
 
 public class InsertBuilder implements ISqlBuilder {
 
-	private List<String> columns = new ArrayList<>();
-	
-	private StringBuilder sql = new StringBuilder();
-	private List<Object> param = new ArrayList<>();
-	private Class beanClass;
+	private final List<String> columns = new ArrayList<>();
+	private final StringBuilder sql = new StringBuilder();
+	private final List<Object> param = new ArrayList<>();
+	private final Class beanClass;
 	
 	public InsertBuilder(Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
-	
+
 	public InsertBuilder use(Object obj) {
-		try {
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
-				columns.add(columnInfo.getColumnName());
-				param.add(value);
-			}
-		} catch (Exception e) {
-			throw new SqlBuilderException(e);
+		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+			Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
+			columns.add(columnInfo.getColumnName());
+			param.add(value);
 		}
 		return this;
 	}
@@ -39,7 +34,7 @@ public class InsertBuilder implements ISqlBuilder {
 	public String getSql() {
 		sql.append("insert into ")
 			.append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" (")
-			.append(columns.stream().collect(Collectors.joining(",")))
+			.append(String.join(",", columns))
 			.append(") values (")
 			.append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))
 			.append(")");

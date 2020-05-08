@@ -27,24 +27,20 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 		for(int i = 0;i < params.size(); i++) {
 			batchParam.add(new ArrayList<>());
 		}
-		try {
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			idName = entityInfo.getId().getColumnName();
-			for(int i = 0;i < params.size(); i++) {
-				Object columnValue = SqlBuilderUtils.getColumnValue(entityInfo.getId(), params.get(i), SqlType.UPDATE);
-				idVals.add(columnValue);
-			}
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				sets.add(columnInfo.getColumnName() + " = ?");
-				for(int i = 0;i < params.size(); i++) {
-					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.UPDATE);
-					batchParam.get(i).add(columnValue);
-				}
-			}
-			getParam().addAll(batchParam);
-		} catch (Exception e) {
-			throw new SqlBuilderException(e);
+		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+		idName = entityInfo.getId().getColumnName();
+		for (int i = 0; i < params.size(); i++) {
+			Object columnValue = SqlBuilderUtils.getColumnValue(entityInfo.getId(), params.get(i), SqlType.UPDATE);
+			idVals.add(columnValue);
 		}
+		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+			sets.add(columnInfo.getColumnName() + " = ?");
+			for (int i = 0; i < params.size(); i++) {
+				Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.UPDATE);
+				batchParam.get(i).add(columnValue);
+			}
+		}
+		getParam().addAll(batchParam);
 		return this;
 	}
 	

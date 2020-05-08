@@ -9,9 +9,8 @@ public interface FillStrategy {
 	/**
 	 *
 	 *
-	 * @param fieldValue {@link NoneValue} 表示没有初始值
 	 * @param sqlType
 	 * @return
 	 */
-	Object getValue(Object fieldValue, SqlType sqlType);
+	Object getValue(SqlType sqlType);
 }

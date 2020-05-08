@@ -5,6 +5,7 @@ import com.nway.spring.jdbc.sql.fill.NoneValue;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,10 +21,8 @@ public class QueryBuilder extends SqlBuilder {
 
 	protected final Log logger = LogFactory.getLog(QueryBuilder.class);
 
-	private List<String> columns = new ArrayList<>();
+	private final List<String> columns = new ArrayList<>();
 
-	private Object rowVal;
-	
 	public QueryBuilder(Class<?> beanClass) {
 		super(beanClass);
 	}
@@ -35,50 +35,21 @@ public class QueryBuilder extends SqlBuilder {
 	}
 
 	public <T, R> QueryBuilder withColumn(String... columnNames) {
-		for(String column : columnNames) {
-			columns.add(column);
-		}
-		return this;
-	}
-
-	public QueryBuilder use(Object obj) {
-		this.rowVal = obj;
-		this.beanClass = obj.getClass();
+		columns.addAll(Arrays.asList(columnNames));
 		return this;
 	}
 
 	@Override
-	public String getSql() {
-		logger.debug("开始构建sql 。。。");
-		try {
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				Object fieldValue = NoneValue.getInstance();
-				if(this.rowVal != null) {
-					fieldValue = columnInfo.getMethodHandle().invoke(this.rowVal, columnInfo.getReadIndex());
-				}
-				WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo, fieldValue);
-				if (whereCondition != null && whereCondition.getExpr().length() > 0) {
-					this.where().appendWhereCondition(whereCondition.getExpr());
-					if(whereCondition.getValue() instanceof Collection) {
-						getParam().addAll((Collection) whereCondition.getValue());
-					}
-					if(ObjectUtils.isArray(whereCondition.getValue())) {
-						getParam().addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
-					}
-					else {
-						getParam().add(whereCondition.getValue());
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new SqlBuilderException(e);
-		}
-		String sql = getSelectStmt() + super.getSql();
-		logger.debug("构建sql完成 。。。");
-		return sql;
+	public <T> SqlBuilder where() {
+		initPermission();
+		return super.where();
 	}
-	
+
+	@Override
+	public String getSql() {
+		return getSelectStmt() + super.getSql();
+	}
+
 	private String getSelectStmt() {
 		StringBuilder sql = new StringBuilder();
 		if (columns.size() > 0) {

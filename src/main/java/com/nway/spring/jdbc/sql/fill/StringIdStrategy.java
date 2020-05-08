@@ -11,7 +11,7 @@ public class StringIdStrategy implements FillStrategy {
     }
 
     @Override
-    public Object getValue(Object fieldValue, SqlType sqlType) {
+    public Object getValue(SqlType sqlType) {
 
         return IdWorker.getIdStr();
     }

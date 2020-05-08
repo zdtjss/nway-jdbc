@@ -150,11 +150,10 @@ public class SqlBuilderUtils {
 	}
 
 	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) {
-		Object fieldValue = columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
-			fieldValue = columnInfo.getFillStrategy().getValue(fieldValue, sqlType);
+			return columnInfo.getFillStrategy().getValue(sqlType);
 		}
-		return fieldValue;
+		return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
 	}
 	
 	public static String getTableNameFromCache(Class<?> entityClass) {

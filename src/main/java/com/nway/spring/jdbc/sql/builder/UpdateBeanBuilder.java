@@ -1,41 +1,45 @@
 package com.nway.spring.jdbc.sql.builder;
 
+import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import org.springframework.beans.BeanInstantiationException;
+import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BeanUpdateBuilder extends SqlBuilder {
+public class UpdateBeanBuilder extends SqlBuilder {
 
 	private final List<String> sets = new ArrayList<>();
 	private final List<Object> setsParam = new ArrayList<>();
 	private final Object obj;
 	
-	public BeanUpdateBuilder(Object obj) {
+	public UpdateBeanBuilder(Object obj) {
 		super(obj.getClass());
 		this.obj = obj;
 	}
-	
+
 	private void init() {
+		Object defaultObj;
 		try {
-			Object defaultObj = getBeanClass().getDeclaredConstructor().newInstance();
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				if(columnInfo == entityInfo.getId()) {
-					continue;
-				}
-				Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
-				if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(defaultObj, columnInfo.getReadIndex()))) {
-					sets.add(columnInfo.getColumnName() + " = ?");
-					setsParam.add(value);
-				}
-			}
+			defaultObj = getBeanClass().getConstructor().newInstance();
 		} catch (Exception e) {
 			throw new SqlBuilderException(e);
+		}
+		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+			if (columnInfo == entityInfo.getId()) {
+				continue;
+			}
+			Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
+			if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(defaultObj, columnInfo.getReadIndex()))) {
+				sets.add(columnInfo.getColumnName() + " = ?");
+				setsParam.add(value);
+			}
 		}
 	}
 	

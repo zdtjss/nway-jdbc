@@ -6,8 +6,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.fill.NoneValue;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.WhereCondition;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 public class SqlBuilder implements ISqlBuilder {
 
@@ -23,6 +30,7 @@ public class SqlBuilder implements ISqlBuilder {
         this.beanClass = beanClass;
     }
 
+    @Override
     public <T> Class<T> getBeanClass() {
         return this.beanClass;
     }
@@ -537,10 +545,34 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
+    protected void initPermission() {
+        EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+        for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+            if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
+                continue;
+            }
+            Object fieldValue = NoneValue.getInstance();
+            WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo, fieldValue);
+            if (whereCondition != null && whereCondition.getExpr().length() > 0) {
+                this.where().appendWhereCondition(whereCondition.getExpr());
+                if (whereCondition.getValue() instanceof Collection) {
+                    getParam().addAll((Collection) whereCondition.getValue());
+                }
+                if (ObjectUtils.isArray(whereCondition.getValue())) {
+                    getParam().addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
+                } else {
+                    getParam().add(whereCondition.getValue());
+                }
+            }
+        }
+    }
+
+    @Override
     public String getSql() {
         return sql.toString();
     }
 
+    @Override
     public List<Object> getParam() {
         return param;
     }

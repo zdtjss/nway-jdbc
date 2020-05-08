@@ -25,22 +25,18 @@ public class BatchInsertBuilder implements ISqlBuilder {
 		for(int i = 0;i < objList.size(); i++) {
 			batchParam.add(new ArrayList<Object>());
 		}
-		try {
-			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			columns.add(entityInfo.getId().getColumnName());
-			for(int i = 0;i < objList.size(); i++) {
-				Object columnValue = SqlBuilderUtils.getColumnValue(entityInfo.getId(), objList.get(i), SqlType.INSERT);
+		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+		columns.add(entityInfo.getId().getColumnName());
+		for (int i = 0; i < objList.size(); i++) {
+			Object columnValue = SqlBuilderUtils.getColumnValue(entityInfo.getId(), objList.get(i), SqlType.INSERT);
+			batchParam.get(i).add(columnValue);
+		}
+		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+			columns.add(columnInfo.getColumnName());
+			for (int i = 0; i < objList.size(); i++) {
+				Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, objList.get(i), SqlType.INSERT);
 				batchParam.get(i).add(columnValue);
 			}
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
-				columns.add(columnInfo.getColumnName());
-				for(int i = 0;i < objList.size(); i++) {
-					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, objList.get(i), SqlType.INSERT);
-					batchParam.get(i).add(columnValue);
-				}
-			}
-		} catch (Exception e) {
-			throw new SqlBuilderException(e);
 		}
 		param.addAll(batchParam);
 		return this;

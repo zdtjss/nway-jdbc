@@ -42,7 +42,7 @@ import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
 import com.nway.spring.jdbc.sql.builder.BatchUpdateByIdBuilder;
-import com.nway.spring.jdbc.sql.builder.BeanUpdateBuilder;
+import com.nway.spring.jdbc.sql.builder.UpdateBeanBuilder;
 import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
@@ -127,7 +127,7 @@ public class SqlExecutor implements InitializingBean {
 	 */
 	public int updateById(Object obj) {
 		Class<?> beanClass = obj.getClass();
-		BeanUpdateBuilder sqlBuilder = new BeanUpdateBuilder(obj);
+		UpdateBeanBuilder sqlBuilder = new UpdateBeanBuilder(obj);
 		sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
 		return update(sqlBuilder);
 	}
