@@ -8,7 +8,7 @@
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.1.4</version>
+		<version>1.3.0</version>
 	</dependency>
 
 #使用
