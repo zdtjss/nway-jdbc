@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.fill.NoneValue;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
@@ -551,10 +550,9 @@ public class SqlBuilder implements ISqlBuilder {
             if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
                 continue;
             }
-            Object fieldValue = NoneValue.getInstance();
-            WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo, fieldValue);
+            WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo);
             if (whereCondition != null && whereCondition.getExpr().length() > 0) {
-                this.where().appendWhereCondition(whereCondition.getExpr());
+                this.appendWhereCondition(whereCondition.getExpr());
                 if (whereCondition.getValue() instanceof Collection) {
                     getParam().addAll((Collection) whereCondition.getValue());
                 }

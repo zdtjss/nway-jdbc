@@ -51,6 +51,9 @@ public class SqlBuilderUtils {
 			for (Field field : declaredFields) {
 				PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), claszz);
 				Column column = field.getAnnotation(Column.class);
+				if(column != null && ColumnType.NONE.equals(column.type())) {
+					continue;
+				}
 				ColumnInfo columnInfo = new ColumnInfo();
 				columnInfo.setColumnName(getColumnName(field));
 				columnInfo.setReadIndex(methodAccess.getIndex(descriptor.getReadMethod().getName()));
@@ -100,11 +103,11 @@ public class SqlBuilderUtils {
 		}
 	}
 
-	public static WhereCondition getWhereCondition(ColumnInfo columnInfo, Object fieldVal) {
+	public static WhereCondition getWhereCondition(ColumnInfo columnInfo) {
 		if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
 			return null;
 		}
-		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName(), fieldVal);
+		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName());
 	}
 
 	public static <T> SerializedLambda getSerializedLambda(SSupplier<T> lambda) {

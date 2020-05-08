@@ -1,20 +1,12 @@
 package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.fill.NoneValue;
 import com.nway.spring.jdbc.sql.function.SFunction;
-import com.nway.spring.jdbc.sql.meta.ColumnInfo;
-import com.nway.spring.jdbc.sql.meta.EntityInfo;
-import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
-import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class QueryBuilder extends SqlBuilder {
@@ -41,8 +33,9 @@ public class QueryBuilder extends SqlBuilder {
 
 	@Override
 	public <T> SqlBuilder where() {
+		super.where();
 		initPermission();
-		return super.where();
+		return this;
 	}
 
 	@Override

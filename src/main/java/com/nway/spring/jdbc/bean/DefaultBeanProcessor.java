@@ -22,6 +22,9 @@ import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -279,7 +282,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 									"' of type '" + ClassUtils.getQualifiedName(pd.getType()) + "'");
 						}
 						try {
-							methodAccess.invoke(mappedObject, writerMethodMap.get(pd.getName()), value);
+							methodAccess.invoke(mappedObject, writerMethodMap.get(pd.getName()), convert(pd.getType(), value));
 						} catch (TypeMismatchException ex) {
 							if (value == null && this.primitivesDefaultedForNullValue) {
 								logger.debug("Intercepted TypeMismatchException for column '" + column + "' with null value when setting property '" +
@@ -299,7 +302,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 					}
 				} else {
 					// No PropertyDescriptor found
-					logger.debug("No property found for column '" + column);
+					logger.debug("No property found for column " + column);
 				}
 			}
 
@@ -312,6 +315,22 @@ public class DefaultBeanProcessor implements BeanProcessor {
 			return mappedObject;
 		}
 
+		private Object convert(Class<?> type, Object value) {
+			if(value == null || type == value.getClass()) {
+				return value;
+			}
+			if(type == LocalDate.class) {
+				return ((java.sql.Date) value).toLocalDate();
+			}
+			else if(type == LocalDateTime.class) {
+				return ((java.sql.Timestamp) value).toLocalDateTime();
+			}
+			else if(type == LocalTime.class) {
+				return ((java.sql.Time) value).toLocalTime();
+			}
+			return value;
+		}
+
 		/**
 		 * Retrieve a JDBC object value for the specified column.
 		 * <p>The default implementation calls
@@ -319,7 +338,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 		 * Subclasses may override this to check specific value types upfront,
 		 * or to post-process values return from {@code getResultSetValue}.
 		 * @param rs is the ResultSet holding the data
-		 * @param index is the column index
+		 * @param index is the column indexL
 		 * @param pd the bean property that each result object is expected to match
 		 * @return the Object value
 		 * @throws SQLException in case of extraction failure

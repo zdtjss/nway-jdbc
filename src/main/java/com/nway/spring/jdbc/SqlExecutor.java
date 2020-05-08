@@ -521,6 +521,6 @@ public class SqlExecutor implements InitializingBean {
 			}
 			return types;
 		}
-		return new int[0];
+		return null;
 	}
 }

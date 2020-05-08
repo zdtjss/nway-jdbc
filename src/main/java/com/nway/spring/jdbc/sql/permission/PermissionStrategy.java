@@ -11,8 +11,7 @@ public interface PermissionStrategy {
 	/**
 	 * 
 	 * @param column 字段名
-	 * @param columnValue 字段值
 	 * @return 不支持时此表和字段时，请返回null
 	 */
-	WhereCondition getSqlSegment(String column, Object columnValue);
+	WhereCondition getSqlSegment(String column);
 }

@@ -1,5 +1,6 @@
 package com.nway.spring.jdbc;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
@@ -137,8 +138,8 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void likeTest() {
 		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
-				.likeLeft(ExampleEntity::getString, "2f79");
-		System.out.println(sqlExecutor.queryBean(builder).toString());
+				.likeLeft(ExampleEntity::getString, "%' or '1'='1");
+		System.out.println(sqlExecutor.queryList(builder));
 	}
 
 	@Test
@@ -248,7 +249,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void lambdaInsertTest() throws SerialException, SQLException {
 
 		List<ExampleEntity> exampleEntityList = new ArrayList<ExampleEntity>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1; i++) {
 
 			ExampleEntity example = new ExampleEntity();
 
@@ -278,7 +279,7 @@ public class SqlExecutorTest extends BaseTest {
 
 			example.setWwShort(((short) (Math.random() * 100)));
 
-			example.setWwInt(((int) (Math.random() * 100000)));
+//			example.setWwInt(((int) (Math.random() * 100000)));
 
 			example.setWwLong((long) (Math.random() * 10000000));
 
@@ -417,7 +418,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void listAll() {
 		List<ExampleEntity> list = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
-		System.out.println(JSONObject.toJSONString(list));
+		System.out.println(list);
 	}
 
 	@Test

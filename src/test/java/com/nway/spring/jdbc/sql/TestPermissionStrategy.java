@@ -8,7 +8,7 @@ import java.util.Date;
 public class TestPermissionStrategy implements PermissionStrategy {
 
     @Override
-    public WhereCondition getSqlSegment(String column, Object fieldVal) {
+    public WhereCondition getSqlSegment(String column) {
         return new WhereCondition(column + " between ? and ? ", new Date[]{new Date(), new Date()});
     }
 

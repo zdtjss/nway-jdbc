@@ -35,7 +35,7 @@ public class ExampleEntity {
 	private float ppFloat;
 	@com.nway.spring.jdbc.annotation.Column(name = "p_Double")
 	private double ppDouble;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_ByteArr")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_Byte_Arr")
 	private byte[] ppByteArr;
 
 	@com.nway.spring.jdbc.annotation.Column(name = "w_Boolean")
@@ -54,7 +54,7 @@ public class ExampleEntity {
 	private Double wwDouble;
 
 	private String string;
-	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
+//	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
 	private Date utilDate;
 	private java.sql.Date sqlDate;
 	@com.nway.spring.jdbc.annotation.Column(name = "c_timestamp")
@@ -64,13 +64,17 @@ public class ExampleEntity {
 	@com.nway.spring.jdbc.annotation.Column(name = "b_blob")
 	private Blob blob;
 
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
 	private LocalDate localDate;
 
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
 	private LocalDateTime localDateTime;
 
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
 	private BigDecimal bigDecimal;
 
 	@Transient
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
 	private List<String> list = Collections.singletonList("aa");
 
 	@Id
