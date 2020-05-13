@@ -89,7 +89,7 @@ public class SqlBuilderUtils {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
 			return methodToColumn(beanClass, serializedLambda.getImplMethodName());
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
 	}
@@ -126,7 +126,7 @@ public class SqlBuilderUtils {
 				});
 	}
 
-	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) throws Throwable {
+	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) {
 		Class<?> funcClass = lambda.getClass();
 		return Optional.ofNullable(SERIALIZED_LAMBDA_MAP.get(funcClass))
 				.orElseGet(() -> {

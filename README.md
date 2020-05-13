@@ -2,8 +2,9 @@
 
 #如遇问题可联系zdtjss@163.com或QQ:670950251。
 
-#镜像地址：https://gitee.com/nway/Nway-JDBC。
+#暂时不建议生产使用
 
+#镜像地址：https://gitee.com/nway/Nway-JDBC。
 
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
