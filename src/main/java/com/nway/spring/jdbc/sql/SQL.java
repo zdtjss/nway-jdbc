@@ -9,7 +9,7 @@ import com.nway.spring.jdbc.sql.builder.UpdateBuilder;
 
 public class SQL {
 
-	public static <T, R> QueryBuilder query(Class<?> beanClass) {
+	public static QueryBuilder query(Class<?> beanClass) {
 		return new QueryBuilder(beanClass);
 	}
 	
