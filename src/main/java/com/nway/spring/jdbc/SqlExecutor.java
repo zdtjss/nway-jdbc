@@ -313,7 +313,7 @@ public class SqlExecutor implements InitializingBean {
 			item = queryList(pageDialect.getSql(), beanClass, realParam);
 		}
 
-		return new Page<T>(item, totalCount, page, pageSize);
+		return new Page<>(item, totalCount, page, pageSize);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public class SqlExecutor implements InitializingBean {
 		}
 	}
 	
-	private int queryCount(String countSql, Object[] params) {
+	private Integer queryCount(String countSql, Object[] params) {
 		if(logger.isDebugEnabled()) {
 			logger.debug("sql = " + countSql);
 			logger.debug("params = " + objToStr(params));
@@ -476,7 +476,7 @@ public class SqlExecutor implements InitializingBean {
 		this.paginationSupport = paginationSupport;
 	}
 
-	private class IntegerResultSetExtractor implements ResultSetExtractor<Integer> {
+	private static class IntegerResultSetExtractor implements ResultSetExtractor<Integer> {
 		private String sql;
 		IntegerResultSetExtractor(String sql) {
 			this.sql = sql;
@@ -515,11 +515,10 @@ public class SqlExecutor implements InitializingBean {
 
 	private int[] getSqlType(Object[] objs) {
 		if (objs != null) {
-			int[] types = new int[objs.length];
-			for (int i = 0; i < objs.length; i++) {
-				types[i] = StatementCreatorUtils.javaTypeToSqlParameterType(objs[i].getClass());
-			}
-			return types;
+			return Arrays.stream(objs)
+					.map(obj -> StatementCreatorUtils.javaTypeToSqlParameterType(obj.getClass()))
+					.mapToInt(x -> x)
+					.toArray();
 		}
 		return null;
 	}
