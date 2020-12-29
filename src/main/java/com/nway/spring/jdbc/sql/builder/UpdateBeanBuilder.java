@@ -1,16 +1,12 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
-import org.springframework.beans.BeanInstantiationException;
-import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UpdateBeanBuilder extends SqlBuilder {
 

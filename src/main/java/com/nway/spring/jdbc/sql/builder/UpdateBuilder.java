@@ -28,9 +28,7 @@ public class UpdateBuilder extends SqlBuilder {
 	@Override
 	public String getSql() {
 		initFilled();
-		String sql = "update " + SqlBuilderUtils.getTableNameFromCache(beanClass) + " set " +
-				String.join(",", sets) + super.getSql();
-		return sql;
+		return "update " + SqlBuilderUtils.getTableNameFromCache(beanClass) + " set " + String.join(",", sets) + super.getSql();
 	}
 
 	private void initFilled() {
