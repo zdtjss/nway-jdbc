@@ -92,12 +92,12 @@ public class SqlExecutor implements InitializingBean {
 	
 	/**
 	 * 
-	 * @param ISqlBuilder sqlBuilder
+	 * @param sqlBuilder sqlBuilder
 	 * @return
 	 */
-	public int update(ISqlBuilder ISqlBuilder) {
-		String sql = ISqlBuilder.getSql();
-		Object[] params = ISqlBuilder.getParam().toArray();
+	public int update(ISqlBuilder sqlBuilder) {
+		String sql = sqlBuilder.getSql();
+		Object[] params = sqlBuilder.getParam().toArray();
 		if(logger.isDebugEnabled()) {
 			logger.debug("sql = " + sql);
 			logger.debug("params = " + objToStr(params));
@@ -107,12 +107,12 @@ public class SqlExecutor implements InitializingBean {
 	
 	/**
 	 * 
-	 * @param ISqlBuilder sqlBuilder
+	 * @param sqlBuilder sqlBuilder
 	 * @return
 	 */
-	public int[] batchUpdate(ISqlBuilder ISqlBuilder) {
-		List<Object[]> params = ISqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
-		String sql = ISqlBuilder.getSql();
+	public int[] batchUpdate(ISqlBuilder sqlBuilder) {
+		List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
+		String sql = sqlBuilder.getSql();
 		if(logger.isDebugEnabled()) {
 			logger.debug("sql = " + sql);
 			logger.debug("params = " + objToStr(params));
@@ -363,10 +363,10 @@ public class SqlExecutor implements InitializingBean {
 			if(logger.isDebugEnabled()) {
 				logger.debug("sql = " + pageDialect.getSql());
 				logger.debug("params = " + objToStr(realParam));
-				item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(params));
 			}
+			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(params));
 		}
-		return new Page<Map<String, Object>>(item, totalCount, page, pageSize);
+		return new Page<>(item, totalCount, page, pageSize);
 	}
 
 	/**
@@ -405,7 +405,7 @@ public class SqlExecutor implements InitializingBean {
 		int firstFromIndex = firstFromIndex(countSql.toString(), 0);
 		String selectedColumns = countSql.substring(0, firstFromIndex);
 		
-		if ((selectedColumns.indexOf(" DISTINCT ") == -1 || selectedColumns.indexOf(" distinct ") == -1)
+		if ((!selectedColumns.contains(" DISTINCT ") || !selectedColumns.contains(" distinct "))
 				&& !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
 			countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(*) ");
 		} 
@@ -439,7 +439,7 @@ public class SqlExecutor implements InitializingBean {
 			this.paginationSupport = new MysqlPaginationSupport();
 		} 
 		else {
-			throw new UnsupportedOperationException("暂不支持本数据库的分页操作，请实现com.nway.spring.jdbc.PaginationSupport接口，通过本类setPaginationSupport方法引入。");
+			throw new UnsupportedOperationException("暂不支持本数据库的分页操作，请实现com.nway.spring.jdbc.pagination.PaginationSupport接口，通过本类setPaginationSupport方法引入。");
 		}
 	}
 	

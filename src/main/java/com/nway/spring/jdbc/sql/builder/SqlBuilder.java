@@ -39,7 +39,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T> SqlBuilder where() {
+    public SqlBuilder where() {
         if (canAppendWhere) {
             sql.append(" where ");
         }
@@ -391,7 +391,7 @@ public class SqlBuilder implements ISqlBuilder {
     public SqlBuilder in(String column, Collection<?> val) {
         appendAnd();
         sql.append(column).append(" in (");
-        val.stream().forEach(e -> param.add(e));
+        param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
             sql.append("?,");
         }
@@ -404,7 +404,7 @@ public class SqlBuilder implements ISqlBuilder {
     public <T, R> SqlBuilder in(SFunction<T, R> column, Collection<?> val) {
         appendAnd();
         sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
-        val.stream().forEach(e -> param.add(e));
+        param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
             sql.append("?,");
         }
@@ -417,7 +417,7 @@ public class SqlBuilder implements ISqlBuilder {
     public SqlBuilder notIn(String column, Collection<?> val) {
         appendAnd();
         sql.append(column).append(" not in (");
-        val.stream().forEach(e -> param.add(e));
+        param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
             sql.append("?,");
         }
@@ -430,7 +430,7 @@ public class SqlBuilder implements ISqlBuilder {
     public <T, R> SqlBuilder notIn(SFunction<T, R> column, Collection<?> val) {
         appendAnd();
         sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
-        val.stream().forEach(e -> param.add(e));
+        param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
             sql.append("?,");
         }
@@ -445,7 +445,8 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, R> SqlBuilder groupBy(SFunction<T, R>... columns) {
+    @SafeVarargs
+    public final <T, R> SqlBuilder groupBy(SFunction<T, R>... columns) {
         sql.append(" group by ");
         for (SFunction<T, R> column : columns) {
             sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
@@ -454,7 +455,8 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, R> SqlBuilder orderBy(SFunction<T, R>... columns) {
+    @SafeVarargs
+    public final <T, R> SqlBuilder orderBy(SFunction<T, R>... columns) {
         sql.append(" order by ");
         for (SFunction<T, R> column : columns) {
             sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
@@ -472,21 +474,20 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, R> SqlBuilder appendOrderBy(SFunction<T, R>... columns) {
-        for (SFunction<T, R> column : columns) {
-            sql.append(",").append(SqlBuilderUtils.getColumn(beanClass, column));
-        }
+    public <T, R> SqlBuilder andOrderByAsc(SFunction<T, R> column) {
+        sql.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" asc");
         return this;
     }
 
-    public SqlBuilder appendOrderBy(String... columns) {
+    public SqlBuilder andOrderByAsc(String... columns) {
         for (String column : columns) {
-            sql.append(",").append(column);
+            sql.append(",").append(column).append(" asc");
         }
         return this;
     }
 
-    public <T, R> SqlBuilder orderByDesc(SFunction<T, R>... columns) {
+    @SafeVarargs
+    public final <T, R> SqlBuilder orderByDesc(SFunction<T, R>... columns) {
         sql.append(" order by ");
         for (SFunction<T, R> column : columns) {
             sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc,");
@@ -504,14 +505,12 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, R> SqlBuilder appendOrderByDesc(SFunction<T, R>... columns) {
-        for (SFunction<T, R> column : columns) {
-            sql.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc");
-        }
+    public <T, R> SqlBuilder andOrderByDesc(SFunction<T, R> column) {
+        sql.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc");
         return this;
     }
 
-    public SqlBuilder appendOrderByDesc(String... columns) {
+    public SqlBuilder andOrderByDesc(String... columns) {
         for (String column : columns) {
             sql.append(",").append(column).append(" desc");
         }

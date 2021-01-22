@@ -9,30 +9,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class QueryBuilder extends SqlBuilder {
+public class QueryBuilder<T> extends SqlBuilder {
 
 	protected final Log logger = LogFactory.getLog(QueryBuilder.class);
 
 	private final List<String> columns = new ArrayList<>();
 
-	public QueryBuilder(Class<?> beanClass) {
+	public QueryBuilder(Class<T> beanClass) {
 		super(beanClass);
 	}
-	
-	public <T, R> QueryBuilder withColumn(SFunction<T, R>... fields) {
-		for(SFunction<T, R> field : fields) {
+
+	@SafeVarargs
+	public final QueryBuilder<T> withColumn(SFunction<T, ?>... fields) {
+		for(SFunction<T, ?> field : fields) {
 			columns.add(SqlBuilderUtils.getColumn(beanClass, field));
 		}
 		return this;
 	}
 
-	public <T, R> QueryBuilder withColumn(String... columnNames) {
+	public QueryBuilder<T> withColumn(String... columnNames) {
 		columns.addAll(Arrays.asList(columnNames));
 		return this;
 	}
 
 	@Override
-	public <T> SqlBuilder where() {
+	public SqlBuilder where() {
 		super.where();
 		initPermission();
 		return this;

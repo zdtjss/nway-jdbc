@@ -1,7 +1,5 @@
 package com.nway.spring.jdbc;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
@@ -15,7 +13,6 @@ import org.springframework.util.ObjectUtils;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -106,15 +103,15 @@ public class SqlExecutorTest extends BaseTest {
 				.or()
 				.eq(exampleEntity::getId)
 				.or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-//				.groupBy(ExampleEntity::getString, ExampleEntity::getPDouble)
+				.groupBy(ExampleEntity::getString, ExampleEntity::getUtilDate)
 //				.groupBy("string", "p_double")
-//				.having(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-//				.orderBy(ExampleEntity::getString, ExampleEntity::getPDouble)
+				.having(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
+//				.orderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
 //				.appendOrderBy("string", "p_double")
 				.orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
-				.appendOrderByDesc("string", "p_double")
-				.appendOrderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
-				;
+				.andOrderByDesc("string", "p_double")
+				.andOrderByAsc(ExampleEntity::getString)
+				.andOrderByDesc(ExampleEntity::getPpDouble);
 
 		sqlExecutor.queryBean(builder);
 	}
@@ -146,7 +143,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void inTest() {
 		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
 				.notIn(ExampleEntity::getId, Arrays.asList(1, 3));
-		sqlExecutor.queryList(builder).forEach(e -> System.out.println(e));
+		sqlExecutor.queryList(builder).forEach(System.out::println);
 	}
 
 	@Test
@@ -218,7 +215,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		String sql = "insert into t_monitor (ID,BRAND,MAX_RESOLUTION,MODEL,PHOTO,PRICE,PRODUCTION_DATE,TYPE) values (?,?,?,?,?,?,?,?)";
 
-		sqlExecutor.getJdbcTemplate().update(sql, new Object[] { 100, "abc", "aa", "bb", null, 1.0, new Date(), 0 });
+		sqlExecutor.getJdbcTemplate().update(sql, 100, "abc", "aa", "bb", null, 1.0, new Date(), 0);
 
 		long begin = System.currentTimeMillis();
 
@@ -246,7 +243,7 @@ public class SqlExecutorTest extends BaseTest {
 	}
 
 	@Test
-	public void lambdaInsertTest() throws SerialException, SQLException {
+	public void lambdaInsertTest() throws SQLException {
 
 		List<ExampleEntity> exampleEntityList = new ArrayList<ExampleEntity>();
 		for (int i = 0; i < 1; i++) {
