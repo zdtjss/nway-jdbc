@@ -199,7 +199,7 @@ public class SqlExecutor implements InitializingBean {
 		return batchUpdate(batchInsertBuilder);
 	}
 	
-	public <T> T queryBean(Serializable id, Class<T> type) {
+	public <T> T queryById(Serializable id, Class<T> type) {
 		ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
 		return queryBean(queryBuilder);
 	}

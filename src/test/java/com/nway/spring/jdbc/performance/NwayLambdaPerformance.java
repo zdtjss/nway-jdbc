@@ -106,7 +106,7 @@ public class NwayLambdaPerformance implements Performance {
 	@Override
 	public Monitor getMonitorById(int id) {
 
-		return sqlExecutor.queryBean(id, Monitor.class);
+		return sqlExecutor.queryById(id, Monitor.class);
 	}
 
 	@Override

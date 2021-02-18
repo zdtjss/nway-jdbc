@@ -38,7 +38,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void testQueryForBean() {
 		
-		String sql = "select * from t_nway where rownum = 1";
+		String sql = "select * from t_nway limit 1";
 
 		ExampleEntity usr = sqlExecutor.queryBean(sql, ExampleEntity.class);
 
@@ -309,7 +309,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void lambdaQueryOneTest() {
 		
-		System.out.println(sqlExecutor.queryBean(406, ExampleEntity.class));
+		System.out.println(sqlExecutor.queryById(406, ExampleEntity.class));
 	}
 
 	@Test
