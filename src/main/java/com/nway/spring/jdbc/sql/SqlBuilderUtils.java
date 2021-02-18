@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class SqlBuilderUtils {
 
@@ -83,6 +84,15 @@ public class SqlBuilderUtils {
 					initEntityInfo(claszz);
 					return ENTITY_INFO_MAP.get(claszz);
 				});
+	}
+
+	public static String getAllColumn(Class<?> beanClass) {
+		EntityInfo entityInfo = getEntityInfo(beanClass);
+		return entityInfo.getColumnList()
+				.values()
+				.stream()
+				.map(ColumnInfo::getColumnName)
+				.collect(Collectors.joining(","));
 	}
 
 	public static <T> String getColumn(Class<?> beanClass, SSupplier<T> lambda) {

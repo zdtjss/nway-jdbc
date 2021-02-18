@@ -2,16 +2,12 @@ package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.function.SFunction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class QueryBuilder<T> extends SqlBuilder {
-
-	protected final Log logger = LogFactory.getLog(QueryBuilder.class);
 
 	private final List<String> columns = new ArrayList<>();
 
@@ -54,9 +50,9 @@ public class QueryBuilder<T> extends SqlBuilder {
 			sql.deleteCharAt(sql.length() - 1).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
 		}
 		else {
-			sql.append("select * from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+			sql.append("select ").append(SqlBuilderUtils.getAllColumn(beanClass)).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
 		}
 		return sql.toString();
 	}
-	
+
 }
