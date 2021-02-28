@@ -184,8 +184,10 @@ public class SqlExecutor implements InitializingBean {
 			return pstmt;
 		};
 		Object key = sqlBuilder.getKeyValue();
-		logger.debug(sqlBuilder.getSql());
-		logger.debug(sqlBuilder.getParam().toArray());
+		if (logger.isDebugEnabled()) {
+			logger.debug(sqlBuilder.getSql());
+			logger.debug(sqlBuilder.getParam().toArray());
+		}
 		int count = jdbcTemplate.update(psc, keyHolder);
 		return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
 	}
@@ -264,8 +266,10 @@ public class SqlExecutor implements InitializingBean {
 			logger.debug("sql = " + sql);
 			logger.debug("params = " + objToStr(args));
 		}
-		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<T>(type));
-		logger.debug("total = " + retVal.size());
+		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<>(type));
+		if(logger.isDebugEnabled()) {
+			logger.debug("total = " + retVal.size());
+		}
 		return retVal;
 	}
 
@@ -325,7 +329,7 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 * @throws DataAccessException
 	 */
-	public Page<Map<String, Object>> queryPage(QueryBuilder queryBuilder, int page,
+	public Page<Map<String, Object>> queryPage(QueryBuilder<?> queryBuilder, int page,
 											   int pageSize) throws DataAccessException {
 		return queryPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
 	}
@@ -477,7 +481,7 @@ public class SqlExecutor implements InitializingBean {
 	}
 
 	private static class IntegerResultSetExtractor implements ResultSetExtractor<Integer> {
-		private String sql;
+		private final String sql;
 		IntegerResultSetExtractor(String sql) {
 			this.sql = sql;
 		}
