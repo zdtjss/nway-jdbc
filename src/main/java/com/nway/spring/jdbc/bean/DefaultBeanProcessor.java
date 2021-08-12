@@ -62,7 +62,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 					return rowMapper;
 				}).setColumnIndexMap(columnIndex);
 
-		return mapper.setColumnIndexMap(columnIndex).mapRow(rs, 0);
+		return mapper.mapRow(rs, 0);
 	}
 
 	private Map<String, Integer> getColumnIndex(ResultSet rs) throws SQLException {
