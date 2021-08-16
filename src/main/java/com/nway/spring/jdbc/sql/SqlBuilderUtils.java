@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc.sql;
 
-import com.esotericsoftware.reflectasm.MethodAccess;
 import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
@@ -14,7 +13,6 @@ import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 
-import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
@@ -30,7 +28,6 @@ public class SqlBuilderUtils {
 
     private static final Map<Class<?>, EntityInfo> ENTITY_INFO_MAP = new ConcurrentHashMap<>(256);
     private static final Map<Class<?>, SerializedLambda> SERIALIZED_LAMBDA_MAP = new ConcurrentHashMap<>(256);
-	private static final Map<Class, MethodAccess> METHOD_ACCESS_MAP = new ConcurrentHashMap<>(256);
 
 	private static void initEntityInfo(Class<?> claszz) {
 		if (ENTITY_INFO_MAP.containsKey(claszz)) {
@@ -42,23 +39,17 @@ public class SqlBuilderUtils {
 			entityInfo.setTableName(getTableName(claszz));
 			entityInfo.setColumnList(new HashMap<>(declaredFields.length));
 
-			MethodAccess methodAccess = Optional.ofNullable(METHOD_ACCESS_MAP.get(claszz))
-					.orElseGet(() -> {
-						MethodAccess method = MethodAccess.get(claszz);
-						METHOD_ACCESS_MAP.put(claszz, method);
-						return method;
-					});
+			MethodHandles.Lookup lookup = MethodHandles.lookup();
 
 			for (Field field : declaredFields) {
-				PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), claszz);
 				Column column = field.getAnnotation(Column.class);
 				if(column != null && ColumnType.NONE.equals(column.type())) {
 					continue;
 				}
+				field.setAccessible(true);
 				ColumnInfo columnInfo = new ColumnInfo();
 				columnInfo.setColumnName(getColumnName(field));
-				columnInfo.setReadIndex(methodAccess.getIndex(descriptor.getReadMethod().getName()));
-				columnInfo.setMethodHandle(methodAccess);
+				columnInfo.setMethodHandle(lookup.unreflectGetter(field));
 				if (column != null) {
 					columnInfo.setFillStrategy(column.fillStrategy().getConstructor().newInstance());
 					columnInfo.setPermissionStrategy(column.permissionStrategy().getConstructor().newInstance());
@@ -166,7 +157,11 @@ public class SqlBuilderUtils {
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
 			return columnInfo.getFillStrategy().getValue(sqlType);
 		}
-		return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
+		try {
+			return columnInfo.getMethodHandle().invokeExact(obj);
+		} catch (Throwable e) {
+			throw new SqlBuilderException(e);
+		}
 	}
 	
 	public static String getTableNameFromCache(Class<?> entityClass) {
@@ -223,8 +218,8 @@ public class SqlBuilderUtils {
 	public static Object getIdValue(Class<?> beanClass, Object obj) {
 		try {
 			ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
-			return columnInfo.getMethodHandle().invoke(obj, columnInfo.getReadIndex());
-		} catch (Exception e) {
+			return columnInfo.getMethodHandle().invokeExact(obj);
+		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
 	}

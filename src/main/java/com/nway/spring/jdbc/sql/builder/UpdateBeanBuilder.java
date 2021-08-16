@@ -31,8 +31,14 @@ public class UpdateBeanBuilder extends SqlBuilder {
 			if (columnInfo == entityInfo.getId()) {
 				continue;
 			}
+			Object defaultValue;
 			Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
-			if (value != null && !value.equals(columnInfo.getMethodHandle().invoke(defaultObj, columnInfo.getReadIndex()))) {
+			try {
+				defaultValue = columnInfo.getMethodHandle().invoke(defaultObj);
+			} catch (Throwable e) {
+				throw new SqlBuilderException(e);
+			}
+			if (value != null && !value.equals(defaultValue)) {
 				sets.add(columnInfo.getColumnName() + " = ?");
 				setsParam.add(value);
 			}

@@ -268,7 +268,7 @@ public class SqlExecutor implements InitializingBean {
 		}
 		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<>(type));
 		if(logger.isDebugEnabled()) {
-			logger.debug("total = " + retVal.size());
+			logger.debug("total = " + (retVal == null ? 0 : retVal.size()));
 		}
 		return retVal;
 	}
