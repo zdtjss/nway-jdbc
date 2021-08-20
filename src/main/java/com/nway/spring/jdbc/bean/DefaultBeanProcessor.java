@@ -66,10 +66,12 @@ public class DefaultBeanProcessor implements BeanProcessor {
 	}
 
 	private Map<String, Integer> getColumnIndex(ResultSet rs) throws SQLException {
-		Map<String, Integer> columnIndex = new HashMap<>();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
-		for (int index = 1; index <= rsmd.getColumnCount(); index++) {
+		int columnCount = rsmd.getColumnCount();
+		Map<String, Integer> columnIndex = new HashMap<>(columnCount);
+
+		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
 			columnIndex.put(column, index);
 		}
