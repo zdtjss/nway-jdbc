@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc.sql.meta;
 
-import com.esotericsoftware.reflectasm.MethodAccess;
 import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.permission.PermissionStrategy;
 
@@ -11,8 +10,7 @@ public class ColumnInfo {
     private String columnName;
     private FillStrategy fillStrategy;
     private PermissionStrategy permissionStrategy;
-    private int readIndex;
-    private MethodAccess methodHandle;
+    private MethodHandle methodHandle;
 
     public String getColumnName() {
         return columnName;
@@ -38,19 +36,11 @@ public class ColumnInfo {
         this.permissionStrategy = permissionStrategy;
     }
 
-    public int getReadIndex() {
-        return readIndex;
-    }
-
-    public void setReadIndex(int readIndex) {
-        this.readIndex = readIndex;
-    }
-
-    public MethodAccess getMethodHandle() {
+    public MethodHandle getMethodHandle() {
         return methodHandle;
     }
 
-    public void setMethodHandle(MethodAccess methodHandle) {
+    public void setMethodHandle(MethodHandle methodHandle) {
         this.methodHandle = methodHandle;
     }
 }
