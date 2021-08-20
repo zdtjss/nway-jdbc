@@ -133,6 +133,13 @@ public class SqlExecutorTest extends BaseTest {
 	}
 
 	@Test
+	public void isExistsTest() {
+		SqlBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getId)
+				.where().ge(ExampleEntity::getPpInt, 2);
+		System.out.println(sqlExecutor.isExists(builder));
+	}
+
+	@Test
 	public void likeTest() {
 		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
 				.likeLeft(ExampleEntity::getString, "%' or '1'='1");

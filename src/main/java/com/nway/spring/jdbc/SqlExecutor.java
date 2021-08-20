@@ -47,6 +47,7 @@ import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -360,15 +361,16 @@ public class SqlExecutor implements InitializingBean {
 
 		if (totalCount != 0) {
 			PageDialect pageDialect = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
-			Object[] realParam = new Object[params.length + 2];
-			System.arraycopy(params, 0, realParam, 0, params.length);
+			int paramsLength = params == null ? 0 : params.length;
+			Object[] realParam = new Object[paramsLength + 2];
+			System.arraycopy(params == null ? new Object[0] : params, 0, realParam, 0, paramsLength);
 			realParam[realParam.length - 2] = pageDialect.getFirstParam();
 			realParam[realParam.length - 1] = pageDialect.getSecondParam();
-			if(logger.isDebugEnabled()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("sql = " + pageDialect.getSql());
 				logger.debug("params = " + objToStr(realParam));
 			}
-			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(params));
+			item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(realParam));
 		}
 		return new Page<>(item, totalCount, page, pageSize);
 	}
@@ -389,6 +391,26 @@ public class SqlExecutor implements InitializingBean {
 			logger.debug("params = " + objToStr(params));
 		}
 		return jdbcTemplate.queryForObject(sql, params, getSqlType(params), Integer.class);
+	}
+
+	/**
+	 *
+	 * 建议只查表中一个字段
+	 *
+	 * @param queryBuilder
+	 * @return
+	 */
+	public boolean isExists(ISqlBuilder queryBuilder) {
+		PageDialect pageDialect = paginationSupport.buildPaginationSql(queryBuilder.getSql(), 1, 1);
+		Object[] params = Optional.ofNullable(queryBuilder.getParam()).orElse(new ArrayList<>(0)).toArray();
+		Object[] realParam = new Object[params.length + 2];
+		System.arraycopy(params, 0, realParam, 0, params.length);
+		realParam[realParam.length - 2] = pageDialect.getFirstParam();
+		realParam[realParam.length - 1] = pageDialect.getSecondParam();		if (logger.isDebugEnabled()) {
+			logger.debug("sql = " + pageDialect.getSql());
+			logger.debug("params = " + objToStr(realParam));
+		}
+		return jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next);
 	}
 	
 	/**
@@ -518,12 +540,15 @@ public class SqlExecutor implements InitializingBean {
 	}
 
 	private int[] getSqlType(Object[] objs) {
-		if (objs != null) {
-			return Arrays.stream(objs)
-					.map(obj -> StatementCreatorUtils.javaTypeToSqlParameterType(obj.getClass()))
-					.mapToInt(x -> x)
-					.toArray();
+		if (objs == null) {
+			return null;
 		}
-		return null;
+		if (objs.length == 0) {
+			return new int[0];
+		}
+		return Arrays.stream(objs)
+				.map(obj -> StatementCreatorUtils.javaTypeToSqlParameterType(obj.getClass()))
+				.mapToInt(x -> x)
+				.toArray();
 	}
 }
