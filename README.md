@@ -9,7 +9,7 @@
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.3.1</version>
+		<version>1.3.5</version>
 	</dependency>
 
 #使用
