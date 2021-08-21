@@ -4,13 +4,14 @@ import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.permission.PermissionStrategy;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Field;
 
 public class ColumnInfo {
 
     private String columnName;
     private FillStrategy fillStrategy;
     private PermissionStrategy permissionStrategy;
-    private MethodHandle methodHandle;
+    private Field readMethod;
 
     public String getColumnName() {
         return columnName;
@@ -36,11 +37,11 @@ public class ColumnInfo {
         this.permissionStrategy = permissionStrategy;
     }
 
-    public MethodHandle getMethodHandle() {
-        return methodHandle;
+    public Field getReadMethod() {
+        return readMethod;
     }
 
-    public void setMethodHandle(MethodHandle methodHandle) {
-        this.methodHandle = methodHandle;
+    public void setReadMethod(Field readMethod) {
+        this.readMethod = readMethod;
     }
 }

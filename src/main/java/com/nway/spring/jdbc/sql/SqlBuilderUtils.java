@@ -39,8 +39,6 @@ public class SqlBuilderUtils {
 			entityInfo.setTableName(getTableName(claszz));
 			entityInfo.setColumnList(new HashMap<>(declaredFields.length));
 
-			MethodHandles.Lookup lookup = MethodHandles.lookup();
-
 			for (Field field : declaredFields) {
 				Column column = field.getAnnotation(Column.class);
 				if(column != null && ColumnType.NONE.equals(column.type())) {
@@ -49,7 +47,7 @@ public class SqlBuilderUtils {
 				field.setAccessible(true);
 				ColumnInfo columnInfo = new ColumnInfo();
 				columnInfo.setColumnName(getColumnName(field));
-				columnInfo.setMethodHandle(lookup.unreflectGetter(field));
+				columnInfo.setReadMethod(field);
 				if (column != null) {
 					columnInfo.setFillStrategy(column.fillStrategy().getConstructor().newInstance());
 					columnInfo.setPermissionStrategy(column.permissionStrategy().getConstructor().newInstance());
@@ -158,8 +156,8 @@ public class SqlBuilderUtils {
 			return columnInfo.getFillStrategy().getValue(sqlType);
 		}
 		try {
-			return columnInfo.getMethodHandle().invokeExact(obj);
-		} catch (Throwable e) {
+			return columnInfo.getReadMethod().get(obj);
+		} catch (IllegalAccessException e) {
 			throw new SqlBuilderException(e);
 		}
 	}
@@ -218,8 +216,8 @@ public class SqlBuilderUtils {
 	public static Object getIdValue(Class<?> beanClass, Object obj) {
 		try {
 			ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
-			return columnInfo.getMethodHandle().invokeExact(obj);
-		} catch (Throwable e) {
+			return columnInfo.getReadMethod().get(obj);
+		} catch (IllegalAccessException e) {
 			throw new SqlBuilderException(e);
 		}
 	}

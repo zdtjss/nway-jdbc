@@ -34,7 +34,7 @@ public class UpdateBeanBuilder extends SqlBuilder {
 			Object defaultValue;
 			Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
 			try {
-				defaultValue = columnInfo.getMethodHandle().invoke(defaultObj);
+				defaultValue = columnInfo.getReadMethod().get(defaultObj);
 			} catch (Throwable e) {
 				throw new SqlBuilderException(e);
 			}
