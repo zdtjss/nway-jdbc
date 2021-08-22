@@ -20,25 +20,13 @@ public class UpdateBeanBuilder extends SqlBuilder {
 	}
 
 	private void init() {
-		Object defaultObj;
-		try {
-			defaultObj = getBeanClass().getConstructor().newInstance();
-		} catch (Exception e) {
-			throw new SqlBuilderException(e);
-		}
 		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
 		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
 			if (columnInfo == entityInfo.getId()) {
 				continue;
 			}
-			Object defaultValue;
 			Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
-			try {
-				defaultValue = columnInfo.getReadMethod().get(defaultObj);
-			} catch (Throwable e) {
-				throw new SqlBuilderException(e);
-			}
-			if (value != null && !value.equals(defaultValue)) {
+			if(value != null) {
 				sets.add(columnInfo.getColumnName() + " = ?");
 				setsParam.add(value);
 			}

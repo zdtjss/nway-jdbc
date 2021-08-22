@@ -112,8 +112,8 @@ public class SqlExecutor implements InitializingBean {
 	 * @return
 	 */
 	public int[] batchUpdate(ISqlBuilder sqlBuilder) {
-		List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
 		String sql = sqlBuilder.getSql();
+		List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
 		if(logger.isDebugEnabled()) {
 			logger.debug("sql = " + sql);
 			logger.debug("params = " + objToStr(params));

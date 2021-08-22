@@ -38,7 +38,7 @@ public class SqlBuilderUtils {
 			EntityInfo entityInfo = new EntityInfo();
 			entityInfo.setTableName(getTableName(claszz));
 			entityInfo.setColumnList(new HashMap<>(declaredFields.length));
-
+			Map<String, ColumnInfo> columnList = entityInfo.getColumnList();
 			for (Field field : declaredFields) {
 				Column column = field.getAnnotation(Column.class);
 				if(column != null && ColumnType.NONE.equals(column.type())) {
@@ -59,7 +59,7 @@ public class SqlBuilderUtils {
 					columnInfo.setFillStrategy(new NoneFillStrategy());
 					columnInfo.setPermissionStrategy(new NonePermissionStrategy());
 				}
-				entityInfo.getColumnList().put(field.getName(), columnInfo);
+				columnList.put(field.getName(), columnInfo);
 			}
 			ENTITY_INFO_MAP.put(claszz, entityInfo);
 		} catch (Exception e) {
