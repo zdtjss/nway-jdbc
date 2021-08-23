@@ -34,11 +34,11 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      */
     private final Class<T> type;
     
-    private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
+    private final BeanProcessor beanProcessor;
 
-    public BeanHandler(Class<T> type) {
-        
+    public BeanHandler(Class<T> type, BeanProcessor beanProcessor) {
         this.type = type;
+        this.beanProcessor = beanProcessor;
     }
 
     /**

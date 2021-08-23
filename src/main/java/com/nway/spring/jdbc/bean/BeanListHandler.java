@@ -33,10 +33,11 @@ public final class BeanListHandler<T> implements ResultSetExtractor<List<T>> {
     /**
      * 考虑本类可能在不同 ClassLoader中使用，这里不应该是静态的 *
      */
-    private final BeanProcessor beanProcessor = BeanProcessorFactory.getBeanProcessor();
+    private final BeanProcessor beanProcessor;
 
-    public BeanListHandler(Class<T> type) {
+    public BeanListHandler(Class<T> type, BeanProcessor beanProcessor) {
         this.type = type;
+        this.beanProcessor = beanProcessor;
     }
 
 	@Override

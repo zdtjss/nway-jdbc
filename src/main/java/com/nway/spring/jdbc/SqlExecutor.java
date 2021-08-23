@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import com.nway.spring.jdbc.bean.BeanProcessor;
+import com.nway.spring.jdbc.bean.DefaultBeanProcessor;
 import com.nway.spring.jdbc.pagination.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,6 +76,8 @@ public class SqlExecutor implements InitializingBean {
 	private JdbcTemplate jdbcTemplate;
 	
 	private DataSource dataSource;
+
+	private BeanProcessor beanProcessor;
 	
 	/**
 	 * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
@@ -232,7 +236,7 @@ public class SqlExecutor implements InitializingBean {
 			logger.debug("sql = " + sql);
 			logger.debug("params = " + objToStr(args));
 		}
-		return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<T>(type));
+		return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<T>(type, beanProcessor));
 	}
 
 	/**
@@ -267,7 +271,7 @@ public class SqlExecutor implements InitializingBean {
 			logger.debug("sql = " + sql);
 			logger.debug("params = " + objToStr(args));
 		}
-		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<>(type));
+		List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<>(type, beanProcessor));
 		if(logger.isDebugEnabled()) {
 			logger.debug("total = " + (retVal == null ? 0 : retVal.size()));
 		}
@@ -484,6 +488,9 @@ public class SqlExecutor implements InitializingBean {
 		if (getPaginationSupport() == null) {
 			initPaginationSupport();
 		}
+		if(beanProcessor == null) {
+			beanProcessor = new DefaultBeanProcessor();
+		}
 	}
 	
 	public void setDataSource(DataSource dataSource) {
@@ -500,6 +507,14 @@ public class SqlExecutor implements InitializingBean {
 
 	public void setPaginationSupport(PaginationSupport paginationSupport) {
 		this.paginationSupport = paginationSupport;
+	}
+
+	public void setBeanProcessor(BeanProcessor beanProcessor) {
+		this.beanProcessor = beanProcessor;
+	}
+
+	public BeanProcessor getBeanProcessor() {
+		return beanProcessor;
 	}
 
 	private static class IntegerResultSetExtractor implements ResultSetExtractor<Integer> {
