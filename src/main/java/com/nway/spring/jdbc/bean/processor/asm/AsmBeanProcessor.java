@@ -33,12 +33,12 @@ public class AsmBeanProcessor implements BeanProcessor {
         String beanClassName = type.getCanonicalName().replace('.', '/');
         String className = beanClassName + "Access";
 
-        classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, null, "java/lang/Object", new String[]{"com/nway/spring/jdbc/bean/processor/asm/BeanAccess"});
+        classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, "Ljava/lang/Object;Lcom/nway/spring/jdbc/bean/processor/asm/BeanAccess<L" + beanClassName + ";>;", "java/lang/Object", new String[]{"com/nway/spring/jdbc/bean/processor/asm/BeanAccess"});
 
-        classWriter.visitSource(type.getSimpleName() + "Access.java", null);
+        classWriter.visitSource("MonitorAccess.java", null);
 
         {
-            fieldVisitor = classWriter.visitField(ACC_PRIVATE, "bean", "L“+beanClassName+”;", null, null);
+            fieldVisitor = classWriter.visitField(ACC_PRIVATE, "bean", "L" + beanClassName + ";", null, null);
             fieldVisitor.visitEnd();
         }
         {
@@ -46,22 +46,25 @@ public class AsmBeanProcessor implements BeanProcessor {
             methodVisitor.visitCode();
             Label label0 = new Label();
             methodVisitor.visitLabel(label0);
-            methodVisitor.visitLineNumber(5, label0);
+            methodVisitor.visitLineNumber(12, label0);
             methodVisitor.visitVarInsn(ALOAD, 0);
             methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-            methodVisitor.visitInsn(RETURN);
             Label label1 = new Label();
             methodVisitor.visitLabel(label1);
-            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label1, 0);
+            methodVisitor.visitLineNumber(13, label1);
+            methodVisitor.visitInsn(RETURN);
+            Label label2 = new Label();
+            methodVisitor.visitLabel(label2);
+            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label2, 0);
             methodVisitor.visitMaxs(1, 1);
             methodVisitor.visitEnd();
         }
         {
-            methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "newInstance", "(Ljava/lang/String;)Ljava/lang/Object;", "<T:Ljava/lang/Object;>(Ljava/lang/String;)TT;", null);
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "newInstance", "()L" + beanClassName + ";", null, null);
             methodVisitor.visitCode();
             Label label0 = new Label();
             methodVisitor.visitLabel(label0);
-            methodVisitor.visitLineNumber(11, label0);
+            methodVisitor.visitLineNumber(16, label0);
             methodVisitor.visitVarInsn(ALOAD, 0);
             methodVisitor.visitTypeInsn(NEW, beanClassName);
             methodVisitor.visitInsn(DUP);
@@ -69,39 +72,37 @@ public class AsmBeanProcessor implements BeanProcessor {
             methodVisitor.visitFieldInsn(PUTFIELD, className, "bean", "L" + beanClassName + ";");
             Label label1 = new Label();
             methodVisitor.visitLabel(label1);
-            methodVisitor.visitLineNumber(12, label1);
+            methodVisitor.visitLineNumber(17, label1);
             methodVisitor.visitVarInsn(ALOAD, 0);
             methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
             methodVisitor.visitInsn(ARETURN);
             Label label2 = new Label();
             methodVisitor.visitLabel(label2);
             methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label2, 0);
-            methodVisitor.visitLocalVariable("className", "Ljava/lang/String;", null, label0, label2, 1);
-            methodVisitor.visitMaxs(3, 2);
+            methodVisitor.visitMaxs(3, 1);
             methodVisitor.visitEnd();
         }
         {
             methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "setVal", "(Ljava/lang/String;Ljava/lang/Object;)V", null, null);
             methodVisitor.visitCode();
-            Label label0 = new Label();
-            methodVisitor.visitLabel(label0);
 
             Field[] declaredFields = type.getDeclaredFields();
-
             Field firstField = declaredFields[0];
 
-            methodVisitor.visitLineNumber(16, label0);
+            Label label0 = new Label();
+            methodVisitor.visitLabel(label0);
+            methodVisitor.visitLineNumber(21, label0);
             methodVisitor.visitLdcInsn(firstField.getName());
             methodVisitor.visitVarInsn(ALOAD, 1);
             methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-
             Label label1 = new Label();
             methodVisitor.visitJumpInsn(IFEQ, label1);
+
             Label label2 = new Label();
             methodVisitor.visitLabel(label2);
-            methodVisitor.visitLineNumber(17, label2);
+            methodVisitor.visitLineNumber(22, label2);
             methodVisitor.visitVarInsn(ALOAD, 0);
-            methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L“+beanClassName+”;");
+            methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
             methodVisitor.visitVarInsn(ALOAD, 2);
             String fieldType = firstField.getType().getName().replace('.', '/');
             methodVisitor.visitTypeInsn(CHECKCAST, fieldType);
@@ -110,12 +111,13 @@ public class AsmBeanProcessor implements BeanProcessor {
             Label label3 = new Label();
             methodVisitor.visitJumpInsn(GOTO, label3);
             methodVisitor.visitLabel(label1);
-            methodVisitor.visitLineNumber(18, label1);
+            methodVisitor.visitLineNumber(23, label1);
 
-            int rowNum = 18;
+            int rowNum = 24;
             for (int i = 1; i < declaredFields.length; i++) {
 
                 Field field = declaredFields[i];
+                fieldType = field.getType().getName().replace('.', '/');
 
                 methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 methodVisitor.visitLdcInsn(field.getName());
@@ -130,49 +132,68 @@ public class AsmBeanProcessor implements BeanProcessor {
                 methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
                 methodVisitor.visitVarInsn(ALOAD, 2);
                 methodVisitor.visitTypeInsn(CHECKCAST, fieldType);
-//                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false);
-                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(firstField), "(L" + fieldType + ";)V", false);
+                if (field.getType().isPrimitive()) {
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldType, getMethodName(field.getType()), getDescriptor(field.getType()), false);
+                }
+                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(L" + fieldType + ";)V", false);
                 methodVisitor.visitJumpInsn(GOTO, label3);
                 methodVisitor.visitLabel(label4);
                 methodVisitor.visitLineNumber((rowNum = rowNum + 2), label4);
             }
 
             methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            methodVisitor.visitTypeInsn(NEW, "java/lang/IllegalArgumentException");
-            methodVisitor.visitInsn(DUP);
-            methodVisitor.visitTypeInsn(NEW, "java/lang/StringBuilder");
-            methodVisitor.visitInsn(DUP);
-            methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-            methodVisitor.visitLdcInsn("\u5c5e\u6027");
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-            methodVisitor.visitVarInsn(ALOAD, 1);
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-            methodVisitor.visitLdcInsn("\u4e0d\u5b58\u5728");
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
-            methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V", false);
-            methodVisitor.visitInsn(ATHROW);
-            methodVisitor.visitLabel(label3);
-            methodVisitor.visitLineNumber((rowNum = rowNum + 2), label3);
-            methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
             methodVisitor.visitInsn(RETURN);
-            Label label6 = new Label();
-            methodVisitor.visitLabel(label6);
-            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label6, 0);
-            methodVisitor.visitLocalVariable("fieldName", "Ljava/lang/String;", null, label0, label6, 1);
-            methodVisitor.visitLocalVariable("val", "Ljava/lang/Object;", null, label0, label6, 2);
-            methodVisitor.visitMaxs(4, 3);
+            Label label13 = new Label();
+            methodVisitor.visitLabel(label13);
+            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label13, 0);
+            methodVisitor.visitLocalVariable("fieldName", "Ljava/lang/String;", null, label0, label13, 1);
+            methodVisitor.visitLocalVariable("val", "Ljava/lang/Object;", null, label0, label13, 2);
+            methodVisitor.visitMaxs(2, 3);
+            methodVisitor.visitEnd();
+        }
+
+        {
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "newInstance", "()Ljava/lang/Object;", null, null);
+            methodVisitor.visitCode();
+            Label label0 = new Label();
+            methodVisitor.visitLabel(label0);
+            methodVisitor.visitLineNumber(8, label0);
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, className, "newInstance", "()Lcom/nway/spring/jdbc/performance/entity/Monitor;", false);
+            methodVisitor.visitInsn(ARETURN);
+            Label label1 = new Label();
+            methodVisitor.visitLabel(label1);
+            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label1, 0);
+            methodVisitor.visitMaxs(1, 1);
             methodVisitor.visitEnd();
         }
         classWriter.visitEnd();
 
         try {
-            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(), "E:\\"+type.getName() + "Access.class");
-            Class<?> processor = beanClassLoader.defineClass(className, classWriter.toByteArray());
+            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(), "D:\\" + className);
+            Class<?> processor = beanClassLoader.defineClass(className.replace('/', '.'), classWriter.toByteArray());
             return (BeanAccess) processor.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("使用ASM创建 [ " + className + " ] 失败", e);
         }
+    }
+
+    private String getMethodName(Class<?> clazz) {
+        if (Integer.class.equals(clazz)) {
+            return "intValue";
+        } else if (Float.class.equals(clazz)) {
+            return "floatValue";
+        }
+        return "";
+    }
+
+    private String getDescriptor(Class<?> clazz) {
+        if (Integer.class.equals(clazz)) {
+            return "()I";
+        } else if (Float.class.equals(clazz)) {
+            return "()F";
+        }
+        return "";
     }
 
     private String getSetter(Field field) {

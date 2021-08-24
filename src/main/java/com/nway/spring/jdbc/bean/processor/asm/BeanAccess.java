@@ -1,8 +1,8 @@
 package com.nway.spring.jdbc.bean.processor.asm;
 
-public interface BeanAccess {
+public interface BeanAccess<T> {
 
-    <T> T newInstance(String className);
+    T newInstance();
 
     void setVal(String fieldName, Object val);
 
