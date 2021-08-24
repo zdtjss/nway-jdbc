@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.nway.spring.jdbc.bean.processor.BeanProcessor;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 /**

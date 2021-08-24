@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.bean;
+package com.nway.spring.jdbc.bean.processor;
 
 import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.esotericsoftware.reflectasm.FieldAccess;

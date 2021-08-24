@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.bean;
+package com.nway.spring.jdbc.bean.processor;
 
 import com.nway.spring.jdbc.annotation.Column;
 import org.apache.commons.logging.Log;
@@ -136,14 +136,6 @@ public class DefaultBeanProcessor implements BeanProcessor {
         private Set<String> mappedProperties;
 
         private Map<String, Integer> columnIndexMap;
-
-        /**
-         * Create a new {@code BeanPropertyRowMapper} for bean-style configuration.
-         *
-         * @see #setMappedClass
-         */
-        public BeanPropertyRowMapper() {
-        }
 
         /**
          * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated

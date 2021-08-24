@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import com.nway.spring.jdbc.bean.BeanProcessor;
-import com.nway.spring.jdbc.bean.DefaultBeanProcessor;
+import com.nway.spring.jdbc.bean.processor.BeanProcessor;
+import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
 import com.nway.spring.jdbc.pagination.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +49,6 @@ import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.InsertBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**

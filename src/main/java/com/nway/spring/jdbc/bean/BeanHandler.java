@@ -19,6 +19,7 @@ package com.nway.spring.jdbc.bean;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.nway.spring.jdbc.bean.processor.BeanProcessor;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 /**
