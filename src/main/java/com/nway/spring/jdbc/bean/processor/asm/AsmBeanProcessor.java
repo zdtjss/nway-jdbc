@@ -353,10 +353,13 @@ public class AsmBeanProcessor implements BeanProcessor {
                 methodVisitor.visitLabel(label2);
                 methodVisitor.visitLineNumber(19, label2);
                 methodVisitor.visitVarInsn(ALOAD, 0);
-                methodVisitor.visitFieldInsn(GETFIELD, "com/nway/spring/jdbc/performance/entity/MonitorAccess", "bean", "Lcom/nway/spring/jdbc/performance/entity/Monitor;");
+                methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L"+beanClassName+";");
                 methodVisitor.visitVarInsn(ALOAD, 2);
                 methodVisitor.visitTypeInsn(CHECKCAST, "java/lang/Integer");
-                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/nway/spring/jdbc/performance/entity/Monitor", "setId", "(Ljava/lang/Integer;)V", false);
+                if (field.getType().isPrimitive()) {
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldTypeStr, getMethodName(field.getType()), "()" + descriptor, false);
+                }
+                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + (descriptor.startsWith("[") || field.getType().isPrimitive() ? descriptor : "L" + descriptor + ";") + ")V", false);
 
                 Label label3 = new Label();
                 methodVisitor.visitJumpInsn(GOTO, label3);
