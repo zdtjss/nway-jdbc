@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.bean.processor.asm;
+package com.nway.spring.jdbc.bean.processor;
 
 public interface BeanAccess {
 

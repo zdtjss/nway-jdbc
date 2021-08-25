@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.bean.processor.asm;
 
 import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.bean.processor.BeanAccess;
 import com.nway.spring.jdbc.bean.processor.BeanProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -286,7 +287,7 @@ public class AsmBeanProcessor implements BeanProcessor {
             String beanClassName = type.getCanonicalName().replace('.', '/');
             String className = beanClassName + "Access";
 
-            classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, null, "java/lang/Object", new String[]{"com/nway/spring/jdbc/bean/processor/asm/BeanAccess"});
+            classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, null, "java/lang/Object", new String[]{"com/nway/spring/jdbc/bean/processor/BeanAccess"});
 
             classWriter.visitSource(type.getSimpleName() + "Access.java", null);
 
