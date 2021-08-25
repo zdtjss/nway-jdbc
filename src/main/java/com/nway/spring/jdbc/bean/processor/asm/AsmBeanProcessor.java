@@ -276,9 +276,9 @@ public class AsmBeanProcessor implements BeanProcessor {
             return JdbcUtils.getResultSetValue(rs, index, paramType);
         }
 
-        private <T> BeanAccess dump(Class<T> type) {
+        private BeanAccess dump(Class<T> type) {
 
-            ClassWriter classWriter = new ClassWriter(0);
+            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             FieldVisitor fieldVisitor;
             MethodVisitor methodVisitor;
 
@@ -339,11 +339,12 @@ public class AsmBeanProcessor implements BeanProcessor {
                 Field[] fields = type.getDeclaredFields();
                 Field field = fields[0];
                 String fieldTypeStr = getClassName(field.getType());
+                String descriptor = getDescriptor(field.getType());
 
                 Label label0 = new Label();
                 methodVisitor.visitLabel(label0);
                 methodVisitor.visitLineNumber(18, label0);
-                methodVisitor.visitLdcInsn(field.getName());
+                methodVisitor.visitLdcInsn("id");
                 methodVisitor.visitVarInsn(ALOAD, 1);
                 methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
                 Label label1 = new Label();
@@ -352,18 +353,15 @@ public class AsmBeanProcessor implements BeanProcessor {
                 methodVisitor.visitLabel(label2);
                 methodVisitor.visitLineNumber(19, label2);
                 methodVisitor.visitVarInsn(ALOAD, 0);
-                methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
+                methodVisitor.visitFieldInsn(GETFIELD, "com/nway/spring/jdbc/performance/entity/MonitorAccess", "bean", "Lcom/nway/spring/jdbc/performance/entity/Monitor;");
                 methodVisitor.visitVarInsn(ALOAD, 2);
-                methodVisitor.visitTypeInsn(CHECKCAST, fieldTypeStr);
-                if (field.getType().isPrimitive()) {
-                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldTypeStr, getMethodName(field.getType()), "()" + getDescriptor(field.getType()), false);
-                }
-                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + getDescriptor(field.getType()) + ")V", false);
+                methodVisitor.visitTypeInsn(CHECKCAST, "java/lang/Integer");
+                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/nway/spring/jdbc/performance/entity/Monitor", "setId", "(Ljava/lang/Integer;)V", false);
 
                 Label label3 = new Label();
                 methodVisitor.visitJumpInsn(GOTO, label3);
                 methodVisitor.visitLabel(label1);
-                methodVisitor.visitLineNumber(20, label1);
+                methodVisitor.visitLineNumber(21, label1);
                 methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 
                 int rowNum = 21;
@@ -371,6 +369,7 @@ public class AsmBeanProcessor implements BeanProcessor {
 
                     field = fields[i];
                     fieldTypeStr = getClassName(field.getType());
+                    descriptor = getDescriptor(field.getType());
 
                     methodVisitor.visitLdcInsn(field.getName());
                     methodVisitor.visitVarInsn(ALOAD, 1);
@@ -384,10 +383,10 @@ public class AsmBeanProcessor implements BeanProcessor {
                     methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
                     methodVisitor.visitVarInsn(ALOAD, 2);
                     methodVisitor.visitTypeInsn(CHECKCAST, fieldTypeStr);
-                    if (field.getType().isPrimitive() && Number.class.isAssignableFrom(field.getType())) {
-                        methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldTypeStr, getMethodName(field.getType()), "()" + getDescriptor(field.getType()), false);
+                    if (field.getType().isPrimitive()) {
+                        methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldTypeStr, getMethodName(field.getType()), "()" + descriptor, false);
                     }
-                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + (fieldTypeStr.startsWith("[") ? fieldTypeStr : "L" + fieldTypeStr + ";") + ")V", false);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + (descriptor.startsWith("[") || field.getType().isPrimitive() ? descriptor : "L" + descriptor + ";") + ")V", false);
                     methodVisitor.visitJumpInsn(GOTO, label3);
                     methodVisitor.visitLabel(label4);
                     methodVisitor.visitLineNumber(rowNum++, label4);
@@ -410,12 +409,31 @@ public class AsmBeanProcessor implements BeanProcessor {
             classWriter.visitEnd();
 
             try {
-                DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(), "D:\\" + className);
+                DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
                 Class<?> processor = beanClassLoader.defineClass(className.replace('/', '.'), classWriter.toByteArray());
                 return (BeanAccess) processor.getConstructor().newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("使用ASM创建 [ " + className + " ] 失败", e);
             }
+        }
+
+        private String toPrimitiveMethod(Class<?> clazz) {
+            if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
+                return "parseInt";
+            } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
+                return "parseLong";
+            } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
+                return "parseBoolean";
+            } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
+                return "parseFloat";
+            } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
+                return "parseDouble";
+            } else if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
+                return "parseByte";
+            } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
+                return "parseShort";
+            }
+            return "";
         }
 
         private String getMethodName(Class<?> clazz) {
@@ -425,7 +443,7 @@ public class AsmBeanProcessor implements BeanProcessor {
                 return "longValue";
             } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
                 return "booleanValue";
-            }  else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
+            } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
                 return "floatValue";
             } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
                 return "doubleValue";
@@ -457,19 +475,19 @@ public class AsmBeanProcessor implements BeanProcessor {
         }
 
         private String getDescriptor(Class<?> clazz) {
-            if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
+            if (Integer.TYPE.equals(clazz)) {
                 return "I";
-            } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
+            } else if (Long.TYPE.equals(clazz)) {
                 return "J";
-            } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
+            } else if (Boolean.TYPE.equals(clazz)) {
                 return "Z";
-            }  else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
+            } else if (Float.TYPE.equals(clazz)) {
                 return "F";
-            } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
+            } else if (Double.TYPE.equals(clazz)) {
                 return "D";
-            } else if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
+            } else if (Byte.TYPE.equals(clazz)) {
                 return "B";
-            } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
+            } else if (Short.TYPE.equals(clazz)) {
                 return "S";
             }
             return clazz.getName().replace('.', '/');
