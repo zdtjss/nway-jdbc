@@ -74,6 +74,7 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
      *
      * @param mappedClass the mapped class
      */
+    @Override
     protected void initialize(Class<T> mappedClass) {
         super.initialize(mappedClass);
         this.beanAccess = createBeanAccess(mappedClass);
@@ -87,26 +88,6 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
     @Override
     protected void setVal(Object mappedObject, Field field, Object value) {
         beanAccess.setVal(field.getName(), value);
-    }
-
-    /**
-     * Retrieve a JDBC object value for the specified column.
-     * <p>The default implementation calls
-     * {@link JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)}.
-     * Subclasses may override this to check specific value types upfront,
-     * or to post-process values return from {@code getResultSetValue}.
-     *
-     * @param rs        is the ResultSet holding the data
-     * @param index     is the column index
-     * @param paramType the target parameter type
-     * @return the Object value
-     * @throws SQLException in case of extraction failure
-     * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)
-     * @since 5.3
-     */
-    @Nullable
-    protected Object getColumnValue(ResultSet rs, int index, Class<?> paramType) throws SQLException {
-        return JdbcUtils.getResultSetValue(rs, index, paramType);
     }
 
     private BeanAccess createBeanAccess(Class<T> type) {
