@@ -1,7 +1,7 @@
-package com.nway.spring.jdbc.bean.processor.rowmapper;
+package com.nway.spring.jdbc.bean.processor.asm;
 
 import com.nway.spring.jdbc.bean.processor.BeanAccess;
-import com.nway.spring.jdbc.bean.processor.asm.DynamicBeanClassLoader;
+import com.nway.spring.jdbc.bean.processor.DefaultRowMapper;
 import org.objectweb.asm.*;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,6 +12,7 @@ import org.springframework.util.ClassUtils;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Opcodes.RETURN;

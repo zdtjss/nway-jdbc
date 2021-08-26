@@ -1,4 +1,4 @@
-package com.nway.spring.jdbc.bean.processor.rowmapper;
+package com.nway.spring.jdbc.bean.processor;
 
 import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.sql.builder.SqlBuilderException;

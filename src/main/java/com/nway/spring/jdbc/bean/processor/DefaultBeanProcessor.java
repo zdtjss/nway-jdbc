@@ -1,8 +1,5 @@
 package com.nway.spring.jdbc.bean.processor;
 
-import com.nway.spring.jdbc.bean.processor.rowmapper.AsmRowMapper;
-import com.nway.spring.jdbc.bean.processor.rowmapper.DefaultRowMapper;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import java.sql.ResultSet;
@@ -24,7 +21,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 
         DefaultRowMapper<T> mapper = Optional.ofNullable(localCache.get(mappedClass))
                 .orElseGet(() -> {
-                    AsmRowMapper<T> rowMapper = new AsmRowMapper<>(mappedClass);
+                    DefaultRowMapper<T> rowMapper = new DefaultRowMapper<>(mappedClass);
                     localCache.put(mappedClass, rowMapper);
                     return rowMapper;
                 }).setColumnIndexMap(columnIndex);
@@ -43,7 +40,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 
         DefaultRowMapper<T> mapper = Optional.ofNullable(localCache.get(mappedClass))
                 .orElseGet(() -> {
-                    AsmRowMapper<T> rowMapper = new AsmRowMapper<>(mappedClass);
+                    DefaultRowMapper<T> rowMapper = new DefaultRowMapper<>(mappedClass);
                     localCache.put(mappedClass, rowMapper);
                     return rowMapper;
                 }).setColumnIndexMap(columnIndex);
