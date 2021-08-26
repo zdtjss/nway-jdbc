@@ -220,7 +220,7 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
             methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label15, 0);
             methodVisitor.visitLocalVariable("fieldName", "Ljava/lang/String;", null, label0, label15, 1);
             methodVisitor.visitLocalVariable("val", "Ljava/lang/Object;", null, label0, label15, 2);
-            methodVisitor.visitMaxs(2, 3);
+            methodVisitor.visitMaxs(3, 3);
             methodVisitor.visitEnd();
         }
         classWriter.visitEnd();

@@ -1,9 +1,8 @@
 package com.nway.spring.jdbc.sql;
 
-import org.junit.Test;
-
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
+import org.junit.jupiter.api.Test;
 
 public class QueryBuilderTest {
 

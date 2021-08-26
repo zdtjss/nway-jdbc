@@ -14,7 +14,7 @@ public class Test {
 
         System.out.println(SqlExecutorTest.class.getSimpleName());
 
-        new AsmBeanProcessor().dump(Monitor.class);
+//        new AsmBeanProcessor().dump(Monitor.class);
 
        /* Scanner scanner = new Scanner(System.in);
 
@@ -41,4 +41,6 @@ public class Test {
             processorA.forEach(e -> System.out.print(e + " "));
         }*/
     }
+
+
 }

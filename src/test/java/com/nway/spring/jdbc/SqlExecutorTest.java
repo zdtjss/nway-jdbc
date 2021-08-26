@@ -7,7 +7,7 @@ import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 
@@ -142,7 +142,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void likeTest() {
 		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
-				.likeLeft(ExampleEntity::getString, "%' or '1'='1");
+				.like(ExampleEntity::getString, "1");
 		System.out.println(sqlExecutor.queryList(builder));
 	}
 
@@ -252,7 +252,7 @@ public class SqlExecutorTest extends BaseTest {
 	@Test
 	public void lambdaInsertTest() throws SQLException {
 
-		List<ExampleEntity> exampleEntityList = new ArrayList<ExampleEntity>();
+		List<ExampleEntity> exampleEntityList = new ArrayList<>();
 		for (int i = 0; i < 1; i++) {
 
 			ExampleEntity example = new ExampleEntity();
@@ -308,7 +308,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		ISqlBuilder ISqlBuilder = SQL.batchInsert(ExampleEntity.class).use(exampleEntityList);
 
-		System.out.println(sqlExecutor.batchUpdate(ISqlBuilder));
+		System.out.println(Arrays.toString(sqlExecutor.batchUpdate(ISqlBuilder)));
 		
 		listAll();
 	}
@@ -332,13 +332,13 @@ public class SqlExecutorTest extends BaseTest {
 		example2.setId(11);
 		example2.setUtilDate(new Date());
 
-		ISqlBuilder ISqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
+		ISqlBuilder updateSqlBuilder = SQL.update(ExampleEntity.class).set(example::getUtilDate).where().eq(example::getId);
 
 		sqlExecutor.updateById(example);
 		
 		sqlExecutor.batchUpdateById(Arrays.asList(example, example2));
 		
-		System.out.println(sqlExecutor.update(ISqlBuilder));
+		System.out.println(sqlExecutor.update(updateSqlBuilder));
 	}
 
 	@Test
@@ -352,7 +352,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		sqlExecutor.deleteById(0, ExampleEntity.class);
 		
-		sqlExecutor.batchDeleteById(Arrays.asList(0), ExampleEntity.class);
+		sqlExecutor.batchDeleteById(Collections.singletonList(0), ExampleEntity.class);
 		
 		System.out.println(sqlExecutor.update(ISqlBuilder));
 	}

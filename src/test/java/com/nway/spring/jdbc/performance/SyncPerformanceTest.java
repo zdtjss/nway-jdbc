@@ -1,22 +1,22 @@
 package com.nway.spring.jdbc.performance;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.stream.IntStream;
-
+import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.performance.dal.po.ComputerPoEntity;
 import com.nway.spring.jdbc.performance.dal.po.MonitorPoEntity;
-import org.junit.Test;
+import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.performance.entity.Monitor;
+import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.nway.spring.jdbc.BaseTest;
-import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.performance.entity.Monitor;
-import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class SyncPerformanceTest extends BaseTest {
@@ -106,15 +106,17 @@ public class SyncPerformanceTest extends BaseTest {
         long begin = System.currentTimeMillis();
 
         nwayPerformance.getMonitorById(id);
+        myBatisPlusPerformance.getMonitorById(id);
 
+        for(int i=0;i<10;i++) {
        /* nway.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(nwayLambdaTask);
-        System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(nwayLambdaTask);
+            System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
 
-        begin = System.currentTimeMillis();
+        /*begin = System.currentTimeMillis();
         List<Future<MonitorPoEntity>> futureListGe = executorService.invokeAll(mybatisGeTask);
         System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
 
@@ -136,19 +138,20 @@ public class SyncPerformanceTest extends BaseTest {
 
         begin = System.currentTimeMillis();
         executorService.invokeAll(mybatisTask);
-        System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
+        System.out.println("mybatis = " + (System.currentTimeMillis() - begin));*/
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisPlusTask);
-        System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisPlusTask);
+            System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
+        }
     }
 
     @Test
     public void testListMonitor() throws InterruptedException {
 
-        int times = 50;
-        int threadn = 100;
+        int times = 30;
+        int threadn = 50;
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadn);
 
@@ -200,55 +203,57 @@ public class SyncPerformanceTest extends BaseTest {
         scriptPerformance.listMonitor();
         myBatisGePerformance.listMonitor();
 
-        long begin = System.currentTimeMillis();
+        for(int i = 0;i<10;i++) {
+            long begin = System.currentTimeMillis();
 
-        executorService.invokeAll(springTask);
-        System.out.println("spring = " + (System.currentTimeMillis() - begin));
-        springJdbcPerformance.listMonitor();
+            /*executorService.invokeAll(springTask);
+            System.out.println("spring = " + (System.currentTimeMillis() - begin));
+            springJdbcPerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(hibernateTask);
-        System.out.println("hibernate = " + (System.currentTimeMillis() - begin));
-        hibernatePerformance.listMonitor();
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(hibernateTask);
+            System.out.println("hibernate = " + (System.currentTimeMillis() - begin));
+            hibernatePerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(jpaTask);
-        System.out.println("jpa = " + (System.currentTimeMillis() - begin));
-        jpaPerformance.listMonitor();
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(jpaTask);
+            System.out.println("jpa = " + (System.currentTimeMillis() - begin));
+            jpaPerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(springDataJpaTask);
-        System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
-        springDataJpaPerformance.listMonitor();
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(springDataJpaTask);
+            System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
+            springDataJpaPerformance.listMonitor();*/
 
         /*begin = System.currentTimeMillis();
         executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));
         nwayPerformance.listMonitor();*/
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(nwayLambdaTask);
-        System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
-        nwayLambdaPerformance.listMonitor();
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(nwayLambdaTask);
+            System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+            nwayLambdaPerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisGeTask);
-        System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
-        myBatisGePerformance.listMonitor();
+            /*begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisGeTask);
+            System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
+            myBatisGePerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisTask);
-        System.out.println("mybatis = "+(System.currentTimeMillis() - begin));
-        myBatisPerformance.listMonitor();
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisTask);
+            System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
+            myBatisPerformance.listMonitor();*/
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisPlusTask);
-        System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
-        myBatisPlusPerformance.listMonitor();
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisPlusTask);
+            System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
+            myBatisPlusPerformance.listMonitor();
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(scriptTask);
-        System.out.println("script = " + (System.currentTimeMillis() - begin));
+            /*begin = System.currentTimeMillis();
+            executorService.invokeAll(scriptTask);
+            System.out.println("script = " + (System.currentTimeMillis() - begin));*/
+        }
     }
 
     @Test
@@ -292,24 +297,22 @@ public class SyncPerformanceTest extends BaseTest {
         }
 
 		myBatisPerformance.getComputerById(id);
-
         hibernatePerformance.getComputerById(id);
-
-        long begin = System.currentTimeMillis();
-
         nwayPerformance.getComputerById(id);
-
         myBatisPlusPerformance.getComputerById(id);
+
+        for(int i =0;i<3;i++) {
+            long begin = System.currentTimeMillis();
 
        /* begin = System.currentTimeMillis();
         executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
 
-		begin = System.currentTimeMillis();
-        executorService.invokeAll(nwayLambdaTask);
-        System.out.println("lambdaNway = " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(nwayLambdaTask);
+            System.out.println("lambdaNway = " + (System.currentTimeMillis() - begin));
 
-		begin = System.currentTimeMillis();
+		/*begin = System.currentTimeMillis();
         executorService.invokeAll(mybatisGeTask);
         System.out.println("mybatisGe = " + (System.currentTimeMillis() - begin));
 
@@ -329,13 +332,14 @@ public class SyncPerformanceTest extends BaseTest {
         executorService.invokeAll(springDataJpaTask);
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));
 
-		begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisTask);
-        System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisTask);
+            System.out.println("mybatis = " + (System.currentTimeMillis() - begin));*/
 
-		begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisPlusTask);
-        System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisPlusTask);
+            System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
+        }
 
     }
 
