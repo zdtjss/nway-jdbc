@@ -3,6 +3,8 @@ package com.nway.spring.jdbc.bean.processor.asm;
 import com.nway.spring.jdbc.bean.processor.BeanAccess;
 import com.nway.spring.jdbc.bean.processor.DefaultRowMapper;
 import org.objectweb.asm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -57,6 +59,8 @@ import static org.objectweb.asm.Opcodes.RETURN;
  */
 public class AsmRowMapper<T> extends DefaultRowMapper<T> {
 
+    private static final Logger log = LoggerFactory.getLogger(AsmRowMapper.class);
+
     private BeanAccess beanAccess;
 
     /**
@@ -67,6 +71,9 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
      */
     public AsmRowMapper(Class<T> mappedClass) {
         super(mappedClass);
+        if(log.isDebugEnabled()) {
+            log.debug("基于ASM映射数据，{}", mappedClass.getName());
+        }
     }
 
     /**

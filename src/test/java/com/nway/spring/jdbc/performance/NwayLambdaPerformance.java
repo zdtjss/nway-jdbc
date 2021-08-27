@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
 import com.nway.spring.jdbc.SqlExecutor;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.ComputerSoftware;
@@ -22,7 +21,6 @@ import com.nway.spring.jdbc.performance.entity.Software;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
-import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import org.springframework.util.CollectionUtils;
 
 @Service("nwayLambdaPerformance")
@@ -36,11 +34,11 @@ public class NwayLambdaPerformance implements Performance {
 	public Computer getComputerById(int id) {
 
 		SqlBuilder computerSql = SQL.query(Computer.class).where().eq(Computer::getId, id);
-		QueryBuilder mainframeSql = SQL.query(Mainframe.class);
-		QueryBuilder monitorSql = SQL.query(Monitor.class);
-		QueryBuilder mouseSql = SQL.query(Mouse.class);
-		QueryBuilder keyboardSql = SQL.query(Keyboard.class);
-		QueryBuilder softwareSql = SQL.query(Software.class);
+		QueryBuilder<Mainframe> mainframeSql = SQL.query(Mainframe.class);
+		QueryBuilder<Monitor> monitorSql = SQL.query(Monitor.class);
+		QueryBuilder<Mouse> mouseSql = SQL.query(Mouse.class);
+		QueryBuilder<Keyboard> keyboardSql = SQL.query(Keyboard.class);
+		QueryBuilder<Software> softwareSql = SQL.query(Software.class);
 		SqlBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class).where().eq(ComputerSoftware::getComputerId, id);
 		
 		Computer computer = sqlExecutor.queryBean(computerSql);
@@ -50,7 +48,7 @@ public class NwayLambdaPerformance implements Performance {
 		computer.setMouse(sqlExecutor.queryBean(mouseSql.where().eq(Mouse::getId, computer.getMouseId())));
 		computer.setKeyboard(sqlExecutor.queryBean(keyboardSql.where().eq(Keyboard::getId, computer.getKeyboardId())));
 		List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryList(computerSoftwareSql);
-		List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
+		List<Integer> softwareIdList = computerSoftwareList.stream().map(ComputerSoftware::getSoftwareId).collect(Collectors.toList());
 		computer.setSoftware(sqlExecutor.queryList(softwareSql.where().in(Software::getId, softwareIdList)));
 		
 		return computer;
@@ -59,14 +57,14 @@ public class NwayLambdaPerformance implements Performance {
 	@Override
 	public List<Computer> listComputer() {
 
-		QueryBuilder computerSql = SQL.query(Computer.class);
+		QueryBuilder<Computer> computerSql = SQL.query(Computer.class);
 
 		List<Computer> computers = sqlExecutor.queryList(computerSql);
 
-		List<Integer> mainframeIds = computers.stream().map(e -> e.getMainframeId()).collect(Collectors.toList());
-		List<Integer> monitorIds = computers.stream().map(e -> e.getMonitorId()).collect(Collectors.toList());
-		List<Integer> mouseIds = computers.stream().map(e -> e.getMouseId()).collect(Collectors.toList());
-		List<Integer> keyboardIds = computers.stream().map(e -> e.getKeyboardId()).collect(Collectors.toList());
+		List<Integer> mainframeIds = computers.stream().map(Computer::getMainframeId).collect(Collectors.toList());
+		List<Integer> monitorIds = computers.stream().map(Computer::getMonitorId).collect(Collectors.toList());
+		List<Integer> mouseIds = computers.stream().map(Computer::getMouseId).collect(Collectors.toList());
+		List<Integer> keyboardIds = computers.stream().map(Computer::getKeyboardId).collect(Collectors.toList());
 
 		List<Mainframe> mainframeList = sqlExecutor.queryList(mainframeIds, Mainframe.class);
 		List<Monitor> monitorList = sqlExecutor.queryList(monitorIds, Monitor.class);
@@ -79,15 +77,15 @@ public class NwayLambdaPerformance implements Performance {
 		Map<Integer, Keyboard> keyboardMap = keyboardList.stream().collect(Collectors.toMap(Keyboard::getId, Function.identity()));
 
 		SqlBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class)
-				.where().in(ComputerSoftware::getComputerId, computers.stream().map(e -> e.getId()).collect(Collectors.toList()));
+				.where().in(ComputerSoftware::getComputerId, computers.stream().map(Computer::getId).collect(Collectors.toList()));
 		List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryList(computerSoftwareSql);
 
 		Map<Integer, List<Software>> computerSoftwareMap = new HashMap<>();
 		if(!CollectionUtils.isEmpty(computerSoftwareList)) {
-			List<Integer> softIds = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
+			List<Integer> softIds = computerSoftwareList.stream().map(ComputerSoftware::getSoftwareId).collect(Collectors.toList());
 			List<Software> softwareList = sqlExecutor.queryList(softIds, Software.class);
 			Map<Integer, Software> softwareMap = softwareList.stream().collect(Collectors.toMap(Software::getId, Function.identity()));
-			computerSoftwareList.stream().collect(Collectors.groupingBy(ComputerSoftware::getComputerId)).entrySet().stream().forEach(e -> {
+			computerSoftwareList.stream().collect(Collectors.groupingBy(ComputerSoftware::getComputerId)).entrySet().forEach(e -> {
 				computerSoftwareMap.put(e.getKey(), e.getValue().stream().map(cs -> softwareMap.get(cs.getSoftwareId())).collect(Collectors.toList()));
 			});
 		}

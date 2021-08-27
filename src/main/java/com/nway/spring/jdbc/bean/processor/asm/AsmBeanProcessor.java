@@ -17,6 +17,8 @@ public class AsmBeanProcessor implements BeanProcessor {
     @Override
     public <T> List<T> toBeanList(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
+//        long begin = System.currentTimeMillis();
+
         int rowNum = 0;
         Map<String, Integer> columnIndex = getColumnIndex(rs);
 
@@ -31,6 +33,9 @@ public class AsmBeanProcessor implements BeanProcessor {
         while (rs.next()) {
             results.add(mapper.mapRow(rs, rowNum++));
         }
+
+//        System.out.printf("%d\t%s%n", System.currentTimeMillis() - begin, Thread.currentThread().getName());
+
         return results;
     }
 

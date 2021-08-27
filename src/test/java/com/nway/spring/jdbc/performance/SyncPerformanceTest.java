@@ -6,6 +6,7 @@ import com.nway.spring.jdbc.performance.dal.po.MonitorPoEntity;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 @Service
 public class SyncPerformanceTest extends BaseTest {
 
@@ -232,7 +234,7 @@ public class SyncPerformanceTest extends BaseTest {
 
             begin = System.currentTimeMillis();
             executorService.invokeAll(nwayLambdaTask);
-            System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+            log.info("nwayLambda = {}", System.currentTimeMillis() - begin);
             nwayLambdaPerformance.listMonitor();
 
             /*begin = System.currentTimeMillis();
@@ -247,7 +249,7 @@ public class SyncPerformanceTest extends BaseTest {
 
             begin = System.currentTimeMillis();
             executorService.invokeAll(mybatisPlusTask);
-            System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
+            log.info("myBatisPlus = {}", System.currentTimeMillis() - begin);
             myBatisPlusPerformance.listMonitor();
 
             /*begin = System.currentTimeMillis();
@@ -310,7 +312,7 @@ public class SyncPerformanceTest extends BaseTest {
 
             begin = System.currentTimeMillis();
             executorService.invokeAll(nwayLambdaTask);
-            System.out.println("lambdaNway = " + (System.currentTimeMillis() - begin));
+            log.info("lambdaNway = {}", System.currentTimeMillis() - begin);
 
 		/*begin = System.currentTimeMillis();
         executorService.invokeAll(mybatisGeTask);
@@ -338,7 +340,7 @@ public class SyncPerformanceTest extends BaseTest {
 
             begin = System.currentTimeMillis();
             executorService.invokeAll(mybatisPlusTask);
-            System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
+            log.info("mybatisPlus = {}", System.currentTimeMillis() - begin);
         }
 
     }

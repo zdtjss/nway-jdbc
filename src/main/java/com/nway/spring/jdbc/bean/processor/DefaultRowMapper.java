@@ -1,9 +1,12 @@
 package com.nway.spring.jdbc.bean.processor;
 
 import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.bean.processor.asm.AsmRowMapper;
 import com.nway.spring.jdbc.sql.builder.SqlBuilderException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -62,6 +65,8 @@ import java.util.Set;
  */
 public class DefaultRowMapper<T> implements RowMapper<T> {
 
+    private static final Logger log = LoggerFactory.getLogger(DefaultRowMapper.class);
+
     /**
      * Logger available to subclasses.
      */
@@ -95,6 +100,9 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
      */
     public DefaultRowMapper(Class<T> mappedClass) {
         initialize(mappedClass);
+        if(log.isDebugEnabled()) {
+            log.debug("基于反射映射数据，{}", mappedClass.getName());
+        }
     }
 
     public DefaultRowMapper<T> setColumnIndexMap(Map<String, Integer> columnIndexMap) {
