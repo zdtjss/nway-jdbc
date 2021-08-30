@@ -379,7 +379,7 @@ public class SqlExecutor implements InitializingBean {
      * @param queryBuilder
      * @return
      */
-    public boolean isExists(ISqlBuilder queryBuilder) {
+    public boolean exist(ISqlBuilder queryBuilder) {
         PageDialect pageDialect = paginationSupport.buildPaginationSql(queryBuilder.getSql(), 1, 1);
         Object[] params = Optional.ofNullable(queryBuilder.getParam()).orElse(new ArrayList<>(0)).toArray();
         Object[] realParam = new Object[params.length + 2];
@@ -390,7 +390,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + pageDialect.getSql());
             logger.debug("params = " + objToStr(realParam));
         }
-        return jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next);
+        return Boolean.TRUE.equals(jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next));
     }
 
     /**
