@@ -7,6 +7,8 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
@@ -14,6 +16,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
     protected List<Object> param = new ArrayList<>();
     private final List<String> sets = new ArrayList<>();
     private final List<Object> idVals = new ArrayList<>();
+    private List<String> columnNameList = new ArrayList<>();
     protected Class beanClass;
     private String idName = "";
 
@@ -31,8 +34,10 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
         params.stream().map(o -> SqlBuilderUtils.getColumnValue(entityInfo.getId(), o, SqlType.UPDATE)).forEach(idVals::add);
 
-        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
-            sets.add(columnInfo.getColumnName() + " = ?");
+        List<String> columnList = columnNameList.size() != 0 ? columnNameList : entityInfo.getColumnList();
+        Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap();
+        for (String column : columnList) {
+            ColumnInfo columnInfo = columnMap.get(column);
             for (int i = 0; i < params.size(); i++) {
                 Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.UPDATE);
                 batchParam.get(i).add(columnValue);
@@ -44,9 +49,15 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
     @Override
     public String getSql() {
+
         StringBuilder sql = new StringBuilder();
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ").append(String.join(",", sets));
+
+        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
+        String setExp = columnList.stream().map(column -> column + " = ?").collect(Collectors.joining(","));
+
+        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(setExp);
         sql.append(" where ").append(idName).append(" = ?");
+
         for (int i = 0; i < getParam().size(); i++) {
             Object idVal = idVals.get(i);
             if (idVal == null) {
