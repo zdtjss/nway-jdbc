@@ -529,6 +529,10 @@ public class SqlBuilder implements ISqlBuilder {
         throw new UnsupportedOperationException("此方法只有update时使用");
     }
 
+    public <T, R> SqlBuilder set(SFunction<T, R> val) {
+        throw new UnsupportedOperationException("此方法只有update时使用");
+    }
+
     private void appendAnd() {
         if (canAppendAnd) {
             sql.append(" and ");

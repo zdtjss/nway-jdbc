@@ -12,6 +12,7 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
+import jdk.internal.joptsimple.internal.Strings;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
@@ -77,6 +78,13 @@ public class SqlBuilderUtils {
 	public static String getAllColumn(Class<?> beanClass) {
 		EntityInfo entityInfo = getEntityInfo(beanClass);
 		return String.join(",", entityInfo.getColumnList());
+	}
+
+	public static List<String> getColumnsWithoutId(Class<?> beanClass) {
+		EntityInfo entityInfo = getEntityInfo(beanClass);
+		List<String> columnList = entityInfo.getColumnList();
+		columnList.remove(entityInfo.getId().getColumnName());
+		return columnList;
 	}
 
 	public static <T> String getColumn(Class<?> beanClass, SSupplier<T> lambda) {
