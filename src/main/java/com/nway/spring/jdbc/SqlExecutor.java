@@ -227,12 +227,11 @@ public class SqlExecutor implements InitializingBean {
         System.arraycopy(params, 0, realParam, 0, params.length);
         realParam[realParam.length - 2] = pageDialect.getFirstParam();
         realParam[realParam.length - 1] = pageDialect.getSecondParam();
-        sql = pageDialect.getSql();
         if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(realParam));
         }
-        return jdbcTemplate.query(sql, realParam, getSqlType(realParam), new BeanHandler<>(type, beanProcessor));
+        return jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), new BeanHandler<>(type, beanProcessor));
     }
 
     /**
