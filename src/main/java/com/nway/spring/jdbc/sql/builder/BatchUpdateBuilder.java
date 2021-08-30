@@ -7,7 +7,6 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BatchUpdateBuilder extends SqlBuilder {
 
@@ -24,7 +23,7 @@ public class BatchUpdateBuilder extends SqlBuilder {
 		}
 		try {
 			EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-			for(ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+			for(ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
 				sets.add(columnInfo.getColumnName() + " = ?");
 				for(int i = 0;i < params.size(); i++) {
 					Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, params.get(i), SqlType.UPDATE);

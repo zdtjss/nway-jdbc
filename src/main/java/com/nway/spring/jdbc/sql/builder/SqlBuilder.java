@@ -545,7 +545,7 @@ public class SqlBuilder implements ISqlBuilder {
 
     protected void initPermission() {
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-        for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
             if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
                 continue;
             }

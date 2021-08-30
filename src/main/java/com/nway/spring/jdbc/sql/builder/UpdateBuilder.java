@@ -33,7 +33,7 @@ public class UpdateBuilder extends SqlBuilder {
 
 	private void initFilled() {
 		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+		for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
 			if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())) {
 				Object value = columnInfo.getFillStrategy().getValue(SqlType.INSERT);
 				sets.add(columnInfo.getColumnName() + " = ?");

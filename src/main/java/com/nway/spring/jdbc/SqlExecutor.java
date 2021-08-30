@@ -228,7 +228,7 @@ public class SqlExecutor implements InitializingBean {
         realParam[realParam.length - 2] = pageDialect.getFirstParam();
         realParam[realParam.length - 1] = pageDialect.getSecondParam();
         if (logger.isDebugEnabled()) {
-            logger.debug("sql = " + sql);
+            logger.debug("sql = " + pageDialect.getSql());
             logger.debug("params = " + objToStr(realParam));
         }
         return jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), new BeanHandler<>(type, beanProcessor));
