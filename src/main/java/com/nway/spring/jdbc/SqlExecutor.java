@@ -221,11 +221,18 @@ public class SqlExecutor implements InitializingBean {
      * @throws DataAccessException 数据访问异常
      */
     public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
+        PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 1);
+        Object[] params = Optional.ofNullable(args).orElse(new Object[0]);
+        Object[] realParam = new Object[params.length + 2];
+        System.arraycopy(params, 0, realParam, 0, params.length);
+        realParam[realParam.length - 2] = pageDialect.getFirstParam();
+        realParam[realParam.length - 1] = pageDialect.getSecondParam();
+        sql = pageDialect.getSql();
         if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
-            logger.debug("params = " + objToStr(args));
+            logger.debug("params = " + objToStr(realParam));
         }
-        return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<T>(type, beanProcessor));
+        return jdbcTemplate.query(sql, realParam, getSqlType(realParam), new BeanHandler<>(type, beanProcessor));
     }
 
     /**
