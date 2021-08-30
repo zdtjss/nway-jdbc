@@ -1,5 +1,6 @@
 package com.nway.spring.jdbc.sql.meta;
 
+import java.util.List;
 import java.util.Map;
 
 public final class EntityInfo {
@@ -8,7 +9,9 @@ public final class EntityInfo {
 
     private ColumnInfo id;
 
-    private Map<String, ColumnInfo> columnList;
+    private List<String> columnList;
+
+    private Map<String, ColumnInfo> columnMap;
 
     public String getTableName() {
         return tableName;
@@ -26,11 +29,19 @@ public final class EntityInfo {
         this.id = id;
     }
 
-    public Map<String, ColumnInfo> getColumnList() {
+    public List<String> getColumnList() {
         return columnList;
     }
 
-    public void setColumnList(Map<String, ColumnInfo> columnList) {
+    public void setColumnList(List<String> columnList) {
         this.columnList = columnList;
+    }
+
+    public Map<String, ColumnInfo> getColumnMap() {
+        return columnMap;
+    }
+
+    public void setColumnMap(Map<String, ColumnInfo> columnMap) {
+        this.columnMap = columnMap;
     }
 }

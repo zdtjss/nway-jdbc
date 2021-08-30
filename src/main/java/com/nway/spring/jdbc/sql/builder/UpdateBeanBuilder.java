@@ -21,7 +21,7 @@ public class UpdateBeanBuilder extends SqlBuilder {
 
 	private void init() {
 		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+		for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
 			if (columnInfo == entityInfo.getId()) {
 				continue;
 			}

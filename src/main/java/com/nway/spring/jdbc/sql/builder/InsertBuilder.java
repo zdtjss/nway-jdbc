@@ -22,7 +22,7 @@ public class InsertBuilder implements ISqlBuilder {
 
 	public InsertBuilder use(Object obj) {
 		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+		for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
 			Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.INSERT);
 			columns.add(columnInfo.getColumnName());
 			param.add(value);

@@ -12,15 +12,13 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
+import jdk.internal.joptsimple.internal.Strings;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -37,8 +35,9 @@ public class SqlBuilderUtils {
 			Field[] declaredFields = ReflectionUtils.getDeclaredFields(claszz);
 			EntityInfo entityInfo = new EntityInfo();
 			entityInfo.setTableName(getTableName(claszz));
-			entityInfo.setColumnList(new HashMap<>(declaredFields.length));
-			Map<String, ColumnInfo> columnList = entityInfo.getColumnList();
+			entityInfo.setColumnList(new ArrayList<>(declaredFields.length));
+			entityInfo.setColumnMap(new HashMap<>(declaredFields.length));
+			Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap();
 			for (Field field : declaredFields) {
 				Column column = field.getAnnotation(Column.class);
 				if(column != null && ColumnType.NONE.equals(column.type())) {
@@ -47,6 +46,7 @@ public class SqlBuilderUtils {
 				field.setAccessible(true);
 				ColumnInfo columnInfo = new ColumnInfo();
 				columnInfo.setColumnName(getColumnName(field));
+				entityInfo.getColumnList().add(columnInfo.getColumnName());
 				columnInfo.setReadMethod(field);
 				if (column != null) {
 					columnInfo.setFillStrategy(column.fillStrategy().getConstructor().newInstance());
@@ -59,7 +59,7 @@ public class SqlBuilderUtils {
 					columnInfo.setFillStrategy(new NoneFillStrategy());
 					columnInfo.setPermissionStrategy(new NonePermissionStrategy());
 				}
-				columnList.put(field.getName(), columnInfo);
+				columnMap.put(field.getName(), columnInfo);
 			}
 			ENTITY_INFO_MAP.put(claszz, entityInfo);
 		} catch (Exception e) {
@@ -77,11 +77,14 @@ public class SqlBuilderUtils {
 
 	public static String getAllColumn(Class<?> beanClass) {
 		EntityInfo entityInfo = getEntityInfo(beanClass);
-		return entityInfo.getColumnList()
-				.values()
-				.stream()
-				.map(ColumnInfo::getColumnName)
-				.collect(Collectors.joining(","));
+		return String.join(",", entityInfo.getColumnList());
+	}
+
+	public static List<String> getColumnsWithoutId(Class<?> beanClass) {
+		EntityInfo entityInfo = getEntityInfo(beanClass);
+		List<String> columnList = entityInfo.getColumnList();
+		columnList.remove(entityInfo.getId().getColumnName());
+		return columnList;
 	}
 
 	public static <T> String getColumn(Class<?> beanClass, SSupplier<T> lambda) {
@@ -202,7 +205,7 @@ public class SqlBuilderUtils {
 		if (fieldName.length() == 1 || (fieldName.length() > 1 && !Character.isUpperCase(fieldName.charAt(1)))) {
 			fieldName = fieldName.substring(0, 1).toLowerCase(Locale.ENGLISH) + fieldName.substring(1);
 		}
-		return getEntityInfo(beanClass).getColumnList().get(fieldName).getColumnName();
+		return getEntityInfo(beanClass).getColumnMap().get(fieldName).getColumnName();
 	}
 
 	public static String getIdName(Class<?> beanClass) {

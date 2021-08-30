@@ -12,6 +12,8 @@
 		<version>1.3.5</version>
 	</dependency>
 
+#本项目专注于单表操作，对于多表的情况可以考虑使用视图，但更建议使用MyBatis等其他擅长多表操作的工具。
+
 #使用
 
 增、改、删：  
@@ -59,19 +61,14 @@
 		
         //页面数据 List<T>
         users.getPageData();
-		
         //页面数据条数
         users.getPageSize();
-		
         //总数据条数
         users.getTotalCount()
-		
         //页面大小
         users.getPageSize();
-		
         //页数
         users.getPageCount();
-		
         //当前页码
         users.getCurrentPage();
 		
@@ -94,7 +91,7 @@ Map对象集分页：
 #数据库表与Java类的映射规则：  
    
    表名：
-   @Table(name = "t_user")  
+   @Table("t_user")
    
    字段：
    类属性和表列默认的对应规则是：删除下划线后首字符大写。表字段user_name对应属性userName，会通过类中setUserName方法赋值。
@@ -104,7 +101,7 @@ Map对象集分页：
       import com.nway.spring.jdbc.annotation.Table;
       import com.nway.spring.jdbc.annotation.Column;
       
-      @Table(name = "t_user")
+      @Table("t_user")
       public class User {
       	@Column("user_name")
 	  	private String name;

@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import com.nway.spring.jdbc.bean.processor.BeanProcessor;
 import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
 import com.nway.spring.jdbc.pagination.*;
+import com.nway.spring.jdbc.sql.builder.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -42,13 +43,6 @@ import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
-import com.nway.spring.jdbc.sql.builder.BatchUpdateByIdBuilder;
-import com.nway.spring.jdbc.sql.builder.UpdateBeanBuilder;
-import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
-import com.nway.spring.jdbc.sql.builder.InsertBuilder;
-import com.nway.spring.jdbc.sql.builder.QueryBuilder;
-import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -213,7 +207,27 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(args));
         }
-        return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<T>(type, beanProcessor));
+        return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<>(type, beanProcessor));
+    }
+
+    /**
+     * 基于分页原理减少数据扫描以提高查询性能，适用于从大量数据中通过非索引字段查询预期返回单行数据的情况
+     *
+     * @return
+     * @throws DataAccessException 数据访问异常
+     */
+    public <T> T queryFirst(ISqlBuilder sqlBuilder) throws DataAccessException {
+        String sql = sqlBuilder.getSql();
+        List<Object> params = Optional.ofNullable(sqlBuilder.getParam()).orElse(new ArrayList<>());
+        PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 1);
+        params.add(pageDialect.getFirstParam());
+        params.add(pageDialect.getSecondParam());
+        if (logger.isDebugEnabled()) {
+            logger.debug("sql = " + pageDialect.getSql());
+            logger.debug("params = " + objToStr(params));
+        }
+        Object[] realParams = params.toArray();
+        return jdbcTemplate.query(pageDialect.getSql(), realParams, getSqlType(realParams), new BeanHandler<>(sqlBuilder.getBeanClass(), beanProcessor));
     }
 
     /**
@@ -295,18 +309,6 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
-     * @param queryBuilder
-     * @param page
-     * @param pageSize
-     * @return
-     * @throws DataAccessException
-     */
-    public Page<Map<String, Object>> queryPage(QueryBuilder<?> queryBuilder, int page,
-                                               int pageSize) throws DataAccessException {
-        return queryPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize);
-    }
-
-    /**
      * @param sql      查询数据的SQL
      * @param params   SQL参数
      * @param page     当前页，<b>负数时将查询所有记录</b>
@@ -361,7 +363,7 @@ public class SqlExecutor implements InitializingBean {
      * @param queryBuilder
      * @return
      */
-    public boolean isExists(ISqlBuilder queryBuilder) {
+    public boolean exist(ISqlBuilder queryBuilder) {
         PageDialect pageDialect = paginationSupport.buildPaginationSql(queryBuilder.getSql(), 1, 1);
         Object[] params = Optional.ofNullable(queryBuilder.getParam()).orElse(new ArrayList<>(0)).toArray();
         Object[] realParam = new Object[params.length + 2];
@@ -372,7 +374,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + pageDialect.getSql());
             logger.debug("params = " + objToStr(realParam));
         }
-        return jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next);
+        return Boolean.TRUE.equals(jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next));
     }
 
     /**

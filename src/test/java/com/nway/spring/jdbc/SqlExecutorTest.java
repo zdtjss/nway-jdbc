@@ -37,10 +37,10 @@ public class SqlExecutorTest extends BaseTest {
 	
 	@Test
 	public void testQueryForBean() {
-		
-		String sql = "select * from t_nway limit 1";
 
-		ExampleEntity usr = sqlExecutor.queryBean(sql, ExampleEntity.class);
+		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getString, "1");
+
+		ExampleEntity usr = sqlExecutor.queryBean(sqlBuilder);
 
 		System.out.println(usr.toString());
 	}
@@ -136,7 +136,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void isExistsTest() {
 		SqlBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getId)
 				.where().ge(ExampleEntity::getPpInt, 2);
-		System.out.println(sqlExecutor.isExists(builder));
+		System.out.println(sqlExecutor.exist(builder));
 	}
 
 	@Test

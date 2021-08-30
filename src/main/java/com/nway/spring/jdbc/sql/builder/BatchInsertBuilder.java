@@ -26,7 +26,7 @@ public class BatchInsertBuilder implements ISqlBuilder {
 			batchParam.add(new ArrayList<Object>());
 		}
 		EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-		for (ColumnInfo columnInfo : entityInfo.getColumnList().values()) {
+		for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
 			columns.add(columnInfo.getColumnName());
 			for (int i = 0; i < objList.size(); i++) {
 				Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, objList.get(i), SqlType.INSERT);
