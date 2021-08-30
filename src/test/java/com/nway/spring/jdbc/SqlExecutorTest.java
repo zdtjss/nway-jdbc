@@ -136,7 +136,7 @@ public class SqlExecutorTest extends BaseTest {
 	public void isExistsTest() {
 		SqlBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getId)
 				.where().ge(ExampleEntity::getPpInt, 2);
-		System.out.println(sqlExecutor.isExists(builder));
+		System.out.println(sqlExecutor.exist(builder));
 	}
 
 	@Test
