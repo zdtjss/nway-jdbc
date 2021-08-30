@@ -108,20 +108,6 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
-     * @param sqlBuilder sqlBuilder
-     * @return
-     */
-    public int[] batchUpdate(ISqlBuilder sqlBuilder) {
-        String sql = sqlBuilder.getSql();
-        List<Object[]> params = sqlBuilder.getParam().stream().map(e -> ((Collection) e).toArray()).collect(Collectors.toList());
-        if (logger.isDebugEnabled()) {
-            logger.debug("sql = " + sql);
-            logger.debug("params = " + objToStr(params));
-        }
-        return jdbcTemplate.batchUpdate(sql, params);
-    }
-
-    /**
      * @param obj bean
      * @return
      */
@@ -141,7 +127,9 @@ public class SqlExecutor implements InitializingBean {
             return new int[]{};
         }
         Class<?> beanClass = objs.get(0).getClass();
-        return batchUpdate(new BatchUpdateByIdBuilder(beanClass).use(objs));
+        ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).use(objs);
+        List<Object[]> params = (List<Object[]>) sqlBuilder.getParam();
+        return jdbcTemplate.batchUpdate(sqlBuilder.getSql(), params, params.size() == 0 ? new int[0] : getSqlType(params.get(0)));
     }
 
     /**
@@ -196,7 +184,7 @@ public class SqlExecutor implements InitializingBean {
         }
         BatchInsertBuilder batchInsertBuilder = new BatchInsertBuilder(objs.get(0).getClass());
         batchInsertBuilder.use(objs);
-        return batchUpdate(batchInsertBuilder);
+        return jdbcTemplate.batchUpdate(batchInsertBuilder);
     }
 
     public <T> T queryById(Serializable id, Class<T> type) {
