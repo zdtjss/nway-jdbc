@@ -12,7 +12,6 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
-import jdk.internal.joptsimple.internal.Strings;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
@@ -20,7 +19,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class SqlBuilderUtils {
 

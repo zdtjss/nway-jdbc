@@ -122,8 +122,13 @@ public class SqlExecutor implements InitializingBean {
         }
         Class<?> beanClass = objs.get(0).getClass();
         ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).use(objs);
-        List<Object[]> params = (List<Object[]>) sqlBuilder.getParam();
-        return jdbcTemplate.batchUpdate(sqlBuilder.getSql(), params, params.size() == 0 ? new int[0] : getSqlType(params.get(0)));
+        String sql = sqlBuilder.getSql();
+        List params = sqlBuilder.getParam();
+        if (logger.isDebugEnabled()) {
+            logger.debug("sql = " + sql);
+            logger.debug("params = " + objToStr(params.toArray()));
+        }
+        return jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
     }
 
     /**
@@ -151,8 +156,7 @@ public class SqlExecutor implements InitializingBean {
 
     public <T> T insertAndGetKey(Object obj) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        InsertBuilder sqlBuilder = SQL.insert(obj.getClass());
-        sqlBuilder.use(obj);
+        InsertBuilder sqlBuilder = SQL.insert(obj.getClass()).use(obj);
         PreparedStatementCreator psc = conn -> {
             PreparedStatement pstmt = conn.prepareStatement(sqlBuilder.getSql());
             List<Object> params = sqlBuilder.getParam();
@@ -165,8 +169,8 @@ public class SqlExecutor implements InitializingBean {
         };
         Object key = sqlBuilder.getKeyValue();
         if (logger.isDebugEnabled()) {
-            logger.debug(sqlBuilder.getSql());
-            logger.debug(sqlBuilder.getParam().toArray());
+            logger.debug("sql = " + sqlBuilder.getSql());
+            logger.debug("params = " + objToStr(sqlBuilder.getParam().toArray()));
         }
         int count = jdbcTemplate.update(psc, keyHolder);
         return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
@@ -178,7 +182,7 @@ public class SqlExecutor implements InitializingBean {
         }
         BatchInsertBuilder batchInsertBuilder = new BatchInsertBuilder(objs.get(0).getClass());
         batchInsertBuilder.use(objs);
-        return jdbcTemplate.batchUpdate(batchInsertBuilder);
+        return jdbcTemplate.batchUpdate(batchInsertBuilder.getSql(), (List) batchInsertBuilder.getParam());
     }
 
     public <T> T queryById(Serializable id, Class<T> type) {

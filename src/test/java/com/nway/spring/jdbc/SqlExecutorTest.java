@@ -141,7 +141,7 @@ public class SqlExecutorTest extends BaseTest {
 
 	@Test
 	public void likeTest() {
-		SqlBuilder builder = SQL.query(ExampleEntity.class).where()
+		SqlBuilder builder = SQL.query(ExampleEntity.class).distinct().where()
 				.like(ExampleEntity::getString, "1");
 		System.out.println(sqlExecutor.queryList(builder));
 	}
@@ -306,9 +306,7 @@ public class SqlExecutorTest extends BaseTest {
 			exampleEntityList.add(example);
 		}
 
-		ISqlBuilder ISqlBuilder = SQL.batchInsert(ExampleEntity.class).use(exampleEntityList);
-
-		System.out.println(Arrays.toString(sqlExecutor.batchUpdate(ISqlBuilder)));
+		System.out.println(Arrays.toString(sqlExecutor.batchInsert(exampleEntityList)));
 		
 		listAll();
 	}
