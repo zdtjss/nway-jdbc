@@ -40,7 +40,7 @@ public class SqlExecutorTest extends BaseTest {
 
 		SqlBuilder sqlBuilder = SQL.query(ExampleEntity.class).where().ne(ExampleEntity::getString, "1");
 
-		ExampleEntity usr = sqlExecutor.queryBean(sqlBuilder);
+		ExampleEntity usr = sqlExecutor.queryFirst(sqlBuilder);
 
 		System.out.println(usr.toString());
 	}
@@ -113,7 +113,7 @@ public class SqlExecutorTest extends BaseTest {
 				.andOrderByAsc(ExampleEntity::getString)
 				.andOrderByDesc(ExampleEntity::getPpDouble);
 
-		sqlExecutor.queryBean(builder);
+		sqlExecutor.queryFirst(builder);
 	}
 
 	@Test
@@ -127,7 +127,7 @@ public class SqlExecutorTest extends BaseTest {
 				.where().like(computer::getString).ge(ExampleEntity::getPpInt, 1)
 				.or().ne(ExampleEntity::getWwInt, 1000);
 
-		ExampleEntity c = sqlExecutor.queryBean(builder);
+		ExampleEntity c = sqlExecutor.queryFirst(builder);
 
 		System.out.println(c);
 	}
@@ -368,11 +368,11 @@ public class SqlExecutorTest extends BaseTest {
 				.like(example::getString).notLike(example::getString)
 				.or(e -> e.eq(example::getId).eq(example::getPpByte))
 				.and(e -> e.eq(example::getPpLong).or().eq(example::getWwDouble));
-		ExampleEntity ee = sqlExecutor.queryBean(sqlBuilder);
+		ExampleEntity ee = sqlExecutor.queryFirst(sqlBuilder);
 
 		System.out.println(ee);
 		
-		ee = sqlExecutor.queryBean(SQL.query(ExampleEntity.class)
+		ee = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class)
 				.withColumn(ExampleEntity::getWwInt)
 				.withColumn(ExampleEntity::getId)
 				.where().eq(ExampleEntity::getId, 136));

@@ -149,29 +149,28 @@ public class SqlExecutor implements InitializingBean {
     }
 
     public int insert(Object obj) {
-        InsertBuilder sqlBuilder = SQL.insert(obj.getClass());
-        sqlBuilder.use(obj);
-        return update(sqlBuilder);
+        return update(SQL.insert(obj.getClass()).use(obj));
     }
 
     public <T> T insertAndGetKey(Object obj) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         InsertBuilder sqlBuilder = SQL.insert(obj.getClass()).use(obj);
+        String sql = sqlBuilder.getSql();
+        Object[] params = sqlBuilder.getParam().toArray(new Object[0]);
+        if (logger.isDebugEnabled()) {
+            logger.debug("sql = " + sql);
+            logger.debug("params = " + objToStr(params));
+        }
         PreparedStatementCreator psc = conn -> {
-            PreparedStatement pstmt = conn.prepareStatement(sqlBuilder.getSql());
-            List<Object> params = sqlBuilder.getParam();
-            if (params != null && params.size() > 0) {
-                for (int i = 0; i < params.size(); i++) {
-                    StatementCreatorUtils.setParameterValue(pstmt, i, StatementCreatorUtils.javaTypeToSqlParameterType(params.get(i).getClass()), params.get(i));
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            if (params.length > 0) {
+                for (int i = 0; i < params.length; i++) {
+                    StatementCreatorUtils.setParameterValue(pstmt, i, StatementCreatorUtils.javaTypeToSqlParameterType(params[i].getClass()), params[i]);
                 }
             }
             return pstmt;
         };
         Object key = sqlBuilder.getKeyValue();
-        if (logger.isDebugEnabled()) {
-            logger.debug("sql = " + sqlBuilder.getSql());
-            logger.debug("params = " + objToStr(sqlBuilder.getParam().toArray()));
-        }
         int count = jdbcTemplate.update(psc, keyHolder);
         return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
     }
@@ -180,23 +179,25 @@ public class SqlExecutor implements InitializingBean {
         if (objs == null || objs.size() == 0) {
             return new int[]{};
         }
-        BatchInsertBuilder batchInsertBuilder = new BatchInsertBuilder(objs.get(0).getClass());
-        batchInsertBuilder.use(objs);
-        return jdbcTemplate.batchUpdate(batchInsertBuilder.getSql(), (List) batchInsertBuilder.getParam());
+        BatchInsertBuilder sqlBuilder = new BatchInsertBuilder(objs.get(0).getClass()).use(objs);
+        String sql = sqlBuilder.getSql();
+        List params = sqlBuilder.getParam();
+        if (logger.isDebugEnabled()) {
+            logger.debug("sql = " + sql);
+            logger.debug("params = " + objToStr(params));
+        }
+        return jdbcTemplate.batchUpdate(sql, params);
     }
 
     public <T> T queryById(Serializable id, Class<T> type) {
         ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
-        return queryBean(queryBuilder);
-    }
-
-    /**
-     * @param queryBuilder lambda
-     * @return queryBuilder描述的beanClass类型的对象
-     * @throws DataAccessException 数据访问异常
-     */
-    public <T> T queryBean(ISqlBuilder queryBuilder) throws DataAccessException {
-        return queryBean(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+        String sql = queryBuilder.getSql();
+        Object[] params = queryBuilder.getParam().toArray(new Object[0]);
+        if (logger.isDebugEnabled()) {
+            logger.debug("sql = " + sql);
+            logger.debug("params = " + objToStr(params));
+        }
+        return jdbcTemplate.query(sql, params, getSqlType(params), new BeanHandler<>(type, beanProcessor));
     }
 
     /**
