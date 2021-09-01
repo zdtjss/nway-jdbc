@@ -20,37 +20,37 @@ import com.nway.spring.jdbc.sql.TestPermissionStrategy;
 public class ExampleEntity {
 
 	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID)
-	private int id;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Boolean")
+	private Integer id;
+	@com.nway.spring.jdbc.annotation.Column(name = "p_boolean")
 	private boolean ppBoolean;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Byte")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_byte")
 	private byte ppByte;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Short")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_short")
 	private short ppShort;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Int")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_int")
 	private int ppInt;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Long")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_long")
 	private long ppLong;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Float")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_float")
 	private float ppFloat;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Double")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_double")
 	private double ppDouble;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_Byte_Arr")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_byte_arr")
 	private byte[] ppByteArr;
 
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Boolean")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_boolean")
 	private Boolean wwBoolean;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Byte")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_byte")
 	private Byte wwByte;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Short")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_short")
 	private Short wwShort;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Int", fillStrategy = TestFillStrategy.class)
+	@com.nway.spring.jdbc.annotation.Column(name = "w_int", fillStrategy = TestFillStrategy.class)
 	private Integer wwInt;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Long")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_long")
 	private Long wwLong;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Float")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_float")
 	private Float wwFloat;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_Double")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_double")
 	private Double wwDouble;
 
 	private String string;
@@ -80,11 +80,11 @@ public class ExampleEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "pk_id")
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

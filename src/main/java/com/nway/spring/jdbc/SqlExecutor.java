@@ -363,23 +363,13 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
-     * 建议只查表中一个字段
+     *
      *
      * @param queryBuilder
      * @return
      */
     public boolean exist(ISqlBuilder queryBuilder) {
-        PageDialect pageDialect = paginationSupport.buildPaginationSql(queryBuilder.getSql(), 1, 1);
-        Object[] params = Optional.ofNullable(queryBuilder.getParam()).orElse(new ArrayList<>(0)).toArray();
-        Object[] realParam = new Object[params.length + 2];
-        System.arraycopy(params, 0, realParam, 0, params.length);
-        realParam[realParam.length - 2] = pageDialect.getFirstParam();
-        realParam[realParam.length - 1] = pageDialect.getSecondParam();
-        if (logger.isDebugEnabled()) {
-            logger.debug("sql = " + pageDialect.getSql());
-            logger.debug("params = " + objToStr(realParam));
-        }
-        return Boolean.TRUE.equals(jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next));
+        return count(queryBuilder) > 0;
     }
 
     /**
@@ -526,7 +516,12 @@ public class SqlExecutor implements InitializingBean {
             return new int[0];
         }
         return Arrays.stream(objs)
-                .map(obj -> StatementCreatorUtils.javaTypeToSqlParameterType(obj.getClass()))
+                .map(obj -> {
+                    if (obj == null) {
+                        return SqlTypeValue.TYPE_UNKNOWN;
+                    }
+                    return StatementCreatorUtils.javaTypeToSqlParameterType(obj.getClass());
+                })
                 .mapToInt(x -> x)
                 .toArray();
     }

@@ -70,7 +70,6 @@ public class SyncPerformanceTest extends BaseTest {
     public void testGetMonitor() throws InterruptedException {
 
         int times = 10;
-        final int id = 1;
 
         ExecutorService executorService = Executors.newFixedThreadPool(times);
 
@@ -83,6 +82,9 @@ public class SyncPerformanceTest extends BaseTest {
         Collection<Callable<Monitor>> mybatisTask = new ArrayList<>(times);
         Collection<Callable<Monitor>> mybatisPlusTask = new ArrayList<>(times);
         Collection<Callable<MonitorPoEntity>> mybatisGeTask = new ArrayList<>(times);
+
+        Monitor monitor = nwayPerformance.listMonitor().stream().findFirst().get();
+        int id = monitor.getId();
 
         for (int i = 0; i < times; i++) {
 
