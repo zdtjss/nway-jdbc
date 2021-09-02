@@ -35,6 +35,10 @@ public class QueryBuilder<T> extends SqlBuilder {
 		return this;
 	}
 
+	public List<String> getColumns() {
+		return columns;
+	}
+
 	@Override
 	public String getSql() {
 		return getSelectStmt() + super.getSql();

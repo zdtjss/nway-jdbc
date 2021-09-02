@@ -43,6 +43,7 @@ import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -363,13 +364,30 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
-     *
+     * 基于分页原理，只查询符合条件的第1条数据，给数据库作为性能优化的提示
      *
      * @param queryBuilder
      * @return
      */
     public boolean exist(ISqlBuilder queryBuilder) {
-        return count(queryBuilder) > 0;
+        if (queryBuilder instanceof QueryBuilder) {
+            QueryBuilder<?> queryBuilder1 = (QueryBuilder) queryBuilder;
+            // 当没有指定具体字段时，只查询id字段
+            if (CollectionUtils.isEmpty(queryBuilder1.getColumns())) {
+                queryBuilder1.withColumn(SqlBuilderUtils.getIdName(queryBuilder1.getBeanClass()));
+            }
+        }
+        PageDialect pageDialect = paginationSupport.buildPaginationSql(queryBuilder.getSql(), 1, 1);
+        Object[] params = Optional.ofNullable(queryBuilder.getParam()).orElse(new ArrayList<>(0)).toArray();
+        Object[] realParam = new Object[params.length + 2];
+        System.arraycopy(params, 0, realParam, 0, params.length);
+        realParam[realParam.length - 2] = pageDialect.getFirstParam();
+        realParam[realParam.length - 1] = pageDialect.getSecondParam();
+        if (logger.isDebugEnabled()) {
+            logger.debug("sql = " + pageDialect.getSql());
+            logger.debug("params = " + objToStr(realParam));
+        }
+        return Boolean.TRUE.equals(jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next));
     }
 
     /**
