@@ -5,7 +5,7 @@
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.3.6</version>
+		<version>1.3.5</version>
 	</dependency>
 
 #本项目专注于单表操作，对于多表的情况可以考虑使用视图，但更建议使用MyBatis等其他擅长多表操作的工具。
