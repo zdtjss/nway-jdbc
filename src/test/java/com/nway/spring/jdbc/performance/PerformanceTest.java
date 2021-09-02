@@ -1,6 +1,12 @@
 package com.nway.spring.jdbc.performance;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +112,7 @@ public class PerformanceTest extends BaseTest {
 
             springJdbcPerformance.listMonitor();
 
-			myBatisPerformance.listMonitor();
+            myBatisPerformance.listMonitor();
 
             myBatisPlusPerformance.listMonitor();
 
@@ -125,7 +131,7 @@ public class PerformanceTest extends BaseTest {
 
         for (int i = 0; i < 10; i++) {
 
-			nwayPerformance.getComputerById(id);
+            nwayPerformance.getComputerById(id);
 
 //			hibernatePerformance.getComputerById(id);
 
@@ -178,50 +184,62 @@ public class PerformanceTest extends BaseTest {
         }
     }
 
-	@Test
-	public void listComputerVsTest() {
+    @Test
+    public void listComputerVsTest() {
 
-		for (int i = 0; i < 50; i++) {
-			myBatisPerformance.listComputer();
-		}
-		System.out.println();
-		for (int i = 0; i < 50; i++) {
-			nwayLambdaPerformance.listComputer();
-		}
-		System.out.println();
-		for (int i = 0; i < 50; i++) {
-			myBatisPlusPerformance.listComputer();
-		}
-		System.out.println();
-		for (int i = 0; i < 50; i++) {
-			myBatisGePerformance.listComputer();
-		}
-	}
-
-	@Test
-	public void listMonitorVsTest() {
-
-		for (int i = 0; i < 50; i++) {
-			myBatisPerformance.listMonitor();
-		}
-		System.out.println();
-		for (int i = 0; i < 50; i++) {
-			nwayLambdaPerformance.listMonitor();
-		}
-		System.out.println();
-		for (int i = 0; i < 50; i++) {
-			myBatisPlusPerformance.listMonitor();
-		}
-		System.out.println();
-		for (int i = 0; i < 50; i++) {
-			myBatisGePerformance.listMonitor();
-		}
-	}
+        for (int i = 0; i < 50; i++) {
+            myBatisPerformance.listComputer();
+        }
+        System.out.println();
+        for (int i = 0; i < 50; i++) {
+            nwayLambdaPerformance.listComputer();
+        }
+        System.out.println();
+        for (int i = 0; i < 50; i++) {
+            myBatisPlusPerformance.listComputer();
+        }
+        System.out.println();
+        for (int i = 0; i < 50; i++) {
+            myBatisGePerformance.listComputer();
+        }
+    }
 
     @Test
-    public void initDB() {
+    public void listMonitorVsTest() {
 
-       hibernatePerformance.initDB();
+        for (int i = 0; i < 50; i++) {
+            myBatisPerformance.listMonitor();
+        }
+        System.out.println();
+        for (int i = 0; i < 50; i++) {
+            nwayLambdaPerformance.listMonitor();
+        }
+        System.out.println();
+        for (int i = 0; i < 50; i++) {
+            myBatisPlusPerformance.listMonitor();
+        }
+        System.out.println();
+        for (int i = 0; i < 50; i++) {
+            myBatisGePerformance.listMonitor();
+        }
+    }
+
+    @Test
+    public void initDB() throws InterruptedException {
+
+        int times = 1000;
+        ExecutorService executorService = Executors.newFixedThreadPool(8);
+        Collection<Callable<Void>> initDataTask = new ArrayList<>(times);
+
+        for (int i = 0; i < times; i++) {
+            initDataTask.add(() -> {
+                hibernatePerformance.initDB();
+                return null;
+            });
+        }
+        long begin = System.currentTimeMillis();
+        executorService.invokeAll(initDataTask);
+        System.out.println("initDataTask = " + (System.currentTimeMillis() - begin));
     }
 
 }
