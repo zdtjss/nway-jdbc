@@ -39,8 +39,8 @@ Spring Boot：
 单对象查询：
 	
     SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
-    User user = sqlExecutor.queryForBean(builder);
-    User user = sqlExecutor.queryForBeanById(100, User.class);
+    User user = sqlExecutor.queryBean(builder);
+    User user = sqlExecutor.queryById(100, User.class);
     
     or
     
