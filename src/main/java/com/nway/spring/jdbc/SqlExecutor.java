@@ -401,7 +401,7 @@ public class SqlExecutor implements InitializingBean {
      */
     public boolean exist(ISqlBuilder queryBuilder) {
         if (queryBuilder instanceof QueryBuilder) {
-            QueryBuilder<?> queryBuilder1 = (QueryBuilder) queryBuilder;
+            QueryBuilder<?> queryBuilder1 = (QueryBuilder<?>) queryBuilder;
             // 当没有指定具体字段时，只查询id字段
             if (CollectionUtils.isEmpty(queryBuilder1.getColumns())) {
                 queryBuilder1.withColumn(SqlBuilderUtils.getIdName(queryBuilder1.getBeanClass()));
@@ -413,11 +413,12 @@ public class SqlExecutor implements InitializingBean {
         System.arraycopy(params, 0, realParam, 0, params.length);
         realParam[realParam.length - 2] = pageDialect.getFirstParam();
         realParam[realParam.length - 1] = pageDialect.getSecondParam();
+        String sql = pageDialect.getSql();
         if (logger.isDebugEnabled()) {
-            logger.debug("sql = " + pageDialect.getSql());
+            logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(realParam));
         }
-        return Boolean.TRUE.equals(jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), ResultSet::next));
+        return Boolean.TRUE.equals(jdbcTemplate.query(sql, realParam, getSqlType(realParam), ResultSet::next));
     }
 
     /**
