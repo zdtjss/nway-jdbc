@@ -2,16 +2,10 @@ package com.nway.spring.jdbc;
 
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.builder.BatchUpdateBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -117,10 +111,23 @@ class SqlExecutorTest2 extends BaseTest {
     }
 
     @Test
+    void queryListMap() {
+        Map<Integer, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class), ExampleEntity::getId);
+        Assertions.assertTrue(objectMap.size() > 0);
+    }
+
+    @Test
     void testQueryList() {
         Page<ExampleEntity> objectPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
         List<ExampleEntity> exampleEntityList = sqlExecutor.queryList(objectPage.getPageData().stream().map(ExampleEntity::getId).collect(Collectors.toList()), ExampleEntity.class);
         Assertions.assertEquals(objectPage.getPageData().size(), exampleEntityList.size());
+    }
+
+    @Test
+    void testQueryListMap() {
+        Page<ExampleEntity> objectPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
+        Map<Integer, ExampleEntity> exampleEntityMap = sqlExecutor.queryListMap(objectPage.getPageData().stream().map(ExampleEntity::getId).collect(Collectors.toList()), ExampleEntity.class, ExampleEntity::getId);
+        Assertions.assertEquals(objectPage.getPageData().size(), exampleEntityMap.size());
     }
 
     @Test

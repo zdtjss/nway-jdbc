@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -246,9 +247,38 @@ public class SqlExecutor implements InitializingBean {
         return queryList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
     }
 
+    /**
+     * 查询列表数据后根据 key 的取值做map映射
+     *
+     * @param queryBuilder
+     * @param key 返回值的key
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public <T, R> Map<R, T> queryListMap(ISqlBuilder queryBuilder, Function<T, R> key) {
+        List<T> dataList = queryList(queryBuilder);
+        return dataList.stream().collect(Collectors.toMap(key, Function.identity()));
+    }
+
     public <T> List<T> queryList(List<? extends Serializable> ids, Class<T> type) {
         ISqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
         return queryList(queryBuilder);
+    }
+
+    /**
+     * 查询列表数据后根据 key 的取值做map映射
+     *
+     * @param ids
+     * @param type
+     * @param key  返回值的key
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public <T, R> Map<R, T> queryListMap(List<? extends Serializable> ids, Class<T> type, Function<T, R> key) {
+        List<T> dataList = queryList(ids, type);
+        return dataList.stream().collect(Collectors.toMap(key, Function.identity()));
     }
 
     /**
