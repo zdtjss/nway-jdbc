@@ -92,9 +92,9 @@ Map对象集分页：
 		2、自动填充功能可应用于统一处理数据的“创建人”、“修改人”、“创建时间”、“修改时间“等
 	使用办法：
 		查询对象对应属性加入注解 Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
-		fillStrategy取值需要实现FillStrategy接口，permissionStrategy取值需要实现PermissionStrategy接口，程序在插入或更新时将自动从fillStrategy中取值，在查询时会根据permissionStrategy自动补充到where条件
 
 关于深度自定义：
+
     1、如果需要对执行SQL和参数深度干预，可以集成Spring的JdbcTemplate覆盖相关方法，然后通过SqlExecutor.setJdbcTemplate替换默认值。
     2、默认表字段和类属性的映射是通过反射完成，但提供了ASM的实现，如果有更好的实现方案，可以实现接口BeanProcessor，然后通过SqlExecutor.setBeanProcessor替换默认值。
     注：理论上ASM性能应高于反射，但自测结果显示，差距并不明显，具体原因需要进一步定位。
