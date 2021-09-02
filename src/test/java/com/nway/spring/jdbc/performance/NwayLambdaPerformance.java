@@ -51,9 +51,7 @@ public class NwayLambdaPerformance implements Performance {
     @Override
     public List<Computer> listComputer() {
 
-        QueryBuilder<Computer> computerSql = SQL.query(Computer.class);
-
-        List<Computer> computers = sqlExecutor.queryList(computerSql);
+        List<Computer> computers = sqlExecutor.queryList(SQL.query(Computer.class));
 
         List<Integer> mainframeIds = computers.stream().map(Computer::getMainframeId).collect(Collectors.toList());
         List<Integer> monitorIds = computers.stream().map(Computer::getMonitorId).collect(Collectors.toList());

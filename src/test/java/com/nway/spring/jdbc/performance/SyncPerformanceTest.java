@@ -265,7 +265,7 @@ public class SyncPerformanceTest extends BaseTest {
 
         int times = 30;
         int nThread = 10;
-        final int id = 1;
+        final int id = 80007;
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 
@@ -302,10 +302,10 @@ public class SyncPerformanceTest extends BaseTest {
 
 		myBatisPerformance.getComputerById(id);
         hibernatePerformance.getComputerById(id);
-        nwayPerformance.getComputerById(id);
+        nwayLambdaPerformance.getComputerById(id);
         myBatisPlusPerformance.getComputerById(id);
 
-        for(int i =0;i<3;i++) {
+        for (int i = 0; i < 10; i++) {
             long begin = System.currentTimeMillis();
 
        /* begin = System.currentTimeMillis();
@@ -350,8 +350,8 @@ public class SyncPerformanceTest extends BaseTest {
     @Test
     public void testListComputer() throws InterruptedException {
 
-        int times = 300;
-        int nThread = 300;
+        int times = 32;
+        int nThread = 32;
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 
@@ -450,9 +450,9 @@ public class SyncPerformanceTest extends BaseTest {
         executorService.invokeAll(mybatisPlusTask);
         System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
-		begin = System.currentTimeMillis();
+		/*begin = System.currentTimeMillis();
         executorService.invokeAll(mybatisTask);
-        System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
+        System.out.println("mybatis = " + (System.currentTimeMillis() - begin));*/
 
     }
 
