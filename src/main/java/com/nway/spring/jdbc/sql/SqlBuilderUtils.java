@@ -80,7 +80,7 @@ public class SqlBuilderUtils {
 
 	public static List<String> getColumnsWithoutId(Class<?> beanClass) {
 		EntityInfo entityInfo = getEntityInfo(beanClass);
-		List<String> columnList = entityInfo.getColumnList();
+		List<String> columnList = new ArrayList<>(entityInfo.getColumnList());
 		columnList.remove(entityInfo.getId().getColumnName());
 		return columnList;
 	}

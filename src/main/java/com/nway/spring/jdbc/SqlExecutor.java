@@ -64,15 +64,11 @@ import org.springframework.util.ObjectUtils;
 public class SqlExecutor implements InitializingBean {
 
     protected final Log logger = LogFactory.getLog(SqlExecutor.class);
-
+    private final boolean isDebugEnabled = isDebugEnabled;
     private PaginationSupport paginationSupport;
-
     private JdbcTemplate jdbcTemplate;
-
     private DataSource dataSource;
-
     private BeanProcessor beanProcessor;
-
     /**
      * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
      */
@@ -96,7 +92,7 @@ public class SqlExecutor implements InitializingBean {
     public int update(ISqlBuilder sqlBuilder) {
         String sql = sqlBuilder.getSql();
         Object[] params = sqlBuilder.getParam().toArray();
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -126,7 +122,7 @@ public class SqlExecutor implements InitializingBean {
         ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).use(objs);
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params.toArray()));
         }
@@ -154,12 +150,12 @@ public class SqlExecutor implements InitializingBean {
         return update(SQL.insert(obj.getClass()).use(obj));
     }
 
-    public <T> T insertAndGetKey(Object obj) {
+    /*public <T> T insertAndGetKey(Object obj) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         InsertBuilder sqlBuilder = SQL.insert(obj.getClass()).use(obj);
         String sql = sqlBuilder.getSql();
         Object[] params = sqlBuilder.getParam().toArray(new Object[0]);
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -175,7 +171,7 @@ public class SqlExecutor implements InitializingBean {
         Object key = sqlBuilder.getKeyValue();
         int count = jdbcTemplate.update(psc, keyHolder);
         return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
-    }
+    }*/
 
     public int[] batchInsert(List<?> objs) {
         if (objs == null || objs.size() == 0) {
@@ -184,7 +180,7 @@ public class SqlExecutor implements InitializingBean {
         BatchInsertBuilder sqlBuilder = new BatchInsertBuilder(objs.get(0).getClass()).use(objs);
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -195,7 +191,7 @@ public class SqlExecutor implements InitializingBean {
         ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
         String sql = queryBuilder.getSql();
         Object[] params = queryBuilder.getParam().toArray(new Object[0]);
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -210,7 +206,7 @@ public class SqlExecutor implements InitializingBean {
      * @throws DataAccessException 数据访问异常
      */
     public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(args));
         }
@@ -229,7 +225,7 @@ public class SqlExecutor implements InitializingBean {
         PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 1);
         params.add(pageDialect.getFirstParam());
         params.add(pageDialect.getSecondParam());
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + pageDialect.getSql());
             logger.debug("params = " + objToStr(params));
         }
@@ -251,7 +247,7 @@ public class SqlExecutor implements InitializingBean {
      * 查询列表数据后根据 key 的取值做map映射
      *
      * @param queryBuilder
-     * @param key 返回值的key
+     * @param key          返回值的key
      * @param <T>
      * @param <R>
      * @return
@@ -290,12 +286,12 @@ public class SqlExecutor implements InitializingBean {
      * @throws DataAccessException 数据访问异常
      */
     public <T> List<T> queryList(String sql, Class<T> type, Object... args) throws DataAccessException {
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(args));
         }
         List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<>(type, beanProcessor));
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("total = " + (retVal == null ? 0 : retVal.size()));
         }
         return retVal;
@@ -369,7 +365,7 @@ public class SqlExecutor implements InitializingBean {
             System.arraycopy(params == null ? new Object[0] : params, 0, realParam, 0, paramsLength);
             realParam[realParam.length - 2] = pageDialect.getFirstParam();
             realParam[realParam.length - 1] = pageDialect.getSecondParam();
-            if (logger.isDebugEnabled()) {
+            if (isDebugEnabled) {
                 logger.debug("sql = " + pageDialect.getSql());
                 logger.debug("params = " + objToStr(realParam));
             }
@@ -386,7 +382,7 @@ public class SqlExecutor implements InitializingBean {
     public int count(ISqlBuilder queryBuilder) throws DataAccessException {
         String sql = buildPaginationCountSql(queryBuilder.getSql());
         Object[] params = queryBuilder.getParam().toArray();
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -414,7 +410,7 @@ public class SqlExecutor implements InitializingBean {
         realParam[realParam.length - 2] = pageDialect.getFirstParam();
         realParam[realParam.length - 1] = pageDialect.getSecondParam();
         String sql = pageDialect.getSql();
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(realParam));
         }
@@ -471,7 +467,7 @@ public class SqlExecutor implements InitializingBean {
     }
 
     private Integer queryCount(String countSql, Object[] params) {
-        if (logger.isDebugEnabled()) {
+        if (isDebugEnabled) {
             logger.debug("sql = " + countSql);
             logger.debug("params = " + objToStr(params));
         }
