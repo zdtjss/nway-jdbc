@@ -63,8 +63,8 @@ import org.springframework.util.ObjectUtils;
  */
 public class SqlExecutor implements InitializingBean {
 
-    protected final Log logger = LogFactory.getLog(SqlExecutor.class);
-    private final boolean isDebugEnabled = isDebugEnabled;
+    private final Log logger = LogFactory.getLog(getClass());
+    private final boolean isDebugEnabled = logger.isDebugEnabled();
     private PaginationSupport paginationSupport;
     private JdbcTemplate jdbcTemplate;
     private DataSource dataSource;
