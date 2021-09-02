@@ -12,7 +12,6 @@ import javax.persistence.*;
 
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
-import com.nway.spring.jdbc.sql.TestPermissionStrategy;
 
 @Entity
 @Table(name = "t_nway")
@@ -64,17 +63,17 @@ public class ExampleEntity {
 	@com.nway.spring.jdbc.annotation.Column(name = "b_blob")
 	private Blob blob;
 
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private LocalDate localDate;
 
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private LocalDateTime localDateTime;
 
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private BigDecimal bigDecimal;
 
 	@Transient
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private List<String> list = Collections.singletonList("aa");
 
 	@Id

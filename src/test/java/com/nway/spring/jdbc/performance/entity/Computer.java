@@ -46,25 +46,25 @@ public class Computer {
 	private int mainframeId;
 	/** 主机 **/
 	@TableField(exist = false)
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private Mainframe mainframe;
 	/** 显示器编号，nway或spring jdbc使用 **/
 	private int monitorId;
 	/** 显示器 **/
 	@TableField(exist = false)
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private Monitor monitor;
 	/** 鼠标编号，nway或spring jdbc使用 **/
 	private int mouseId;
 	/** 鼠标 **/
 	@TableField(exist = false)
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private Mouse mouse;
 	/** 键盘编号，nway或spring jdbc使用 **/
 	private int keyboardId;
 	/** 键盘 **/
 	@TableField(exist = false)
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private Keyboard keyboard;
 	/** 生产日期 **/
 	private Date productionDate;
@@ -72,7 +72,7 @@ public class Computer {
 	private byte[] photo;
 	/** 预装软件 **/
 	@TableField(exist = false)
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.NONE)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private List<Software> software;
 
 	@Id

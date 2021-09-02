@@ -38,7 +38,7 @@ public class SqlBuilderUtils {
 			Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap();
 			for (Field field : declaredFields) {
 				Column column = field.getAnnotation(Column.class);
-				if(column != null && ColumnType.NONE.equals(column.type())) {
+				if(column != null && ColumnType.IGNORE.equals(column.type())) {
 					continue;
 				}
 				field.setAccessible(true);
