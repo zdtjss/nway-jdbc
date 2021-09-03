@@ -7,10 +7,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -312,4 +321,65 @@ class SqlExecutorTest extends BaseTest {
         sqlExecutor.queryFirst(builder);
     }
 
+    private final AtomicInteger atomicInteger = new AtomicInteger(5041731);
+
+    @Test
+    public void initData() throws InterruptedException {
+        int times = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        Collection<Callable<Void>> initDataTask = new ArrayList<>(times);
+
+        for (int i = 0; i < times; i++) {
+            initDataTask.add(() -> {
+                initTable();
+                return null;
+            });
+        }
+        long begin = System.currentTimeMillis();
+        executorService.invokeAll(initDataTask);
+        System.out.println("initDataTask = " + (System.currentTimeMillis() - begin));
+    }
+
+    private void initTable() throws SQLException, SQLException {
+
+        List<ExampleEntity> exampleEntityList = new ArrayList<>();
+        for (int i = 0; i < 300; i++) {
+
+            ExampleEntity example = new ExampleEntity();
+            example.setId(atomicInteger.getAndIncrement());
+            DecimalFormat numberFormat = new DecimalFormat("0000000000.00000000000000");
+            example.setPpBoolean(0 == ((Math.random() * 10000) % 2));
+            example.setPpByte(Double.valueOf(Math.random() * Byte.MAX_VALUE).byteValue());
+            example.setPpShort(Double.valueOf(Math.random() * Short.MAX_VALUE).shortValue());
+            example.setPpInt(Double.valueOf(Math.random() * Integer.MAX_VALUE).intValue());
+            example.setPpLong(Double.valueOf(Math.random() * Long.MAX_VALUE).longValue());
+            example.setPpFloat(Float.parseFloat(numberFormat.format((Math.random() * Float.MAX_VALUE))));
+            example.setPpDouble(Double.parseDouble(numberFormat.format((Math.random() * Double.MAX_VALUE))));
+            example.setPpByteArr(UUID.randomUUID().toString().getBytes());
+            example.setWwBoolean(1 == Double.valueOf(Math.random() * 10000).intValue() % 2);
+            example.setWwByte(Double.valueOf(Math.random() * Byte.MAX_VALUE).byteValue());
+            example.setWwShort(Double.valueOf(Math.random() * Short.MAX_VALUE).shortValue());
+            example.setWwInt(Double.valueOf(Math.random() * Integer.MAX_VALUE).intValue());
+            example.setWwFloat(Float.valueOf(numberFormat.format((Math.random() * Float.MAX_VALUE))));
+            example.setWwDouble(Double.valueOf(numberFormat.format((Math.random() * Double.MAX_VALUE))));
+            example.setString(UUID.randomUUID().toString());
+            example.setUtilDate(new Date());
+            example.setSqlDate(new java.sql.Date(System.currentTimeMillis()));
+            example.setTimestamp(new Timestamp(System.currentTimeMillis()));
+            example.setClob(new SerialClob("nway".toCharArray()));
+            example.setBlob(new SerialBlob("nway".getBytes()));
+            example.setBigDecimal(BigDecimal.valueOf(Math.random() * 10000));
+            example.setLocalDate(LocalDate.now());
+            example.setLocalDateTime(LocalDateTime.now());
+            example.setBigDecimal(BigDecimal.valueOf(Math.random() * Integer.MAX_VALUE));
+//			example.setInputStream(Hibernate.getLobCreator(session).createBlob("nway".getBytes()).getBinaryStream());
+            exampleEntityList.add(example);
+
+        }
+
+        long begin = System.currentTimeMillis();
+        sqlExecutor.batchInsert(exampleEntityList);
+        System.out.println("batchInsert = " + (System.currentTimeMillis() - begin));
+
+    }
 }

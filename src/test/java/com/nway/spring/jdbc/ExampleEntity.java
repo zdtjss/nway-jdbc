@@ -63,13 +63,13 @@ public class ExampleEntity {
 	@com.nway.spring.jdbc.annotation.Column(name = "b_blob")
 	private Blob blob;
 
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
+	@com.nway.spring.jdbc.annotation.Column
 	private LocalDate localDate;
 
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
+	@com.nway.spring.jdbc.annotation.Column
 	private LocalDateTime localDateTime;
 
-	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
+	@com.nway.spring.jdbc.annotation.Column
 	private BigDecimal bigDecimal;
 
 	@Transient
