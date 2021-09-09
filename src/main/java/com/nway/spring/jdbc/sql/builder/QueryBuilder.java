@@ -9,6 +9,8 @@ import java.util.List;
 
 public class QueryBuilder<T> extends SqlBuilder {
 
+	private boolean ignorePower = false;
+
 	private final List<String> columns = new ArrayList<>();
 
 	public QueryBuilder(Class<T> beanClass) {
@@ -28,10 +30,16 @@ public class QueryBuilder<T> extends SqlBuilder {
 		return this;
 	}
 
+	public void ignorePower() {
+		this.ignorePower = true;
+	}
+
 	@Override
 	public SqlBuilder where() {
 		super.where();
-		initPermission();
+		if(!this.ignorePower) {
+			initPermission();
+		}
 		return this;
 	}
 
