@@ -3,6 +3,7 @@ package com.nway.spring.jdbc.performance;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -25,153 +26,153 @@ public class HibernatePerformance implements Performance {
 
     @Autowired
     private SessionFactory sessionFactory;
-	
-	@Override
-	public Computer getComputerById(int id) {
 
-		Session session = sessionFactory.openSession();
+    @Override
+    public Computer getComputerById(int id) {
 
-		Computer computer = session.get(Computer.class, id);
+        Session session = sessionFactory.openSession();
 
-		session.close();
+        Computer computer = session.get(Computer.class, id);
 
-		return computer;
-	}
+        session.close();
 
-	@Override
-	public List<Computer> listComputer() {
+        return computer;
+    }
 
-		Session session = sessionFactory.openSession();
-		
-		@SuppressWarnings("unchecked")
-		List<Computer> computers = session.createQuery("from com.nway.spring.jdbc.performance.entity.Computer").list();
+    @Override
+    public List<Computer> listComputer() {
 
-		session.close();
-		
-		return computers;
-	}
+        Session session = sessionFactory.openSession();
 
-	@Override
-	public Monitor getMonitorById(int id) {
+        @SuppressWarnings("unchecked")
+        List<Computer> computers = session.createQuery("from com.nway.spring.jdbc.performance.entity.Computer").list();
 
-		Session session = sessionFactory.openSession();
-		
-		Monitor mouse = session.get(Monitor.class, id);
-		
-		session.close();
-		
-		return mouse;
-	}
+        session.close();
 
-	@Override
-	public List<Monitor> listMonitor() {
+        return computers;
+    }
 
-		Session session = sessionFactory.openSession();
-		
-		Query query = session.createQuery("from Monitor");
-		
-		@SuppressWarnings("unchecked")
-		List<Monitor> monitor = query.list();
+    @Override
+    public Monitor getMonitorById(int id) {
 
-		session.close();
-		
-		return monitor;
-	}
+        Session session = sessionFactory.openSession();
+
+        Monitor mouse = session.get(Monitor.class, id);
+
+        session.close();
+
+        return mouse;
+    }
+
+    @Override
+    public List<Monitor> listMonitor() {
+
+        Session session = sessionFactory.openSession();
+
+        Query query = session.createQuery("from Monitor");
+
+        @SuppressWarnings("unchecked")
+        List<Monitor> monitor = query.list();
+
+        session.close();
+
+        return monitor;
+    }
 
     @Transactional(transactionManager = "hibernateTxManager", readOnly = false)
-	public void initDB() {
+    public void initDB() {
 
-		Session session = sessionFactory.openSession();
+        Session session = sessionFactory.openSession();
 
-		Transaction transaction = session.beginTransaction();
+        Transaction transaction = session.beginTransaction();
 
-		for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 30; i++) {
 
-			Computer computer = new Computer();
+            Computer computer = new Computer();
 
-			computer.setBrand("HP");
-			computer.setPrice(1.1f);
-			computer.setProductionDate(new Date());
-			
-			Monitor monitor = new Monitor();
+            computer.setBrand("HP" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            computer.setPrice(Double.valueOf(Math.random() * Integer.MAX_VALUE).floatValue());
+            computer.setProductionDate(new Date());
 
-			monitor.setBrand("aoc");
-			monitor.setModel("100-01");
-			monitor.setType(0);
-			monitor.setMaxResolution("1920*1080");
-			monitor.setProductionDate(new Date());
-			monitor.setPrice(1.1f);
+            Monitor monitor = new Monitor();
 
-			Mainframe mainframe = new Mainframe();
+            monitor.setBrand("aoc" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            monitor.setModel("100-01" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            monitor.setType((int) (Math.random() * 100) % 2);
+            monitor.setMaxResolution("1920*1080" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            monitor.setProductionDate(new Date());
+            monitor.setPrice(1.1f);
 
-			mainframe.setBrand("GIGABYTE");
-			mainframe.setModel("90-09");
-			mainframe.setType(1);
-			mainframe.setPrice(1.1f);
-			mainframe.setProductionDate(new Date());
+            Mainframe mainframe = new Mainframe();
 
-			Mouse mouse = new Mouse();
+            mainframe.setBrand("GIGABYTE" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            mainframe.setModel("90-09" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            mainframe.setType(Double.valueOf(Math.random() * 10).intValue());
+            mainframe.setPrice(Double.valueOf(Math.random() * Integer.MAX_VALUE).floatValue());
+            mainframe.setProductionDate(new Date());
 
-			mouse.setBrand("AUSU");
-			mouse.setColor("black");
-			mouse.setModel("M-1");
-			mouse.setType(1);
-			mouse.setIsWireless(false);
-			mouse.setProductionDate(new Date());
+            Mouse mouse = new Mouse();
 
-			Keyboard keyboard = new Keyboard();
+            mouse.setBrand("AUSU" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            mouse.setColor("black" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            mouse.setModel("M-1" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            mouse.setType(Double.valueOf(Math.random() * 10).intValue());
+            mouse.setIsWireless(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue() % 2 == 1);
+            mouse.setProductionDate(new Date());
 
-			keyboard.setBrand("DELL");
-			keyboard.setModel("10-01");
-			keyboard.setType(1);
-			keyboard.setPrice(1.1f);
-			keyboard.setInterfaceType(1);
-			keyboard.setIsWireless(false);
-			keyboard.setPhoto(null);
-			keyboard.setProductionDate(new Date());
+            Keyboard keyboard = new Keyboard();
 
-			computer.setMainframe(mainframe);
-			computer.setMonitor(monitor);
-			computer.setMouse(mouse);
-			computer.setKeyboard(keyboard);
-			
-			List<Software> software = new ArrayList<Software>();
-			
-			Software s1 = new Software();
-			
-			s1.setName("计算器");
-			s1.setSize(100);
-			s1.setVender("微软");
-			s1.setVersion("1.0");
-			
-			software.add(s1);
-			
-			Software s2 = new Software();
-			
-			s2.setName("计算器");
-			s2.setSize(100);
-			s2.setVender("微软");
-			s2.setVersion("1.0");
-			
-			software.add(s2);
-			
-			Software s3 = new Software();
-			
-			s3.setName("计算器");
-			s3.setSize(100);
-			s3.setVender("微软");
-			s3.setVersion("1.0");
-			
-			software.add(s3);
-			
-			computer.setSoftware(software);
+            keyboard.setBrand("DELL" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            keyboard.setModel("10-01" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            keyboard.setType(Double.valueOf(Math.random() * 10).intValue());
+            keyboard.setPrice(Double.valueOf(Math.random() * Integer.MAX_VALUE).floatValue());
+            keyboard.setInterfaceType(Double.valueOf(Math.random() * 10).intValue());
+            keyboard.setIsWireless(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue() % 2 == 1);
+            keyboard.setPhoto(null);
+            keyboard.setProductionDate(new Date());
 
-			session.save(computer);
-		}
+            computer.setMainframe(mainframe);
+            computer.setMonitor(monitor);
+            computer.setMouse(mouse);
+            computer.setKeyboard(keyboard);
 
-		transaction.commit();
-		
-		session.close();
-	}
+            List<Software> software = new ArrayList<>();
+
+            Software s1 = new Software();
+
+            s1.setName("计算器" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            s1.setSize(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue());
+            s1.setVender("微软" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            s1.setVersion("1.0");
+
+            software.add(s1);
+
+            Software s2 = new Software();
+
+            s2.setName("计算器" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            s2.setSize(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue());
+            s2.setVender("微软" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            s2.setVersion("1.0");
+
+            software.add(s2);
+
+            Software s3 = new Software();
+
+            s3.setName("计算器" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            s3.setSize(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue());
+            s3.setVender("微软" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
+            s3.setVersion("1.0");
+
+            software.add(s3);
+
+            computer.setSoftware(software);
+
+            session.save(computer);
+        }
+
+        transaction.commit();
+
+        session.close();
+    }
 
 }

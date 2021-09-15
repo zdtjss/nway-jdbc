@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -187,21 +188,36 @@ public class PerformanceTest extends BaseTest {
     @Test
     public void listComputerVsTest() {
 
-        for (int i = 0; i < 50; i++) {
+        IntStream.range(0, 30).forEach(e -> {
+            nwayLambdaPerformance.listComputer();
+            myBatisPerformance.listComputer();
+            myBatisPlusPerformance.listComputer();
+        });
+        System.out.println();
+
+        int times = 500;
+        long begin = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
             myBatisPerformance.listComputer();
         }
-        System.out.println();
-        for (int i = 0; i < 50; i++) {
+        System.out.println("myBatis = " + (System.currentTimeMillis() - begin));
+
+        begin = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
             nwayLambdaPerformance.listComputer();
         }
-        System.out.println();
-        for (int i = 0; i < 50; i++) {
-            myBatisPlusPerformance.listComputer();
-        }
-        System.out.println();
+        System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+
+//        begin = System.currentTimeMillis();
+//        for (int i = 0; i < times; i++) {
+//            myBatisPlusPerformance.listComputer();
+//        }
+//        System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
+
+        /*System.out.println();
         for (int i = 0; i < 50; i++) {
             myBatisGePerformance.listComputer();
-        }
+        }*/
     }
 
     @Test
@@ -227,8 +243,8 @@ public class PerformanceTest extends BaseTest {
     @Test
     public void initDB() throws InterruptedException {
 
-        int times = 1000;
-        ExecutorService executorService = Executors.newFixedThreadPool(8);
+        int times = 100000;
+        ExecutorService executorService = Executors.newFixedThreadPool(16);
         Collection<Callable<Void>> initDataTask = new ArrayList<>(times);
 
         for (int i = 0; i < times; i++) {

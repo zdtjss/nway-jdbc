@@ -21,51 +21,51 @@ import com.nway.spring.jdbc.performance.entity.Software;
 public class SpringJdbcPerformance implements Performance {
 
     private Gson gson = new Gson();
-    
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-	
-	@Override
-	public Computer getComputerById(int id) {
 
-		String computerSql = "select * from t_computer where id = ?";
-		String mainframeSql = "select * from t_mainframe where id = ?";
-		String monitorSql = "select * from t_monitor where id = ?";
-		String mouseSql = "select * from t_mouse where id = ?";
-		String keyboardSql = "select * from t_keyboard where id = ?";
-	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-		Computer computer = jdbcTemplate.query(computerSql, new BeanPropertyRowMapper<Computer>(Computer.class), id).get(0);
+    @Override
+    public Computer getComputerById(int id) {
 
-		computer.setMainframe(jdbcTemplate.query(mainframeSql, BeanPropertyRowMapper.newInstance(Mainframe.class), computer.getMainframeId()).get(0));
-		computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
-		computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
-		computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
-		computer.setSoftware(jdbcTemplate.query(softwareSql, BeanPropertyRowMapper.newInstance(Software.class), computer.getId()));
-		
-		return computer;
-	}
+        String computerSql = "select * from t_computer where id = ?";
+        String mainframeSql = "select * from t_mainframe where id = ?";
+        String monitorSql = "select * from t_monitor where id = ?";
+        String mouseSql = "select * from t_mouse where id = ?";
+        String keyboardSql = "select * from t_keyboard where id = ?";
+        String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
 
-	@Override
-	public List<Computer> listComputer() {
+        Computer computer = jdbcTemplate.query(computerSql, new BeanPropertyRowMapper<Computer>(Computer.class), id).get(0);
 
-		String computerSql = "select * from t_computer";
-		String mainframeSql = "select * from t_mainframe where id = ?";
-		String monitorSql = "select * from t_monitor where id = ?";
-		String mouseSql = "select * from t_mouse where id = ?";
-		String keyboardSql = "select * from t_keyboard where id = ?";
-	    String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
+        computer.setMainframe(jdbcTemplate.query(mainframeSql, BeanPropertyRowMapper.newInstance(Mainframe.class), computer.getMainframeId()).get(0));
+        computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
+        computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
+        computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
+        computer.setSoftware(jdbcTemplate.query(softwareSql, BeanPropertyRowMapper.newInstance(Software.class), computer.getId()));
 
-		List<Computer> computers = jdbcTemplate.query(computerSql, BeanPropertyRowMapper.newInstance(Computer.class));
+        return computer;
+    }
 
-		for (Computer computer : computers) {
+    @Override
+    public List<Computer> listComputer() {
 
-			computer.setMainframe(jdbcTemplate.query(mainframeSql, BeanPropertyRowMapper.newInstance(Mainframe.class), computer.getMainframeId()).get(0));
-			computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
-			computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
-			computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
-			computer.setSoftware(jdbcTemplate.query(softwareSql, BeanPropertyRowMapper.newInstance(Software.class), computer.getId()));
-		}
+        String computerSql = "select * from t_computer";
+        String mainframeSql = "select * from t_mainframe where id = ?";
+        String monitorSql = "select * from t_monitor where id = ?";
+        String mouseSql = "select * from t_mouse where id = ?";
+        String keyboardSql = "select * from t_keyboard where id = ?";
+        String softwareSql = "select s.* from t_software s join t_computer_software cs on s.id = cs.software_id and cs.computer_id = ?";
+
+        List<Computer> computers = jdbcTemplate.query(computerSql, BeanPropertyRowMapper.newInstance(Computer.class));
+
+        for (Computer computer : computers) {
+
+            computer.setMainframe(jdbcTemplate.query(mainframeSql, BeanPropertyRowMapper.newInstance(Mainframe.class), computer.getMainframeId()).get(0));
+            computer.setMonitor(jdbcTemplate.query(monitorSql, BeanPropertyRowMapper.newInstance(Monitor.class), computer.getMonitorId()).get(0));
+            computer.setMouse(jdbcTemplate.query(mouseSql, BeanPropertyRowMapper.newInstance(Mouse.class), computer.getMouseId()).get(0));
+            computer.setKeyboard(jdbcTemplate.query(keyboardSql, BeanPropertyRowMapper.newInstance(Keyboard.class), computer.getKeyboardId()).get(0));
+            computer.setSoftware(jdbcTemplate.query(softwareSql, BeanPropertyRowMapper.newInstance(Software.class), computer.getId()));
+        }
 		
 		/*List<Computer> computers = new ArrayList<>();
 		
@@ -151,19 +151,19 @@ public class SpringJdbcPerformance implements Performance {
 			e.printStackTrace();
 		}*/
 
-		return computers;
-	}
+        return computers;
+    }
 
-	@Override
-	public Monitor getMonitorById(int id) {
+    @Override
+    public Monitor getMonitorById(int id) {
 
-		return jdbcTemplate.query("select * from t_monitor where id=?", BeanPropertyRowMapper.newInstance(Monitor.class), id).get(0);
-	}
+        return jdbcTemplate.query("select * from t_monitor where id=?", BeanPropertyRowMapper.newInstance(Monitor.class), id).get(0);
+    }
 
-	@Override
-	public List<Monitor> listMonitor() {
+    @Override
+    public List<Monitor> listMonitor() {
 
-		return jdbcTemplate.query("select * from t_monitor", BeanPropertyRowMapper.newInstance(Monitor.class));
-	}
+        return jdbcTemplate.query("select * from t_monitor", BeanPropertyRowMapper.newInstance(Monitor.class));
+    }
 
 }

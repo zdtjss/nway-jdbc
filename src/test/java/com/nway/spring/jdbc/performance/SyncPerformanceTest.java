@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -112,7 +113,7 @@ public class SyncPerformanceTest extends BaseTest {
         nwayPerformance.getMonitorById(id);
         myBatisPlusPerformance.getMonitorById(id);
 
-        for(int i=0;i<10;i++) {
+        for (int i = 0; i < 10; i++) {
        /* nway.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
 
@@ -350,8 +351,8 @@ public class SyncPerformanceTest extends BaseTest {
     @Test
     public void testListComputer() throws InterruptedException {
 
-        int times = 32;
-        int nThread = 32;
+        int times = 1500;
+        int nThread = 1500;
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 
@@ -386,29 +387,21 @@ public class SyncPerformanceTest extends BaseTest {
             mybatisPlusTask.add(() -> myBatisPlusPerformance.listComputer());
         }
 
-//        nwayPerformance.listComputer();
+        IntStream.range(0, 30).forEach(e -> {
+            nwayLambdaPerformance.listComputer();
+            myBatisPerformance.listComputer();
+            myBatisPlusPerformance.listComputer();
+        });
 
-//        IntStream.range(1, 30).forEach(e -> {
-//            nwayLambdaPerformance.listComputer();
-//        });
-
-        nwayLambdaPerformance.listComputer();
-
-		myBatisPerformance.listComputer();
-
-        hibernatePerformance.listComputer();
+        System.out.println();
 
         long begin = System.currentTimeMillis();
 
-        myBatisPlusPerformance.listComputer();
+        for (int i = 0; i < 2; i++) {
 
         /*begin = System.currentTimeMillis();
         executorService.invokeAll(nwayTask);
         System.out.println("nway = " + (System.currentTimeMillis() - begin));*/
-
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(nwayLambdaTask);
-        System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
 
         /*begin = System.currentTimeMillis();
         nwayLambdaPerformance.listComputer();
@@ -446,14 +439,19 @@ public class SyncPerformanceTest extends BaseTest {
         executorService.invokeAll(springDataJpaTask);
         System.out.println("springDataJpa = " + (System.currentTimeMillis() - begin));*/
 
-        begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisPlusTask);
-        System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisPlusTask);
+            System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
-		/*begin = System.currentTimeMillis();
-        executorService.invokeAll(mybatisTask);
-        System.out.println("mybatis = " + (System.currentTimeMillis() - begin));*/
+//            begin = System.currentTimeMillis();
+//            executorService.invokeAll(mybatisTask);
+//            System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
 
+//            begin = System.currentTimeMillis();
+//            executorService.invokeAll(nwayLambdaTask);
+//            System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+
+        }
     }
 
 }

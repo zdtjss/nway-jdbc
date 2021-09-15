@@ -83,7 +83,7 @@ public class JdbcPerformance implements Performance, JsonQueryPerformance {
         monitor.setBrand(rs.getString(2));
         monitor.setMaxResolution(rs.getString(3));
         monitor.setModel(rs.getString(4));
-        monitor.setPhoto(rs.getBytes(5));
+//        monitor.setPhoto(rs.getBytes(5));
         monitor.setPrice(rs.getFloat(6));
         monitor.setProductionDate(rs.getTimestamp(7));
         monitor.setType(rs.getInt(8));
