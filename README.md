@@ -121,9 +121,17 @@ Map对象集分页：
 
 #使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
 
-#查询不到数据时：
+# 查询不到数据时：
+
  <ul>
   <li>query返回null</li>
   <li>queryList返回值size() == 0</li>
   <li>queryPage返回值getTotal() == 0</li>
  </ul>
+
+# 性能测试：
+
+各种情况下的性能均不输给当前主流的其他工具
+
+    OrderPerformanceTest 单线程顺序执行时的性能测试类
+    ConcurrentPerformanceTest   多线程并发模式下的性能测试类
