@@ -10,9 +10,9 @@
 
 #本项目专注于单表操作，对于多表的情况可以考虑使用视图，但更建议使用MyBatis等其他擅长多表操作的工具。
 
-#使用方法：
+# 使用方法：
 
-基于xml配置的bean： 
+基于xml配置的bean：
 
     <bean id="sqlExecutor" class="com.nway.spring.jdbc.SqlExecutor">
         <property name="dataSource" ref="dataSource"/>
