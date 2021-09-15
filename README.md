@@ -10,7 +10,7 @@
 
 #本项目专注于单表操作，对于多表的情况可以考虑使用视图，但更建议使用MyBatis等其他擅长多表操作的工具。
 
-# 使用方法：
+# 基本使用方法
 
 基于xml配置的bean：
 
@@ -85,7 +85,7 @@ Map对象集分页：
     Page<Map<String, Object>> users = sqlExecutor.queryPage("select * from user_name where id <> ? order by id", new Object[]{ "abc", 1 }, 1, 10);
     分页默认支持Oracle、Mysql、MariaDB，关于其他数据库的分页可以实现com.nway.spring.jdbc.pagination.PaginationSupport接口，通过com.nway.spring.jdbc.SqlExecutor.setPaginationSupport方法引入。
 
-自动填充数据和数据权限支持：
+# 自动填充数据和数据权限支持
 
 	应用场景： 
 		1、数据权限可用于数据查询时自动限制可返回的数据
@@ -93,14 +93,14 @@ Map对象集分页：
 	使用办法：
 		查询对象对应属性加入注解 Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
 
-关于深度自定义：
+# 关于深度自定义
 
     1、如果需要对执行SQL和参数深度干预，可以集成Spring的JdbcTemplate覆盖相关方法，然后通过SqlExecutor.setJdbcTemplate替换默认值。
     2、默认表字段和类属性的映射是通过反射完成，但提供了ASM的实现，如果有更好的实现方案，可以实现接口BeanProcessor，然后通过SqlExecutor.setBeanProcessor替换默认值。
     注：理论上ASM性能应高于反射，但自测结果显示，差距并不明显，具体原因需要进一步定位。
 
-#数据库表与Java类的映射规则：  
-   
+## 数据库表与Java类的映射规则
+
    表名：
    @Table("t_user")
    
@@ -121,7 +121,7 @@ Map对象集分页：
 
 #使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
 
-# 查询不到数据时：
+# 查询不到数据时
 
  <ul>
   <li>query返回null</li>
@@ -129,7 +129,7 @@ Map对象集分页：
   <li>queryPage返回值getTotal() == 0</li>
  </ul>
 
-# 性能测试：
+# 性能测试
 
 各种情况下的性能均不输给当前主流的其他工具
 
