@@ -9,66 +9,64 @@
     </select>
 
     <select id="getById" resultMap="computerMap">
-        SELECT
-		c.id computer_id,
-		c.brand computer_brand,
-		c.model computer_model,
-		c.photo computer_photo,
-		c.price computer_price,
-		c.production_date computer_production_date,
-		mf.id mainframe_id,
-		mf.brand mainframe_brand,
-		mf.model mainframe_model,
-		mf.photo mainframe_photo,
-		mf.price mainframe_price,
-		mf.production_date mainframe_production_date,
-		mf.type mainframe_type,
-		monitor.id monitor_id,
-		monitor.brand monitor_brand,
-		monitor.model monitor_model,
-		monitor.photo monitor_photo,
-		monitor.price monitor_price,
-		monitor.max_resolution monitor_max_resolution,
-		monitor.production_date monitor_production_date,
-		monitor.type monitor_type,
-		k.id keyboard_id,
-		k.brand keyboard_brand,
-		k.color keyboard_color,
-		k.model keyboard_model,
-		k.photo keyboard_photo,
-		k.price keyboard_price,
-		k.interface_type keyboard_interface_type,
-		k.production_date keyboard_production_date,
-		k.type keyboard_type,
-		k.is_wireless keyboard_wireless,
-		mouse.id mouse_id,
-		mouse.brand mouse_brand,
-		mouse.color mouse_color,
-		mouse.model mouse_model,
-		mouse.photo mouse_photo,
-		mouse.price mouse_price,
-		mouse.production_date mouse_production_date,
-		mouse.type mouse_type,
-		mouse.is_wireless mouse_wireless,
-		s.id software_id,
-		s.name software_name,
-		s.file_size software_size,
-		s.vender software_vender,
-		s.version software_version
-		FROM
-		t_computer c
-		inner JOIN
-		t_mainframe mf ON c.mainframe_id = mf.id
-		inner JOIN
-		t_monitor monitor ON c.monitor_id = monitor.id
-		inner JOIN
-		t_keyboard k ON c.keyboard_id = k.id
-		inner JOIN
-		t_mouse mouse ON c.mouse_id = mouse.id
-		inner join
-		t_computer_software cs on cs.COMPUTER_ID = c.id
-		inner join
-		t_software s on cs.software_id = s.id
+        SELECT c.id                    computer_id,
+               c.brand                 computer_brand,
+               c.model                 computer_model,
+               c.photo                 computer_photo,
+               c.price                 computer_price,
+               c.production_date       computer_production_date,
+               mf.id                   mainframe_id,
+               mf.brand                mainframe_brand,
+               mf.model                mainframe_model,
+               mf.photo                mainframe_photo,
+               mf.price                mainframe_price,
+               mf.production_date      mainframe_production_date,
+               mf.type                 mainframe_type,
+               monitor.id              monitor_id,
+               monitor.brand           monitor_brand,
+               monitor.model           monitor_model,
+               monitor.photo           monitor_photo,
+               monitor.price           monitor_price,
+               monitor.max_resolution  monitor_max_resolution,
+               monitor.production_date monitor_production_date,
+               monitor.type            monitor_type,
+               k.id                    keyboard_id,
+               k.brand                 keyboard_brand,
+               k.color                 keyboard_color,
+               k.model                 keyboard_model,
+               k.photo                 keyboard_photo,
+               k.price                 keyboard_price,
+               k.interface_type        keyboard_interface_type,
+               k.production_date       keyboard_production_date,
+               k.type                  keyboard_type,
+               k.is_wireless           keyboard_wireless,
+               mouse.id                mouse_id,
+               mouse.brand             mouse_brand,
+               mouse.color             mouse_color,
+               mouse.model             mouse_model,
+               mouse.photo             mouse_photo,
+               mouse.price             mouse_price,
+               mouse.production_date   mouse_production_date,
+               mouse.type              mouse_type,
+               mouse.is_wireless       mouse_wireless,
+               s.id                    software_id,
+               s.name                  software_name,
+               s.file_size             software_size,
+               s.vender                software_vender,
+               s.version               software_version
+        FROM t_computer c
+                 inner JOIN
+             t_mainframe mf ON c.mainframe_id = mf.id
+                 inner JOIN
+             t_monitor monitor ON c.monitor_id = monitor.id
+                 inner JOIN
+             t_keyboard k ON c.keyboard_id = k.id
+                 inner JOIN
+             t_mouse mouse ON c.mouse_id = mouse.id
+                 inner join
+             t_computer_software cs on cs.COMPUTER_ID = c.id
+                 inner join
+             t_software s on cs.software_id = s.id
         where c.id = #{id}
     </select>
 
@@ -77,75 +75,76 @@
     </select>
 
     <select id="getMonitorById" resultType="com.nway.spring.jdbc.performance.entity.Monitor">
-		select * from t_monitor where id = #{id}
-	</select>
+        select *
+        from t_monitor
+        where id = #{id}
+    </select>
 
     <select id="listMonitor" resultType="com.nway.spring.jdbc.performance.entity.Monitor">
-		select * from t_monitor
-	</select>
+        select *
+        from t_monitor
+    </select>
 
     <sql id="computer">
-		SELECT
-		c.id computer_id,
-		c.brand computer_brand,
-		c.model computer_model,
-		c.photo computer_photo,
-		c.price computer_price,
-		c.production_date computer_production_date,
-		mf.id mainframe_id,
-		mf.brand mainframe_brand,
-		mf.model mainframe_model,
-		mf.photo mainframe_photo,
-		mf.price mainframe_price,
-		mf.production_date mainframe_production_date,
-		mf.type mainframe_type,
-		monitor.id monitor_id,
-		monitor.brand monitor_brand,
-		monitor.model monitor_model,
-		monitor.photo monitor_photo,
-		monitor.price monitor_price,
-		monitor.max_resolution monitor_max_resolution,
-		monitor.production_date monitor_production_date,
-		monitor.type monitor_type,
-		k.id keyboard_id,
-		k.brand keyboard_brand,
-		k.color keyboard_color,
-		k.model keyboard_model,
-		k.photo keyboard_photo,
-		k.price keyboard_price,
-		k.interface_type keyboard_interface_type,
-		k.production_date keyboard_production_date,
-		k.type keyboard_type,
-		k.is_wireless keyboard_wireless,
-		mouse.id mouse_id,
-		mouse.brand mouse_brand,
-		mouse.color mouse_color,
-		mouse.model mouse_model,
-		mouse.photo mouse_photo,
-		mouse.price mouse_price,
-		mouse.production_date mouse_production_date,
-		mouse.type mouse_type,
-		mouse.is_wireless mouse_wireless,
-		s.id software_id,
-		s.name software_name,
-		s.file_size software_size,
-		s.vender software_vender,
-		s.version software_version
-		FROM
-		t_computer c
-		inner JOIN
-		t_mainframe mf ON c.mainframe_id = mf.id
-		inner JOIN
-		t_monitor monitor ON c.monitor_id = monitor.id
-		inner JOIN
-		t_keyboard k ON c.keyboard_id = k.id
-		inner JOIN
-		t_mouse mouse ON c.mouse_id = mouse.id
-		inner join
-		t_computer_software cs on cs.COMPUTER_ID = c.id 
-		inner join 
-		t_software s on cs.software_id = s.id
-	</sql>
+        SELECT c.id                    computer_id,
+               c.brand                 computer_brand,
+               c.model                 computer_model,
+               c.photo                 computer_photo,
+               c.price                 computer_price,
+               c.production_date       computer_production_date,
+               mf.id                   mainframe_id,
+               mf.brand                mainframe_brand,
+               mf.model                mainframe_model,
+               mf.photo                mainframe_photo,
+               mf.price                mainframe_price,
+               mf.production_date      mainframe_production_date,
+               mf.type                 mainframe_type,
+               monitor.id              monitor_id,
+               monitor.brand           monitor_brand,
+               monitor.model           monitor_model,
+               monitor.photo           monitor_photo,
+               monitor.price           monitor_price,
+               monitor.max_resolution  monitor_max_resolution,
+               monitor.production_date monitor_production_date,
+               monitor.type            monitor_type,
+               k.id                    keyboard_id,
+               k.brand                 keyboard_brand,
+               k.color                 keyboard_color,
+               k.model                 keyboard_model,
+               k.photo                 keyboard_photo,
+               k.price                 keyboard_price,
+               k.interface_type        keyboard_interface_type,
+               k.production_date       keyboard_production_date,
+               k.type                  keyboard_type,
+               k.is_wireless           keyboard_wireless,
+               mouse.id                mouse_id,
+               mouse.brand             mouse_brand,
+               mouse.color             mouse_color,
+               mouse.model             mouse_model,
+               mouse.photo             mouse_photo,
+               mouse.price             mouse_price,
+               mouse.production_date   mouse_production_date,
+               mouse.type              mouse_type,
+               mouse.is_wireless       mouse_wireless,
+               s.id                    software_id,
+               s.name                  software_name,
+               s.file_size             software_size,
+               s.vender                software_vender,
+               s.version               software_version
+        FROM t_computer c
+                 left JOIN
+             t_mainframe mf ON c.mainframe_id = mf.id
+                 left JOIN
+             t_monitor monitor ON c.monitor_id = monitor.id
+                 left JOIN
+             t_keyboard k ON c.keyboard_id = k.id
+                 left JOIN
+             t_mouse mouse ON c.mouse_id = mouse.id
+                 left join
+             t_computer_software cs on cs.COMPUTER_ID = c.id
+                 left join
+             t_software s on cs.software_id = s.id
+    </sql>
 
     <resultMap id="computerMap" type="com.nway.spring.jdbc.performance.entity.Computer">
         <id property="id" column="computer_id"/>
@@ -210,7 +209,11 @@
     </resultMap>
 
     <select id="software" resultType="com.nway.spring.jdbc.performance.entity.Software">
-		select * from t_software s,t_computer_software cs where s.id = cs.software_id and cs.COMPUTER_ID = #{id}
-	</select>
+        select *
+        from t_software s,
+             t_computer_software cs
+        where s.id = cs.software_id
+          and cs.COMPUTER_ID = #{id}
+    </select>
 
 </mapper>
