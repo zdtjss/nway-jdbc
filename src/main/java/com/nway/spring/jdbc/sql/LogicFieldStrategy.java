@@ -7,7 +7,7 @@ import com.nway.spring.jdbc.sql.permission.WhereCondition;
 /**
  * 逻辑删除
  */
-public class LogicField implements FillStrategy, PermissionStrategy {
+public class LogicFieldStrategy implements FillStrategy, PermissionStrategy {
 
     @Override
     public boolean isSupport(SqlType sqlType) {

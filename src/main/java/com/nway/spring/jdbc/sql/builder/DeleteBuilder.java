@@ -1,6 +1,6 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import com.nway.spring.jdbc.sql.LogicField;
+import com.nway.spring.jdbc.sql.LogicFieldStrategy;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
@@ -31,7 +31,7 @@ public class DeleteBuilder extends SqlBuilder {
 
     private Optional<ColumnInfo> getLogicDelField() {
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-        return entityInfo.getColumnMap().values().stream().filter(e -> e.getFillStrategy() instanceof LogicField).findFirst();
+        return entityInfo.getColumnMap().values().stream().filter(e -> e.getFillStrategy() instanceof LogicFieldStrategy).findFirst();
     }
 
 }
