@@ -93,6 +93,8 @@ Map对象集分页：
 	使用办法：
 		查询对象对应属性加入注解 Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
 
+    LogicField：基于fillStrategy、permissionStrategy实现的软删除。这两个属性有很大的想象空间。
+
 # 关于深度自定义
 
     1、如果需要对执行SQL和参数深度干预，可以集成Spring的JdbcTemplate覆盖相关方法，然后通过SqlExecutor.setJdbcTemplate替换默认值。

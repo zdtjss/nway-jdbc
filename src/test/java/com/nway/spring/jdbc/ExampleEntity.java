@@ -11,6 +11,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
+import com.nway.spring.jdbc.sql.LogicField;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
 
 @Entity
@@ -71,6 +72,9 @@ public class ExampleEntity {
 
 	@com.nway.spring.jdbc.annotation.Column
 	private BigDecimal bigDecimal;
+
+	@com.nway.spring.jdbc.annotation.Column(fillStrategy = LogicField.class, permissionStrategy = LogicField.class)
+	private int delFlag;
 
 	@Transient
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
@@ -303,6 +307,15 @@ public class ExampleEntity {
 
 	public void setBigDecimal(BigDecimal bigDecimal) {
 		this.bigDecimal = bigDecimal;
+	}
+
+	public void setDelFlag(int delFlag) {
+		this.delFlag = delFlag;
+	}
+
+	@Column(name = "del_flag")
+	public int getDelFlag() {
+		return delFlag;
 	}
 
 	@Transient
