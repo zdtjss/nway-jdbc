@@ -4,18 +4,18 @@ Nway-JDBC提供了高性能简单易用的单表操作方法，支持新增、�
 最好也运行一下源码关于性能的测试ConcurrentPerformanceTest、OrderPerformanceTest（本类方法initDB可以初始化性能测试所需数据），对比了解一下性能。
 当然，对性能测试提点建议就更好了。如果你感觉还可以，不要忘了点击star，让更多的人有机会了解。
 
-# maven
+本项目专注于单表操作，对于多表的情况可以考虑使用视图，但更建议使用MyBatis等其他擅长多表操作的工具。
+对于有嵌套对象的情况，根据测试数据，使用本工具进行多次单表查询后复合对象，与直接使用外连接由MyBatis自动组合嵌套对象的性能相差无几，甚至部分场景下此工具胜出。
+
+# 基本使用方法
+
+maven
 
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
 		<version>1.3.15</version>
 	</dependency>
-
-#本项目专注于单表操作，对于多表的情况可以考虑使用视图，但更建议使用MyBatis等其他擅长多表操作的工具。
-#对于有嵌套对象的情况，根据测试数据，使用本工具进行多次单表查询后复合对象，与直接使用外连接由MyBatis自动组合嵌套对象的性能相差无几，甚至部分场景下此工具胜出。
-
-# 基本使用方法
 
 基于xml配置的bean：
 
