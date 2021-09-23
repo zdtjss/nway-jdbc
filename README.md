@@ -1,6 +1,8 @@
 Nway-JDBC提供了高性能简单易用的单表操作方法，支持新增、修改时为指定字段自动填充数据，并为数据权限的管控提供了支持。使用时只需要给主类SqlExecutor配置好数据源，不需要继承某个类，也不需要实现哪个接口。
     
-希望看到的朋友，能够花一点点时间真正的写写，或是看看源码中单元测试部分的SqlExecutorTest（本类方法initData可以初始化此类所需数据），切实了解Nway-JDBC的简单易用。最好也运行一下源码关于性能的测试ConcurrentPerformanceTest、OrderPerformanceTest（本类方法initDB可以初始化性能测试所需数据），对比了解一下性能。当然，能对性能测试提点建议就更好了。
+希望看到的朋友，能够花一点点时间真正的写写，或是看看源码中单元测试部分的SqlExecutorTest（本类方法initData可以初始化此类所需数据），切实了解Nway-JDBC的简单易用。
+最好也运行一下源码关于性能的测试ConcurrentPerformanceTest、OrderPerformanceTest（本类方法initDB可以初始化性能测试所需数据），对比了解一下性能。
+当然，对性能测试提点建议就更好了。如果你感觉还可以，不要忘了点击star，让更多的人有机会了解。
 
 # maven
 
