@@ -99,10 +99,10 @@ Map对象集分页：
 # 关于深度自定义
 
     1、如果需要对执行SQL和参数深度干预，可以集成Spring的JdbcTemplate覆盖相关方法，然后通过SqlExecutor.setJdbcTemplate替换默认值。
-    2、默认表字段和类属性的映射是通过反射完成，但提供了ASM的实现，如果有更好的实现方案，可以实现接口BeanProcessor，然后通过SqlExecutor.setBeanProcessor替换默认值。
+    2、默认表字段和类属性的映射是通过反射完成，但提供了ASM的实现（AsmBeanProcessor），如果有更好的实现方案，可以实现接口BeanProcessor，然后通过SqlExecutor.setBeanProcessor替换默认值。
     注：理论上ASM性能应高于反射，但自测结果显示，差距并不明显，具体原因需要进一步定位。
 
-## 数据库表与Java类的映射规则
+# 数据库表与Java类的映射规则
 
    表名：
    @Table("t_user")
@@ -117,12 +117,14 @@ Map对象集分页：
       
       @Table("t_user")
       public class User {
+        @Column(type = ColumnType.ID)
+        private Integer id;
       	@Column("user_name")
 	  	private String name;
 	  	private int status;
       }
 
-#使用中SqlExecutor的日志级别需要单独配置，且要高于debug，不然会影响性能，因为JdbcTemplate.handleWarnings()比较耗时。
+#对于JdbcTemplate.handleWarnings()，当日志级别为debug或trace时比较耗时（这是比较早的测试数据，默认可以忽略，发现性能较差时，可以考虑此问题是否存在）。
 
 # 查询不到数据时
 
