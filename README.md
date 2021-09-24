@@ -96,7 +96,7 @@ Map对象集分页：
 		1、数据权限可用于数据查询时自动限制可返回的数据
 		2、自动填充功能可应用于统一处理数据的“创建人”、“修改人”、“创建时间”、“修改时间“等
 	使用办法：
-		查询对象对应属性加入注解 Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
+		查询对象对应属性加入注解 @Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
 
     LogicFieldStrategy：基于fillStrategy、permissionStrategy实现的软删除。这两个属性有很大的想象空间。
 
