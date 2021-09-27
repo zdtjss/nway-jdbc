@@ -65,9 +65,6 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
      */
     public AsmRowMapper(Class<T> mappedClass) {
         super(mappedClass);
-        if(log.isDebugEnabled()) {
-            log.debug("基于ASM映射数据，" + mappedClass.getName());
-        }
     }
 
     /**

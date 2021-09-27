@@ -95,9 +95,6 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
      */
     public DefaultRowMapper(Class<T> mappedClass) {
         initialize(mappedClass);
-        if (logger.isDebugEnabled()) {
-            logger.debug("基于反射映射数据，" + mappedClass.getName());
-        }
     }
 
     public DefaultRowMapper<T> setColumnIndexMap(Map<String, Integer> columnIndexMap) {
