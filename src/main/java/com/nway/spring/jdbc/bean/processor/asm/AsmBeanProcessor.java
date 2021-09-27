@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.bean.processor.asm;
 
 import com.nway.spring.jdbc.bean.processor.BeanProcessor;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import java.sql.ResultSet;
@@ -51,7 +52,11 @@ public class AsmBeanProcessor implements BeanProcessor {
                     return rowMapper;
                 }).setColumnIndexMap(columnIndex);
 
-        return mapper.mapRow(rs, 0);
+        T row = mapper.mapRow(rs, 0);
+        if (rs.next()) {
+            throw new IncorrectResultSizeDataAccessException("发现了多条符合条件的数据", 1);
+        }
+        return row;
     }
 
     private Map<String, Integer> getColumnIndex(ResultSet rs) throws SQLException {
