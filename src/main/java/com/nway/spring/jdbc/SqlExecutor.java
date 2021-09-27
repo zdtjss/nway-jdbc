@@ -214,7 +214,9 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
-     * 基于分页原理减少数据扫描以提高查询性能，适用于从大量数据中通过非索引字段查询预期返回单行数据的情况
+     * 基于分页原理减少数据扫描以提高查询性能，适用于从大量数据中通过非索引字段查询预期返回单行数据的情况。
+     * <p>
+     * 注意：但当满足查询条件的数据不止条时，返回的数据可能不是所预期的。
      *
      * @return
      * @throws DataAccessException 数据访问异常
