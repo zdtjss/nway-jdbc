@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.bean.processor;
 
 import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.sql.builder.SqlBuilderException;
+import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -126,7 +127,7 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
         this.mappedFields = new HashMap<>();
         this.mappedProperties = new HashSet<>();
 
-        for (Field field : mappedClass.getDeclaredFields()) {
+        for (Field field : ReflectionUtils.getAllFields(mappedClass)) {
             field.setAccessible(true);
             this.mappedFields.put(annotationName(field), field);
             this.mappedProperties.add(field.getName());

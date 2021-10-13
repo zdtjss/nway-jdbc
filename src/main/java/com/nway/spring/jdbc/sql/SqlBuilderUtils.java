@@ -30,7 +30,7 @@ public class SqlBuilderUtils {
 			return;
 		}
 		try {
-			Field[] declaredFields = ReflectionUtils.getDeclaredFields(claszz);
+			Field[] declaredFields = ReflectionUtils.getAllFields(claszz);
 			EntityInfo entityInfo = new EntityInfo();
 			entityInfo.setTableName(getTableName(claszz));
 			entityInfo.setColumnList(new ArrayList<>(declaredFields.length));

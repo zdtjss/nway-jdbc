@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.bean.processor.asm;
 
 import com.nway.spring.jdbc.bean.processor.BeanAccess;
 import com.nway.spring.jdbc.bean.processor.DefaultRowMapper;
+import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.*;
@@ -148,7 +149,7 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
             methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "setVal", "(Ljava/lang/String;Ljava/lang/Object;)V", null, null);
             methodVisitor.visitCode();
 
-            Field[] fields = type.getDeclaredFields();
+            Field[] fields = ReflectionUtils.getAllFields(type);
             Field field = fields[0];
             String fieldTypeStr = getClassName(field.getType());
             String descriptor = getDescriptor(field.getType());
