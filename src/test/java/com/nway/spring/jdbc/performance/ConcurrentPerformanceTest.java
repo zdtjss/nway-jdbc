@@ -268,9 +268,9 @@ public class ConcurrentPerformanceTest extends BaseTest {
     @Test
     public void testGetComputer() throws InterruptedException {
 
-        int times = 30;
-        int nThread = 10;
-        final int id = 80007;
+        int times = 100;
+        int nThread = 100;
+        final int id = nwayLambdaPerformance.listComputer().get(0).getId();
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThread);
 
@@ -450,6 +450,46 @@ public class ConcurrentPerformanceTest extends BaseTest {
 //            begin = System.currentTimeMillis();
 //            executorService.invokeAll(mybatisTask);
 //            System.out.println("mybatis = " + (System.currentTimeMillis() - begin));
+
+//            begin = System.currentTimeMillis();
+//            executorService.invokeAll(nwayLambdaTask);
+//            System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+
+        }
+    }
+
+    @Test
+    public void testLambda() throws InterruptedException {
+
+        int times = 150;
+        int nThread = 150;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(nThread);
+
+        Collection<Callable<List<Computer>>> nwayLambdaTask = new ArrayList<>(times);
+        Collection<Callable<List<Computer>>> mybatisPlusTask = new ArrayList<>(times);
+
+        for (int i = 0; i < times; i++) {
+
+            nwayLambdaTask.add(() -> nwayLambdaPerformance.lambdaTest());
+
+            mybatisPlusTask.add(() -> myBatisPlusPerformance.lambdaTest());
+        }
+
+        IntStream.range(0, 30).forEach(e -> {
+            nwayLambdaPerformance.lambdaTest();
+            myBatisPlusPerformance.lambdaTest();
+        });
+
+        System.out.println();
+
+        long begin = System.currentTimeMillis();
+
+        for (int i = 0; i < 5; i++) {
+
+            begin = System.currentTimeMillis();
+            executorService.invokeAll(mybatisPlusTask);
+            System.out.println("mybatisPlus = " + (System.currentTimeMillis() - begin));
 
 //            begin = System.currentTimeMillis();
 //            executorService.invokeAll(nwayLambdaTask);

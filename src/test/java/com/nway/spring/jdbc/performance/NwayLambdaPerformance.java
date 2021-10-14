@@ -3,6 +3,7 @@ package com.nway.spring.jdbc.performance;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -105,4 +106,15 @@ public class NwayLambdaPerformance implements Performance {
         return sqlExecutor.queryList(SQL.query(Monitor.class));
     }
 
+    public List<Computer> lambdaTest() {
+        SqlBuilder sqlBuilder = SQL.query(Computer.class).withColumn(Computer::getId)
+                .where()
+                .eq(Computer::getKeyboardId, 0)
+                .ne(Computer::getMainframeId, 1)
+                .ge(Computer::getMouseId, 100)
+                .likeLeft(Computer::getBrand, "a")
+                .or((e) -> e.eq(Computer::getMonitorId, 10)
+                        .and((s) -> s.likeLeft(Computer::getModel, "o")));
+        return sqlExecutor.queryList(sqlBuilder);
+    }
 }

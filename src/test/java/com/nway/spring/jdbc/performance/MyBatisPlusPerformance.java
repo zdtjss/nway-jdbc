@@ -122,4 +122,15 @@ public class MyBatisPlusPerformance implements Performance {
 		return monitorDao.selectList(Wrappers.query());
 	}
 
+	public List<Computer> lambdaTest() {
+		LambdaQueryWrapper<Computer> sqlBuilder = Wrappers.lambdaQuery(Computer.class).select(Computer::getId)
+				.eq(Computer::getKeyboardId, 0)
+				.ne(Computer::getMainframeId, 1)
+				.ge(Computer::getMouseId, 100)
+				.likeLeft(Computer::getBrand, "a")
+				.or((e) -> e.eq(Computer::getMonitorId, 10)
+						.and((s) -> s.likeLeft(Computer::getModel, "o")));
+		return computerDao.selectList(sqlBuilder);
+	}
+
 }
