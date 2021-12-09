@@ -406,7 +406,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, X> SqlBuilder between(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <X> SqlBuilder between(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
             return this;
         }
@@ -428,7 +428,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, X> SqlBuilder notBetween(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <X> SqlBuilder notBetween(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
             return this;
         }
@@ -472,7 +472,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T> SqlBuilder and(Consumer<SqlBuilder> lambdaWhereBuilder) {
+    public SqlBuilder and(Consumer<SqlBuilder> lambdaWhereBuilder) {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
         // 5代表" and "的长度
