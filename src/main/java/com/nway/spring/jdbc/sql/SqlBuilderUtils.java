@@ -34,6 +34,7 @@ public class SqlBuilderUtils {
 			EntityInfo entityInfo = new EntityInfo();
 			entityInfo.setTableName(getTableName(claszz));
 			entityInfo.setColumnList(new ArrayList<>(declaredFields.length));
+			entityInfo.setMultiValue(new ArrayList<>(8));
 			entityInfo.setColumnMap(new HashMap<>(declaredFields.length));
 			Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap();
 			for (Field field : declaredFields) {
@@ -44,7 +45,6 @@ public class SqlBuilderUtils {
 				field.setAccessible(true);
 				ColumnInfo columnInfo = new ColumnInfo();
 				columnInfo.setColumnName(getColumnName(field));
-				entityInfo.getColumnList().add(columnInfo.getColumnName());
 				columnInfo.setReadMethod(field);
 				if (column != null) {
 					columnInfo.setFillStrategy(column.fillStrategy().getConstructor().newInstance());
@@ -52,12 +52,19 @@ public class SqlBuilderUtils {
 					if (ColumnType.ID.equals(column.type())) {
 						entityInfo.setId(columnInfo);
 					}
+					else if(ColumnType.MULTI_VALUE.equals(column.type())) {
+						entityInfo.getMultiValue().add(columnInfo);
+					}
 				}
 				else {
 					columnInfo.setFillStrategy(new NoneFillStrategy());
 					columnInfo.setPermissionStrategy(new NonePermissionStrategy());
 				}
 				columnMap.put(field.getName(), columnInfo);
+				// 多值字段在子表查
+				if(entityInfo.getMultiValue() == null) {
+					entityInfo.getColumnList().add(columnInfo.getColumnName());
+				}
 			}
 			ENTITY_INFO_MAP.put(claszz, entityInfo);
 		} catch (Exception e) {
@@ -215,12 +222,25 @@ public class SqlBuilderUtils {
 	}
 
 	public static Object getIdValue(Class<?> beanClass, Object obj) {
+		ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
 		try {
-			ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
 			return columnInfo.getReadMethod().get(obj);
 		} catch (IllegalAccessException e) {
 			throw new SqlBuilderException(e);
 		}
+	}
+
+	public static Object[] getIdValue(Class<?> beanClass, List<?> objs) {
+		Object[] idValList = new Object[objs.size()];
+		ColumnInfo columnInfo = getEntityInfo(beanClass).getId();
+		try {
+			for (int i = 0; i < objs.size(); i++) {
+				idValList[i] = columnInfo.getReadMethod().get(objs.get(i));
+			}
+		} catch (IllegalAccessException e) {
+			throw new SqlBuilderException(e);
+		}
+		return idValList;
 	}
 
 }

@@ -30,6 +30,11 @@ public class QueryBuilder<T> extends SqlBuilder {
 		return this;
 	}
 
+	public QueryBuilder<T> excludeColumn(String... columnNames) {
+		columns.removeAll(Arrays.asList(columnNames));
+		return this;
+	}
+
 	public void ignorePower() {
 		this.ignorePower = true;
 	}

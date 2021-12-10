@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc.bean.processor;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.support.JdbcUtils;
 

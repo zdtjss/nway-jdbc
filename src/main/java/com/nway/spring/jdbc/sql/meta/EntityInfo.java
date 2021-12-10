@@ -9,6 +9,8 @@ public final class EntityInfo {
 
     private ColumnInfo id;
 
+    private List<ColumnInfo> multiValue;
+
     private List<String> columnList;
 
     private Map<String, ColumnInfo> columnMap;
@@ -27,6 +29,14 @@ public final class EntityInfo {
 
     public void setId(ColumnInfo id) {
         this.id = id;
+    }
+
+    public List<ColumnInfo> getMultiValue() {
+        return multiValue;
+    }
+
+    public void setMultiValue(List<ColumnInfo> multiValue) {
+        this.multiValue = multiValue;
     }
 
     public List<String> getColumnList() {
