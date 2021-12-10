@@ -50,10 +50,10 @@ public class SqlBuilder implements ISqlBuilder {
     }
 
     /**
-     * 调用此方法后，需要自己判断参数是否为空，仅限当前调用
+     * 设置为true后，需要自己判断参数是否为空
      */
-    public SqlBuilder manual() {
-        this.ignoreInvalid = false;
+    public SqlBuilder setIgnoreInvalid(boolean ignoreInvalid) {
+        this.ignoreInvalid = ignoreInvalid;
         return this;
     }
 
@@ -682,7 +682,7 @@ public class SqlBuilder implements ISqlBuilder {
     }
 
     private boolean isInvalid(Object val) {
-        if (ignoreInvalid) {
+        if (!ignoreInvalid) {
             return false;
         }
         if (val instanceof String && !StringUtils.hasText((String) val)) {
