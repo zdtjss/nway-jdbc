@@ -15,8 +15,6 @@
  */
 package com.nway.spring.jdbc.sql.fill.incrementer;
 
-import com.nway.spring.jdbc.sql.fill.incrementer.DefaultIdentifierGenerator;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;

@@ -62,7 +62,7 @@ public class SqlBuilderUtils {
 				}
 				columnMap.put(field.getName(), columnInfo);
 				// 多值字段在子表查
-				if(entityInfo.getMultiValue() == null) {
+				if(column == null || (column != null && !ColumnType.MULTI_VALUE.equals(column.type()))) {
 					entityInfo.getColumnList().add(columnInfo.getColumnName());
 				}
 			}
@@ -161,7 +161,13 @@ public class SqlBuilderUtils {
 
 	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) {
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
-			return columnInfo.getFillStrategy().getValue(sqlType);
+			Object value = columnInfo.getFillStrategy().getValue(sqlType);
+			try {
+				columnInfo.getReadMethod().set(obj, value);
+			} catch (IllegalAccessException e) {
+				throw new SqlBuilderException(e);
+			}
+			return value;
 		}
 		try {
 			return columnInfo.getReadMethod().get(obj);

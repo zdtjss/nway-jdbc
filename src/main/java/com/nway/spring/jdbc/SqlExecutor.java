@@ -32,6 +32,8 @@ import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
 import com.nway.spring.jdbc.pagination.*;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.builder.*;
+import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
+import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +51,7 @@ import com.nway.spring.jdbc.bean.BeanListHandler;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.IdGenerator;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -112,7 +115,7 @@ public class SqlExecutor implements InitializingBean {
         UpdateBeanBuilder sqlBuilder = new UpdateBeanBuilder(obj);
         sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
         int count = update(sqlBuilder);
-        saveMultiValue(beanClass, Collections.singletonList(obj));
+        saveMultiValue(beanClass, Collections.singletonList(obj), true);
         return count;
     }
 
@@ -132,7 +135,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params.toArray()));
         }
-        saveMultiValue(beanClass, objs);
+        saveMultiValue(beanClass, objs, true);
         return jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
     }
 
@@ -156,7 +159,7 @@ public class SqlExecutor implements InitializingBean {
     public int insert(Object obj) {
         Class<?> beanClass = obj.getClass();
         int count = update(SQL.insert(beanClass).use(obj));
-        saveMultiValue(beanClass, Collections.singletonList(obj));
+        saveMultiValue(beanClass, Collections.singletonList(obj), false);
         return count;
     }
 
@@ -195,7 +198,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params));
         }
         int[] count = jdbcTemplate.batchUpdate(sql, params);
-        saveMultiValue(sqlBuilder.getBeanClass(), objs);
+        saveMultiValue(sqlBuilder.getBeanClass(), objs, false);
         return count;
     }
 
@@ -208,7 +211,23 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params));
         }
         T bean = jdbcTemplate.query(sql, params, getSqlType(params), new BeanHandler<>(type, beanProcessor));
-        fillMultiValue(sql, type, Collections.singletonList(bean));
+        fillMultiValue(queryBuilder, Collections.singletonList(bean));
+        return bean;
+    }
+
+    public <T> T queryById(Serializable id, Class<T> type, String... mvColNames) {
+        ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
+        ((QueryBuilder<T>) queryBuilder).withMVColumn(mvColNames);
+        T bean = queryFirst(queryBuilder);
+        fillMultiValue(queryBuilder, Collections.singletonList(bean));
+        return bean;
+    }
+
+    public <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
+        ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
+        ((QueryBuilder<T>) queryBuilder).withMVColumn(mvFields);
+        T bean = queryFirst(queryBuilder);
+        fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
     }
 
@@ -225,7 +244,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(args));
         }
         T bean = jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<>(type, beanProcessor));
-        fillMultiValue(sql, type, Collections.singletonList(bean));
+//        fillMultiValue(sql, type, Collections.singletonList(bean));
         return bean;
     }
 
@@ -249,7 +268,7 @@ public class SqlExecutor implements InitializingBean {
         }
         Object[] realParams = params.toArray();
         T bean = jdbcTemplate.query(pageDialect.getSql(), realParams, getSqlType(realParams), new BeanHandler<>(sqlBuilder.getBeanClass(), beanProcessor));
-        fillMultiValue(sql, sqlBuilder.getBeanClass(), Collections.singletonList(bean));
+        fillMultiValue(sqlBuilder, Collections.singletonList(bean));
         return bean;
     }
 
@@ -314,7 +333,7 @@ public class SqlExecutor implements InitializingBean {
         if (isDebugEnabled) {
             logger.debug("total = " + (retVal == null ? 0 : retVal.size()));
         }
-        fillMultiValue(sql, type, retVal);
+//        fillMultiValue(sql, type, retVal);
         return retVal;
     }
 
@@ -565,34 +584,55 @@ public class SqlExecutor implements InitializingBean {
         return fromIndex;
     }
 
-    private <T> void fillMultiValue(String sql, Class<T> type, List<T> bean) {
-        List<String> realMultiValue = getMultiValue(sql, type);
-        if(CollectionUtils.isEmpty(realMultiValue)) {
+    private <T> void fillMultiValue(ISqlBuilder queryBuilder, List<T> beanList) {
+        if(beanList == null || beanList.isEmpty() || (beanList.size() == 1 && beanList.get(0) == null)) {
             return;
         }
+        List<String> multiValColumn = null;
+        if(queryBuilder instanceof QueryBuilder) {
+            multiValColumn = ((QueryBuilder) queryBuilder).getMultiValColumn();
+        }
+        if(CollectionUtils.isEmpty(multiValColumn)) {
+            return;
+        }
+        Class<T> type = queryBuilder.getBeanClass();
         List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
         if (!multiValueList.isEmpty()) {
             for (ColumnInfo columnInfo : multiValueList) {
                 String columnName = columnInfo.getColumnName();
-                if(!realMultiValue.contains(columnName)) {
+                if(!multiValColumn.contains(columnName)) {
                     continue;
                 }
+
+                Map<Object, T> rows = new HashMap<>(beanList.size());
+                for (T bean : beanList) {
+                    rows.put(SqlBuilderUtils.getIdValue(type, bean), bean);
+                }
+
                 StringBuilder subSql = new StringBuilder(64)
-                        .append("select ")
+                        .append("select foreign_key,")
                         .append(columnName)
                         .append(" from ")
-                        .append(SqlBuilderUtils.getTableNameFromCache(type)).append(columnName)
+                        .append(SqlBuilderUtils.getTableNameFromCache(type)).append('_').append(columnName)
                         .append(" where foreign_key in (");
-                String placeholder = IntStream.range(0, bean.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
+                String placeholder = IntStream.range(0, beanList.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
                 subSql.append(placeholder).append(") order by idx");
-                Object[] idValueArr = SqlBuilderUtils.getIdValue(type, bean);
+                Object[] idValueArr = rows.keySet().toArray(new Object[0]);
                 if (isDebugEnabled) {
                     logger.debug("sql = " + subSql);
                     logger.debug("params = " + objToStr(idValueArr));
                 }
-                List<Object> subVal = jdbcTemplate.queryForList(subSql.toString(), Object.class, idValueArr);
+                List<Map<String, Object>> subVal = jdbcTemplate.queryForList(subSql.toString(), idValueArr);
+                Map<Object, List<Object>> group = new HashMap<>(idValueArr.length);
+                for (Map<String, Object> map : subVal) {
+                    Object foreignKey = map.get("foreign_key");
+                    List<Object> row = group.computeIfAbsent(foreignKey, k -> new ArrayList<>());
+                    row.add(map.get(columnName));
+                }
                 try {
-                    columnInfo.getReadMethod().set(bean, subVal);
+                    for (Map.Entry<Object, List<Object>> entry : group.entrySet()) {
+                        columnInfo.getReadMethod().set(rows.get(entry.getKey()), entry.getValue());
+                    }
                 } catch (IllegalAccessException e) {
                     throw new IllegalArgumentException(e);
                 }
@@ -607,75 +647,65 @@ public class SqlExecutor implements InitializingBean {
      * @param beanList
      * @param <T>
      */
-    private <T> void saveMultiValue(Class<?> type, List<T> beanList) {
+    protected <T> void saveMultiValue(Class<?> type, List<T> beanList, boolean nedDel) {
         List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
         if (!multiValueList.isEmpty()) {
+            Map<Integer, Object> idValMap = new HashMap<>(beanList.size());
             for (ColumnInfo columnInfo : multiValueList) {
                 String columnName = columnInfo.getColumnName();
-                List<T> effectiveBean = new ArrayList<>(beanList.size());
-                List<Collection> effectiveVal = new ArrayList<>(beanList.size());
+                Map<Object, List<Object>> data = new HashMap<>();
                 for (T bean : beanList) {
                     Object value = SqlBuilderUtils.getColumnValue(columnInfo, bean, SqlType.INSERT);
-                    if (value == null || ((Collection) value).isEmpty()) {
+                    if (value == null || ((List) value).isEmpty()) {
                         continue;
                     }
-                    effectiveBean.add(bean);
-                    effectiveVal.add((Collection) value);
+                    Object fk = Optional.ofNullable(idValMap.get(bean.hashCode())).orElseGet(() -> {
+                        Object idValue = SqlBuilderUtils.getIdValue(type, bean);
+                        idValMap.put(bean.hashCode(), idValue);
+                        return idValue;
+                    });
+                    data.put(fk, (List) value);
                 }
-                if (effectiveBean.isEmpty()) {
+                if (data.isEmpty()) {
                     continue;
                 }
-                String tableName = SqlBuilderUtils.getTableNameFromCache(type) + columnName;
-                StringBuilder delSql = new StringBuilder(64)
-                        .append("delete from ")
-                        .append(tableName)
-                        .append(" where foreign_key in (");
-                String placeholder = IntStream.range(0, effectiveBean.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                delSql.append(placeholder).append(")");
-                Object[] idValueArr = SqlBuilderUtils.getIdValue(type, effectiveBean);
-                if (isDebugEnabled) {
-                    logger.debug("sql = " + delSql);
-                    logger.debug("params = " + objToStr(idValueArr));
+                String tableName = SqlBuilderUtils.getTableNameFromCache(type) + "_" + columnName;
+
+                if(nedDel) {
+                    StringBuilder delSql = new StringBuilder(64)
+                            .append("delete from ")
+                            .append(tableName)
+                            .append(" where foreign_key in (");
+                    String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
+                    delSql.append(placeholder).append(")");
+                    Object[] idValueArr = idValMap.values().toArray(new Object[0]);
+                    if (isDebugEnabled) {
+                        logger.debug("sql = " + delSql);
+                        logger.debug("params = " + objToStr(idValueArr));
+                    }
+                    jdbcTemplate.update(delSql.toString(), idValueArr);
                 }
-                jdbcTemplate.update(delSql.toString(), idValueArr);
 
                 StringBuilder insertSql = new StringBuilder(64)
                         .append("insert into ")
                         .append(tableName)
-                        .append("(id, foreign_key,").append(columnName).append(") values (");
-                placeholder = IntStream.range(0, effectiveBean.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                insertSql.append(placeholder).append(")");
+                        .append("(id, foreign_key,").append(columnName).append(",idx) values (?,?,?,?)");
 
-                List<Object[]> params = new ArrayList<>(effectiveBean.size());
-                for (Collection value : effectiveVal) {
-                    params.add(value.toArray());
-                }
-                if (isDebugEnabled) {
-                    logger.debug("sql = " + insertSql);
-                    logger.debug("params = " + objToStr(params));
-                }
-                jdbcTemplate.update(insertSql.toString(), params.toArray());
-            }
-        }
-    }
-
-    private <T> List<String> getMultiValue(String sql, Class<T> type) {
-        List<String> multiValueColumnList = new ArrayList<>(8);
-        String sqlUpper = sql.toUpperCase();
-
-        int fromIdx = sqlUpper.indexOf(" FROM ");
-        String[] queryColumn = sqlUpper.substring(7, fromIdx).split(",");
-        List<ColumnInfo> columnInfoList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
-
-        for (String setExp : queryColumn) {
-            for (ColumnInfo column : columnInfoList) {
-                if (setExp.contains(column.getColumnName())) {
-                    multiValueColumnList.add(column.getColumnName());
-                    break;
+                for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
+                    Collection<Object> entryValue = entry.getValue();
+                    List<Object[]> rows = new ArrayList<>(entryValue.size());
+                    int idx = 0;
+                    for (Object bizVal : entryValue) {
+                        rows.add(new Object[]{IdWorker.getId(), entry.getKey(), bizVal, ++idx});
+                    }
+                    if (isDebugEnabled) {
+                        logger.debug("sql = " + insertSql);
+                        logger.debug("params = " + objToStr(rows));
+                    }
+                    jdbcTemplate.batchUpdate(insertSql.toString(), rows);
                 }
             }
         }
-        return multiValueColumnList;
     }
 
     private String objToStr(Object obj) {

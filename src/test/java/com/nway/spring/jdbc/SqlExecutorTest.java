@@ -206,6 +206,21 @@ class SqlExecutorTest extends BaseTest {
     }
 
     @Test
+    void mvQueryTest() {
+        ExampleEntity obj = sqlExecutor.queryById("507", ExampleEntity.class, ExampleEntity::getMv);
+        Assertions.assertFalse(obj.getMv().isEmpty());
+    }
+
+    @Test
+    void mvInsertTest() {
+        ExampleEntity obj = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+        obj.setMv(Arrays.asList("1", "2", "3"));
+        obj.setId(null);
+        sqlExecutor.insert(obj);
+        Assertions.assertFalse(obj.getMv().isEmpty());
+    }
+
+    @Test
     public void countSql() {
 
         StringBuilder countSql = new StringBuilder();
@@ -238,6 +253,15 @@ class SqlExecutorTest extends BaseTest {
                 .compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
 
         System.out.println(ORDER_BY_PATTERN.matcher(input.toLowerCase()).matches());
+    }
+
+    @Test
+    public void argTest() {
+        arg(new Object[]{"abc", 123});
+    }
+
+    private void arg(Object... abc) {
+        System.out.println(abc);
     }
 
     @Test

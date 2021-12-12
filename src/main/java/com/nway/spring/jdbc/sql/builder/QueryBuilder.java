@@ -11,6 +11,8 @@ public class QueryBuilder<T> extends SqlBuilder {
 
 	private boolean ignorePower = false;
 
+	private final List<String> multiValColumn = new ArrayList<>();
+
 	private final List<String> columns = new ArrayList<>();
 
 	public QueryBuilder(Class<T> beanClass) {
@@ -35,6 +37,18 @@ public class QueryBuilder<T> extends SqlBuilder {
 		return this;
 	}
 
+	@SafeVarargs
+	public final QueryBuilder<T> withMVColumn(SFunction<T, ?>... fields) {
+		for(SFunction<T, ?> field : fields) {
+			multiValColumn.add(SqlBuilderUtils.getColumn(beanClass, field));
+		}
+		return this;
+	}
+
+	public QueryBuilder<T> withMVColumn(String... columnNames) {
+		multiValColumn.addAll(Arrays.asList(columnNames));
+		return this;
+	}
 	public void ignorePower() {
 		this.ignorePower = true;
 	}
@@ -50,6 +64,10 @@ public class QueryBuilder<T> extends SqlBuilder {
 
 	public List<String> getColumns() {
 		return columns;
+	}
+
+	public List<String> getMultiValColumn() {
+		return multiValColumn;
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import com.nway.spring.jdbc.sql.TestFillStrategy;
 @com.nway.spring.jdbc.annotation.Table(name = "t_nway")
 public class ExampleEntity {
 
-	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID)
+	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID, fillStrategy = TestFillStrategy.class)
 	private Integer id;
 	@com.nway.spring.jdbc.annotation.Column(name = "p_boolean")
 	private boolean ppBoolean;
@@ -70,11 +70,14 @@ public class ExampleEntity {
 	@com.nway.spring.jdbc.annotation.Column
 	private LocalDateTime localDateTime;
 
-	@com.nway.spring.jdbc.annotation.Column
+	@com.nway.spring.jdbc.annotation.Column("bigDecimal")
 	private BigDecimal bigDecimal;
 
 	@com.nway.spring.jdbc.annotation.Column(fillStrategy = LogicFieldStrategy.class, permissionStrategy = LogicFieldStrategy.class)
 	private int delFlag;
+
+	@com.nway.spring.jdbc.annotation.Column(name = "mv", type = ColumnType.MULTI_VALUE)
+	private List<String> mv;
 
 	@Transient
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
@@ -316,6 +319,15 @@ public class ExampleEntity {
 	@Column(name = "del_flag")
 	public int getDelFlag() {
 		return delFlag;
+	}
+
+	@Transient
+	public List<String> getMv() {
+		return mv;
+	}
+
+	public void setMv(List<String> mv) {
+		this.mv = mv;
 	}
 
 	@Transient

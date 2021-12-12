@@ -682,14 +682,10 @@ public class SqlBuilder implements ISqlBuilder {
     }
 
     private boolean isInvalid(Object val) {
-        if (!ignoreInvalid) {
+        if (!ignoreInvalid
+                || val instanceof String && !StringUtils.hasText((String) val)
+                || val instanceof Collection && !CollectionUtils.isEmpty((Collection) val)) {
             return false;
-        }
-        if (val instanceof String && !StringUtils.hasText((String) val)) {
-            return true;
-        }
-        else if (val instanceof Collection && !CollectionUtils.isEmpty((Collection) val)) {
-            return true;
         }
         return val == null;
     }
