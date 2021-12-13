@@ -206,18 +206,27 @@ class SqlExecutorTest extends BaseTest {
     }
 
     @Test
-    void mvQueryTest() {
-        ExampleEntity obj = sqlExecutor.queryById("507", ExampleEntity.class, ExampleEntity::getMv);
+    void mvInsertTest() {
+        ExampleEntity obj = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+        obj.setMv(Arrays.asList(UUID.randomUUID().toString().substring(0, 3), "2", UUID.randomUUID().toString().substring(0, 3)));
+        obj.setId(null);
+        sqlExecutor.insert(obj);
         Assertions.assertFalse(obj.getMv().isEmpty());
     }
 
     @Test
-    void mvInsertTest() {
-        ExampleEntity obj = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
-        obj.setMv(Arrays.asList("1", "2", "3"));
-        obj.setId(null);
-        sqlExecutor.insert(obj);
+    void mvQueryTest() {
+        mvInsertTest();
+        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct foreign_key from t_nway_mv", String.class);
+        ExampleEntity obj = sqlExecutor.queryById(fks.get(0), ExampleEntity.class, ExampleEntity::getMv);
         Assertions.assertFalse(obj.getMv().isEmpty());
+    }
+
+    @Test
+    void mvListTest() {
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
+        boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv() != null && !obj.getMv().isEmpty());
+        Assertions.assertTrue(anyMatch);
     }
 
     @Test

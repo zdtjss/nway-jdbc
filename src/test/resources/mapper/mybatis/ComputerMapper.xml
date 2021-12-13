@@ -5,7 +5,7 @@
 
     <select id="getComputerById" resultMap="computerMap">
         <include refid="computer"/>
-        AND c.id = #{id}
+        where c.id = #{id}
     </select>
 
     <select id="getById" resultMap="computerMap">
@@ -15,6 +15,7 @@
                c.photo                 computer_photo,
                c.price                 computer_price,
                c.production_date       computer_production_date,
+               cu.user                 user,
                mf.id                   mainframe_id,
                mf.brand                mainframe_brand,
                mf.model                mainframe_model,
@@ -55,17 +56,19 @@
                s.vender                software_vender,
                s.version               software_version
         FROM t_computer c
-                 inner JOIN
+                 left JOIN
+             t_computer_user cu on c.id = cu.foreign_key
+             left join
              t_mainframe mf ON c.mainframe_id = mf.id
-                 inner JOIN
+                 left JOIN
              t_monitor monitor ON c.monitor_id = monitor.id
-                 inner JOIN
+                 left JOIN
              t_keyboard k ON c.keyboard_id = k.id
-                 inner JOIN
+                 left JOIN
              t_mouse mouse ON c.mouse_id = mouse.id
-                 inner join
+                 left join
              t_computer_software cs on cs.COMPUTER_ID = c.id
-                 inner join
+                 left join
              t_software s on cs.software_id = s.id
         where c.id = #{id}
     </select>
@@ -92,6 +95,7 @@
                c.photo                 computer_photo,
                c.price                 computer_price,
                c.production_date       computer_production_date,
+               cu.user                 user,
                mf.id                   mainframe_id,
                mf.brand                mainframe_brand,
                mf.model                mainframe_model,
@@ -132,6 +136,8 @@
                s.vender                software_vender,
                s.version               software_version
         FROM t_computer c
+                 left JOIN
+             t_computer_user cu on c.id = cu.foreign_key
                  left JOIN
              t_mainframe mf ON c.mainframe_id = mf.id
                  left JOIN
@@ -206,6 +212,11 @@
             <result property="vender" column="software_vender"/>
             <result property="version" column="software_version"/>
         </collection>
+        <collection property="userList" resultMap="userMap"/>
+    </resultMap>
+    
+    <resultMap id="userMap" type="string">
+        <result column="user"/>
     </resultMap>
 
     <select id="software" resultType="com.nway.spring.jdbc.performance.entity.Software">

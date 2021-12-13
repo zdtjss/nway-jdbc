@@ -31,6 +31,8 @@ public class MyBatisPlusPerformance implements Performance {
 	@Autowired
 	private ComputerDao computerDao;
 	@Autowired
+	private ComputerUserDao computerUserDao;
+	@Autowired
 	private KeyboardDao keyboardDao;
 	@Autowired
 	private MainframeDao mainframeDao;
@@ -70,36 +72,41 @@ public class MyBatisPlusPerformance implements Performance {
 
 		List<Computer> computers = computerDao.selectList(Wrappers.lambdaQuery(Computer.class));
 
-		List<Integer> mainframeIds = computers.stream().map(e -> e.getMainframeId()).collect(Collectors.toList());
-		List<Integer> monitorIds = computers.stream().map(e -> e.getMonitorId()).collect(Collectors.toList());
-		List<Integer> mouseIds = computers.stream().map(e -> e.getMouseId()).collect(Collectors.toList());
-		List<Integer> keyboardIds = computers.stream().map(e -> e.getKeyboardId()).collect(Collectors.toList());
+		List<Integer> computerIds = computers.stream().map(Computer::getId).collect(Collectors.toList());
+		List<Integer> mainframeIds = computers.stream().map(Computer::getMainframeId).collect(Collectors.toList());
+		List<Integer> monitorIds = computers.stream().map(Computer::getMonitorId).collect(Collectors.toList());
+		List<Integer> mouseIds = computers.stream().map(Computer::getMouseId).collect(Collectors.toList());
+		List<Integer> keyboardIds = computers.stream().map(Computer::getKeyboardId).collect(Collectors.toList());
 
+		List<ComputerUser> computerUsers = computerUserDao.selectList(Wrappers.lambdaQuery(ComputerUser.class).in(ComputerUser::getForeignKey, computerIds));
 		List<Mainframe> mainframeList = mainframeDao.selectBatchIds(mainframeIds);
 		List<Monitor> monitorList = monitorDao.selectBatchIds(monitorIds);
 		List<Mouse> mouseList = mouseDao.selectBatchIds(mouseIds);
 		List<Keyboard> keyboardList = keyboardDao.selectBatchIds(keyboardIds);
 
+		Map<Integer, List<String>> computerUserMap = computerUsers.stream().collect(Collectors.groupingBy(ComputerUser::getForeignKey))
+				.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream().map(ComputerUser::getUser).collect(Collectors.toList())));
 		Map<Integer, Mainframe> mainframeMap = mainframeList.stream().collect(Collectors.toMap(Mainframe::getId, Function.identity()));
 		Map<Integer, Monitor> monitorMap = monitorList.stream().collect(Collectors.toMap(Monitor::getId, Function.identity()));
 		Map<Integer, Mouse> mouseMap = mouseList.stream().collect(Collectors.toMap(Mouse::getId, Function.identity()));
 		Map<Integer, Keyboard> keyboardMap = keyboardList.stream().collect(Collectors.toMap(Keyboard::getId, Function.identity()));
 
 		LambdaQueryWrapper<ComputerSoftware> computerSoftwareSql = Wrappers.lambdaQuery();
-		computerSoftwareSql.in(ComputerSoftware::getComputerId, computers.stream().map(e -> e.getId()).collect(Collectors.toList()));
+		computerSoftwareSql.in(ComputerSoftware::getComputerId, computers.stream().map(Computer::getId).collect(Collectors.toList()));
 		List<ComputerSoftware> computerSoftwareList = computerSoftwareDao.selectList(computerSoftwareSql);
 
 		Map<Integer, List<Software>> computerSoftwareMap = new HashMap<>();
 		if(!CollectionUtils.isEmpty(computerSoftwareList)) {
-			List<Integer> softIds = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
+			List<Integer> softIds = computerSoftwareList.stream().map(ComputerSoftware::getSoftwareId).collect(Collectors.toList());
 			List<Software> softwareList = softwareDao.selectBatchIds(softIds);
 			Map<Integer, Software> softwareMap = softwareList.stream().collect(Collectors.toMap(Software::getId, Function.identity()));
-			computerSoftwareList.stream().collect(Collectors.groupingBy(ComputerSoftware::getComputerId)).entrySet().stream().forEach(e -> {
+			computerSoftwareList.stream().collect(Collectors.groupingBy(ComputerSoftware::getComputerId)).entrySet().forEach(e -> {
 				computerSoftwareMap.put(e.getKey(), e.getValue().stream().map(cs -> softwareMap.get(cs.getSoftwareId())).collect(Collectors.toList()));
 			});
 		}
 
 		for (Computer computer : computers) {
+			computer.setUserList(computerUserMap.get(computer.getId()));
 			computer.setMainframe(mainframeMap.get(computer.getMainframeId()));
 			computer.setMonitor(monitorMap.get(computer.getMonitorId()));
 			computer.setMouse(mouseMap.get(computer.getMouseId()));

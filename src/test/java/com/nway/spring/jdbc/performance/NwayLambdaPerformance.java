@@ -78,9 +78,7 @@ public class NwayLambdaPerformance implements Performance {
             List<Integer> softIds = computerSoftwareList.stream().map(ComputerSoftware::getSoftwareId).collect(Collectors.toList());
             List<Software> softwareList = sqlExecutor.queryList(softIds, Software.class);
             Map<Integer, Software> softwareMap = softwareList.stream().collect(Collectors.toMap(Software::getId, Function.identity()));
-            computerSoftwareList.stream().collect(Collectors.groupingBy(ComputerSoftware::getComputerId)).entrySet().forEach(e -> {
-                computerSoftwareMap.put(e.getKey(), e.getValue().stream().map(cs -> softwareMap.get(cs.getSoftwareId())).collect(Collectors.toList()));
-            });
+            computerSoftwareList.stream().collect(Collectors.groupingBy(ComputerSoftware::getComputerId)).forEach((key, value) -> computerSoftwareMap.put(key, value.stream().map(cs -> softwareMap.get(cs.getSoftwareId())).collect(Collectors.toList())));
         }
 
         for (Computer computer : computers) {

@@ -223,7 +223,8 @@ public class SqlExecutor implements InitializingBean {
         return bean;
     }
 
-    public <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
+    @SafeVarargs
+    public final <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
         ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
         ((QueryBuilder<T>) queryBuilder).withMVColumn(mvFields);
         T bean = queryFirst(queryBuilder);
@@ -279,7 +280,9 @@ public class SqlExecutor implements InitializingBean {
      * @throws DataAccessException 数据访问异常
      */
     public <T> List<T> queryList(ISqlBuilder queryBuilder) throws DataAccessException {
-        return queryList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+        List<T> beanList = queryList(queryBuilder.getSql(), queryBuilder.getBeanClass(), queryBuilder.getParam().toArray());
+        fillMultiValue(queryBuilder, beanList);
+        return beanList;
     }
 
     /**
@@ -293,12 +296,15 @@ public class SqlExecutor implements InitializingBean {
      */
     public <T, R> Map<R, T> queryListMap(ISqlBuilder queryBuilder, Function<T, R> key) {
         List<T> dataList = queryList(queryBuilder);
+        fillMultiValue(queryBuilder, dataList);
         return dataList.stream().collect(Collectors.toMap(key, Function.identity()));
     }
 
     public <T> List<T> queryList(List<? extends Serializable> ids, Class<T> type) {
         ISqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
-        return queryList(queryBuilder);
+        List<T> dataList = queryList(queryBuilder);
+        fillMultiValue(queryBuilder, dataList);
+        return dataList;
     }
 
     /**
@@ -347,7 +353,9 @@ public class SqlExecutor implements InitializingBean {
      */
     public <T> Page<T> queryPage(ISqlBuilder queryBuilder, int page, int pageSize)
             throws DataAccessException {
-        return queryPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
+        Page<T> pageData = queryPage(queryBuilder.getSql(), queryBuilder.getParam().toArray(), page, pageSize, queryBuilder.getBeanClass());
+        fillMultiValue(queryBuilder, pageData.getPageData());
+        return pageData;
     }
 
     /**
@@ -363,7 +371,7 @@ public class SqlExecutor implements InitializingBean {
     public <T> Page<T> queryPage(String sql, Object[] params, int page, int pageSize, Class<T> beanClass)
             throws DataAccessException {
 
-        List<T> item = new ArrayList<T>();
+        List<T> item = new ArrayList<>();
 
         String countSql = buildPaginationCountSql(sql);
         int totalCount = queryCount(countSql, params);
@@ -592,11 +600,11 @@ public class SqlExecutor implements InitializingBean {
         if(queryBuilder instanceof QueryBuilder) {
             multiValColumn = ((QueryBuilder) queryBuilder).getMultiValColumn();
         }
-        if(CollectionUtils.isEmpty(multiValColumn)) {
-            return;
-        }
         Class<T> type = queryBuilder.getBeanClass();
         List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
+        if(CollectionUtils.isEmpty(multiValColumn)) {
+            multiValColumn = multiValueList.stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
+        }
         if (!multiValueList.isEmpty()) {
             for (ColumnInfo columnInfo : multiValueList) {
                 String columnName = columnInfo.getColumnName();

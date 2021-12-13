@@ -74,6 +74,9 @@ public class Computer {
 	@TableField(exist = false)
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private List<Software> software;
+	@TableField(exist = false)
+	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.MULTI_VALUE, name = "user")
+	private List<String> userList;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.TABLE)
@@ -220,6 +223,10 @@ public class Computer {
 
 	public void setKeyboardId(int keyboardId) {
 		this.keyboardId = keyboardId;
+	}
+
+	public void setUserList(List<String> userList) {
+		this.userList = userList;
 	}
 
 	@Override
