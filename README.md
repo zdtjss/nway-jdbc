@@ -1,5 +1,12 @@
-Nway-JDBC提供了高性能简单易用的单表操作方法，支持新增、修改时自动填充数据，支持数据权限的管控、逻辑删除等。
+Nway-JDBC提供了高性能简单易用的单表操作方法，支持新增、修改时自动填充数据，支持单字段多值时自动保存、查询（如多选字典项），支持数据权限的管控、逻辑删除等。
 使用时只需要给主类SqlExecutor配置好数据源，不需要继承某个类，也不需要实现哪个接口，工具类式使用。
+
+性能对比（持续补充中）
+
+![img.png](img.png)
+如上图所示，本工具的每秒吞吐量比MyBatis-Plus高出约60%
+
+![img_1.png](img_1.png)
 
 希望看到的朋友，能够花一点点时间真正的写写，或是看看源码中单元测试部分的SqlExecutorTest（本类方法initData可以初始化此类所需数据），切实了解Nway-JDBC的简单易用。
 最好也运行一下源码关于性能的测试ConcurrentPerformanceTest、OrderPerformanceTest（本类方法initDB可以初始化性能测试所需数据），对比了解一下性能。
@@ -127,7 +134,19 @@ Map对象集分页：
       	@Column("user_name")
 	  	private String name;
 	  	private int status;
+        @Column(type = ColumnType.MULTI_VALUE, name = "power")
+        private List<String> powerList;
       }
+
+对于ColumnType.MULTI_VALUE类型的字段，程序自动从所属类表名加当前字段名命名的表里读写，上述powerList数据对应的表为t_user_power，其表结构为
+
+    CREATE TABLE `t_computer_user` (
+        `pk_id` int NOT NULL,               --固定字段，主键
+        `foreign_key` int DEFAULT NULL,     --固定字段，主表主键
+        `power` varchar(255) DEFAULT NULL,  --固定字段，@Column配置的字段名（遵从默认下划线命名规则）
+        `idx` int DEFAULT NULL,             --固定字段，排序用
+        PRIMARY KEY (`pk_id`)
+    );
 
 #对于JdbcTemplate.handleWarnings()，当日志级别为debug或trace时比较耗时（这是比较早的测试数据，默认可以忽略，发现性能较差时，可以考虑此问题是否存在）。
 
