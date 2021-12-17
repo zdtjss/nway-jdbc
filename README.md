@@ -4,7 +4,10 @@ Nway-JDBC提供了高性能简单易用的单表操作方法，支持新增、�
 性能对比（持续补充中，测试代码为vs-java项目，测试工具JMeter）
 
 ![img.png](img.png)
-如上图所示，本工具的每秒吞吐量比MyBatis高出约90%，比MyBatis-Plus高出约78%
+如上图所示，本工具的每秒吞吐量与MyBatis大致相当，比MyBatis-Plus高出约50%，内存占用比MyBatis-Plus低30%左右（内存占用参考top -p的res）。
+测试数据可能因环境而异，但从多台机器不同版本jdk的测试情况看，性能明显优于同类型的MyBatis-Plus，内存占用也明显低于MyBatis-Plus。
+本工具与mybatis定位不同，本不应对比，之所以列出，一是想说明本单表操作后复合对象，与基于mybatis的外连接查询性能基本一致，但请自行搜索关于单表查询的优点。
+关于MyBatis-Plus性能问题，我已两次向MyBatis-Plus社区提出，均未收到积极解决的态度，相反其创建者认可当前性能表现，所以，希望使用高性能的单表操作，可以考虑本工具。
 
 ![img_1.png](img_1.png)
 
