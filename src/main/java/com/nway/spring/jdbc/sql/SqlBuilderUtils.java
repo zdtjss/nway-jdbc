@@ -62,7 +62,7 @@ public class SqlBuilderUtils {
 				}
 				columnMap.put(field.getName(), columnInfo);
 				// 多值字段在子表查
-				if(column == null || (column != null && !ColumnType.MULTI_VALUE.equals(column.type()))) {
+				if(column == null || !ColumnType.MULTI_VALUE.equals(column.type())) {
 					entityInfo.getColumnList().add(columnInfo.getColumnName());
 				}
 			}
