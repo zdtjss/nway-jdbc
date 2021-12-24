@@ -32,7 +32,7 @@ class SqlExecutorTest extends BaseTest {
     void update() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         String str = UUID.randomUUID().toString();
-        sqlExecutor.update(SQL.update(ExampleEntity.class).set(ExampleEntity::getString, str).where().eq(example::getId));
+        sqlExecutor.update(SQL.update(ExampleEntity.class).set(ExampleEntity::getString, str).eq(example::getId));
         ExampleEntity exampleUpdated = sqlExecutor.queryById(example.getId(), ExampleEntity.class);
         Assertions.assertEquals(str, exampleUpdated.getString());
     }
@@ -68,7 +68,7 @@ class SqlExecutorTest extends BaseTest {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         int effectCount = sqlExecutor.deleteById(example.getId(), ExampleEntity.class);
         Assertions.assertEquals(effectCount, 1);
-        boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).where().eq(example::getId));
+        boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).eq(example::getId));
         Assertions.assertFalse(exist);
     }
 
@@ -77,7 +77,7 @@ class SqlExecutorTest extends BaseTest {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         int effectCount = sqlExecutor.batchDeleteById(Collections.singletonList(example.getId()), ExampleEntity.class);
         Assertions.assertEquals(effectCount, 1);
-        boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).where().eq(example::getId));
+        boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).eq(example::getId));
         Assertions.assertFalse(exist);
     }
 
@@ -184,7 +184,7 @@ class SqlExecutorTest extends BaseTest {
     @Test
     void testQueryPage2() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
-        Page<ExampleEntity> mapPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class).where().eq(example::getId), 1, 1);
+        Page<ExampleEntity> mapPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class).eq(example::getId), 1, 1);
         Assertions.assertEquals(mapPage.getPageData().size(), 1);
         Assertions.assertEquals(mapPage.getPageData().get(0).getId(), example.getId());
     }
@@ -193,7 +193,7 @@ class SqlExecutorTest extends BaseTest {
     void count() {
         int count = sqlExecutor.count(SQL.query(ExampleEntity.class));
         Assertions.assertTrue(count > 0);
-        count = sqlExecutor.count(SQL.query(ExampleEntity.class).where().eq(ExampleEntity::getString, UUID.randomUUID().toString()));
+        count = sqlExecutor.count(SQL.query(ExampleEntity.class).eq(ExampleEntity::getString, UUID.randomUUID().toString()));
         Assertions.assertEquals(0, count);
     }
 
@@ -201,7 +201,7 @@ class SqlExecutorTest extends BaseTest {
     void exist() {
         boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class));
         Assertions.assertTrue(exist);
-        exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).where().eq(ExampleEntity::getString, UUID.randomUUID().toString()));
+        exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).eq(ExampleEntity::getString, UUID.randomUUID().toString()));
         Assertions.assertFalse(exist);
     }
 
@@ -281,7 +281,7 @@ class SqlExecutorTest extends BaseTest {
         exampleEntity.setString("strcolumn");
 
         SqlBuilder builder = SQL.query(ExampleEntity.class)
-                .where()
+                
                 .eq(ExampleEntity::getId, 1)
                 .eq(exampleEntity::getId)
                 .eq("pk_id", exampleEntity.getId())
