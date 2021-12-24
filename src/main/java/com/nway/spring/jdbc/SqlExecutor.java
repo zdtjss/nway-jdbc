@@ -113,7 +113,7 @@ public class SqlExecutor implements InitializingBean {
     public int updateById(Object obj) {
         Class<?> beanClass = obj.getClass();
         UpdateBeanBuilder sqlBuilder = new UpdateBeanBuilder(obj);
-        sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
+        sqlBuilder.eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
         int count = update(sqlBuilder);
         saveMultiValue(beanClass, Collections.singletonList(obj), true);
         return count;
@@ -146,13 +146,21 @@ public class SqlExecutor implements InitializingBean {
      */
     public int deleteById(Serializable id, Class<?> beanClass) {
         DeleteBuilder sqlBuilder = new DeleteBuilder(beanClass);
-        sqlBuilder.where().eq(SqlBuilderUtils.getIdName(beanClass), id);
+        sqlBuilder.eq(SqlBuilderUtils.getIdName(beanClass), id);
+        return update(sqlBuilder);
+    }
+
+    /**
+     * @param sqlBuilder sqlBuilder
+     * @return
+     */
+    public int delete(ISqlBuilder sqlBuilder) {
         return update(sqlBuilder);
     }
 
     public int batchDeleteById(Collection<? extends Serializable> ids, Class<?> beanClass) {
         DeleteBuilder sqlBuilder = new DeleteBuilder(beanClass);
-        sqlBuilder.where().in(SqlBuilderUtils.getIdName(beanClass), ids);
+        sqlBuilder.in(SqlBuilderUtils.getIdName(beanClass), ids);
         return update(sqlBuilder);
     }
 
@@ -203,7 +211,7 @@ public class SqlExecutor implements InitializingBean {
     }
 
     public <T> T queryById(Serializable id, Class<T> type) {
-        ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
+        ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
         String sql = queryBuilder.getSql();
         Object[] params = queryBuilder.getParam().toArray(new Object[0]);
         if (isDebugEnabled) {
@@ -216,7 +224,7 @@ public class SqlExecutor implements InitializingBean {
     }
 
     public <T> T queryById(Serializable id, Class<T> type, String... mvColNames) {
-        ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
+        ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
         ((QueryBuilder<T>) queryBuilder).withMVColumn(mvColNames);
         T bean = queryFirst(queryBuilder);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
@@ -225,7 +233,7 @@ public class SqlExecutor implements InitializingBean {
 
     @SafeVarargs
     public final <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
-        ISqlBuilder queryBuilder = SQL.query(type).where().eq(SqlBuilderUtils.getIdName(type), id);
+        ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
         ((QueryBuilder<T>) queryBuilder).withMVColumn(mvFields);
         T bean = queryFirst(queryBuilder);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
@@ -301,7 +309,7 @@ public class SqlExecutor implements InitializingBean {
     }
 
     public <T> List<T> queryList(List<? extends Serializable> ids, Class<T> type) {
-        ISqlBuilder queryBuilder = SQL.query(type).where().in(SqlBuilderUtils.getIdName(type), ids);
+        ISqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
         List<T> dataList = queryList(queryBuilder);
         fillMultiValue(queryBuilder, dataList);
         return dataList;

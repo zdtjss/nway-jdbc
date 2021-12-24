@@ -63,7 +63,7 @@ public class BatchUpdateBuilder extends SqlBuilder {
     @Override
     public String getSql() {
 
-        if (this.where().getSql().trim().endsWith(" where ")) {
+        if (!this.where().getSql().trim().endsWith(" where")) {
             throw new SqlBuilderException("请明确where条件");
         }
 

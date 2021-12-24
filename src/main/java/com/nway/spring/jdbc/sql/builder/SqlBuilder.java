@@ -41,7 +41,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public SqlBuilder where() {
+    protected SqlBuilder where() {
         if (canAppendWhere) {
             sql.append(" where ");
         }
@@ -52,7 +52,7 @@ public class SqlBuilder implements ISqlBuilder {
     /**
      * 设置为true后，需要自己判断参数是否为空
      */
-    public SqlBuilder setIgnoreInvalid(boolean ignoreInvalid) {
+    public SqlBuilder ignoreInvalid(boolean ignoreInvalid) {
         this.ignoreInvalid = ignoreInvalid;
         return this;
     }
@@ -75,7 +75,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T> SqlBuilder eq(String column, Object val) {
+    public SqlBuilder eq(String column, Object val) {
         if(isInvalid(val)) {
             return this;
         }

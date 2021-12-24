@@ -19,6 +19,7 @@ public class QueryBuilder<T> extends SqlBuilder {
 
 	public QueryBuilder(Class<T> beanClass) {
 		super(beanClass);
+		where();
 	}
 
 	@SafeVarargs
@@ -65,7 +66,7 @@ public class QueryBuilder<T> extends SqlBuilder {
 	}
 
 	@Override
-	public SqlBuilder where() {
+	protected SqlBuilder where() {
 		super.where();
 		if(!this.ignorePower) {
 			initPermission();
