@@ -15,7 +15,6 @@ import java.util.stream.IntStream;
 
 public class BatchUpdateBuilder extends SqlBuilder {
 
-    private int whereParamFirstIdx = -1;
     private List<String> columnNameList = new ArrayList<>();
     private final List<String> sets = new ArrayList<>();
 
@@ -54,13 +53,6 @@ public class BatchUpdateBuilder extends SqlBuilder {
     }
 
     @Override
-    public BatchUpdateBuilder where() {
-        super.where();
-        whereParamFirstIdx = getParam().size() - 1;
-        return this;
-    }
-
-    @Override
     public String getSql() {
 
         if (!this.where().getSql().trim().endsWith(" where")) {
@@ -72,7 +64,8 @@ public class BatchUpdateBuilder extends SqlBuilder {
 
         List<Object> paramList = getParam();
         int rowCount = ((List) paramList.get(0)).size();
-        for (int i = whereParamFirstIdx, n = paramList.size(); i < n; i++) {
+        int whereParamFirstIdx = getParam().size() - 1;
+        for (int i = whereParamFirstIdx == -1 ? 0 : whereParamFirstIdx, n = paramList.size(); i < n; i++) {
             Object param = paramList.get(i);
             paramList.add(i, IntStream.of(rowCount).mapToObj(e -> param).collect(Collectors.toList()));
         }

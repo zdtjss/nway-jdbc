@@ -12,7 +12,6 @@ public class DeleteBuilder extends SqlBuilder {
 
     public DeleteBuilder(Class<?> beanClass) {
         super(beanClass);
-        where();
     }
 
     @Override

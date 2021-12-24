@@ -19,7 +19,6 @@ public class QueryBuilder<T> extends SqlBuilder {
 
 	public QueryBuilder(Class<T> beanClass) {
 		super(beanClass);
-		where();
 	}
 
 	@SafeVarargs
@@ -65,15 +64,6 @@ public class QueryBuilder<T> extends SqlBuilder {
 		this.ignorePower = true;
 	}
 
-	@Override
-	protected SqlBuilder where() {
-		super.where();
-		if(!this.ignorePower) {
-			initPermission();
-		}
-		return this;
-	}
-
 	public List<String> getColumns() {
 		return columns;
 	}
@@ -84,6 +74,9 @@ public class QueryBuilder<T> extends SqlBuilder {
 
 	@Override
 	public String getSql() {
+		if(!this.ignorePower) {
+			initPermission();
+		}
 		return getSelectStmt() + super.getSql();
 	}
 

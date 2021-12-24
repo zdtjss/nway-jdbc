@@ -48,10 +48,23 @@ Spring Boot：
 	SqlBuilder builder = SQL.update(Class beanClass);
 	
 	int effectCount = sqlExecutor.update(builder);
-    
+
+查询条件自动判空，省去不必要的判断代码，如：
+
+    if(StringUtils.isBlank(user.getName)) {
+        sqlBuilder.like(User::getName, user.getName());
+    }
+
+上述代码可直接写成：
+
+    sqlBuilder.like(User::getName, user.getName()); 
+
+    工具内部会判断user.getName()是否有效，只有有效时才会作为查询条件。
+    您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(true)，同样的调用sqlBuilder.ignoreInvalid(false)即恢复自动判断。
+   
 单对象查询：
 	
-    SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
+    SqlBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName);
     User user = sqlExecutor.queryBean(builder);
     User user = sqlExecutor.queryById(100, User.class);
     
@@ -61,7 +74,7 @@ Spring Boot：
         
 对象集查询：
 	
-    SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName);
+    SqlBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName);
     List<User> users = sqlExecutor.queryList(builder);
     List<User> users = sqlExecutor.queryList(Arrays.asList(100), User.class);
     Map<String, User> userMap = queryListMap(builder, User::getId)
@@ -73,7 +86,7 @@ Spring Boot：
     
 分页对象集查询：
 
-    SqlBuilder builder = SQL.query(User.class).where().eq(usrQuery::getStatus).like(usrQuery::getName).orderBy(usrQuery::getId);
+    SqlBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName).orderBy(usrQuery::getId);
     Page<User> users = sqlExecutor.queryPage(builder, 1, 10);
     
     or

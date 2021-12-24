@@ -18,7 +18,6 @@ public class UpdateBuilder extends SqlBuilder {
     public UpdateBuilder(Class<?> beanClass) {
         super(beanClass);
         initFilled();
-        where();
     }
 
     @Override

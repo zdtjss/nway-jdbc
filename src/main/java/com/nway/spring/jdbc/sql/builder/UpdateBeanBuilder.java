@@ -17,7 +17,6 @@ public class UpdateBeanBuilder extends SqlBuilder {
 	public UpdateBeanBuilder(Object obj) {
 		super(obj.getClass());
 		this.obj = obj;
-		where();
 	}
 
 	private void init() {

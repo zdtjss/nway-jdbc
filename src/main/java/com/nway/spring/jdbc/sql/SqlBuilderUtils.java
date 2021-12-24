@@ -13,11 +13,13 @@ import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +41,9 @@ public class SqlBuilderUtils {
 			entityInfo.setColumnMap(new HashMap<>(declaredFields.length));
 			Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap();
 			for (Field field : declaredFields) {
+				if (Modifier.isStatic(field.getModifiers())) {
+					continue;
+				}
 				Column column = field.getAnnotation(Column.class);
 				if(column != null && ColumnType.IGNORE.equals(column.type())) {
 					continue;
@@ -214,9 +219,13 @@ public class SqlBuilderUtils {
 	}
 
 	private static String getTableName(Class<?> entityClass) {
+		String tableName = "";
 		Table table = entityClass.getAnnotation(Table.class);
 		if(table != null) {
-			return table.value().length() > 0 ? table.value() : table.name();
+			tableName = table.value().length() > 0 ? table.value() : table.name();
+		}
+		if (tableName.length() != 0) {
+			return tableName;
 		}
 		return fieldNameToColumn(entityClass.getSimpleName());
 	}
@@ -231,7 +240,7 @@ public class SqlBuilderUtils {
 				columnName.append(c);
 			}
 		}
-		return columnName.toString();
+		return columnName.charAt(0) == '_' ? columnName.substring(1) : columnName.toString();
 	}
 	
 	public static String methodToColumn(Class<?> beanClass, String methodName) {

@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 
 public class SqlBuilder implements ISqlBuilder {
 
-    protected StringBuilder sql = new StringBuilder();
+    protected StringBuilder sql = new StringBuilder(128);
     protected List<Object> param = new ArrayList<>();
     protected Class beanClass;
 
@@ -656,6 +656,8 @@ public class SqlBuilder implements ISqlBuilder {
     private void appendAnd() {
         if (canAppendAnd) {
             sql.append(" and ");
+        } else {
+            where();
         }
         // canAppendAnd 只失效一次，只有在or()方法后第一次补充条件时，新补充的条件不需要 and
         canAppendAnd = true;
