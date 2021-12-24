@@ -12,6 +12,7 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
+import org.springframework.util.ClassUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
@@ -80,6 +81,20 @@ public class SqlBuilderUtils {
 				});
 	}
 
+	public static <T, R> EntityInfo getEntityInfo(SFunction<T, R> lambda) {
+		SerializedLambda serializedLambda = getSerializedLambda(lambda);
+		try {
+			final Class<?> claszz = ClassUtils.forName(serializedLambda.getImplClass(), SerializedLambda.class.getClassLoader());
+			return Optional.ofNullable(ENTITY_INFO_MAP.get(claszz))
+					.orElseGet(() -> {
+						initEntityInfo(claszz);
+						return ENTITY_INFO_MAP.get(claszz);
+					});
+		} catch (ClassNotFoundException e) {
+			throw new SqlBuilderException(e);
+		}
+	}
+
 	public static String getAllColumn(Class<?> beanClass) {
 		EntityInfo entityInfo = getEntityInfo(beanClass);
 		return String.join(",", entityInfo.getColumnList());
@@ -92,6 +107,15 @@ public class SqlBuilderUtils {
 		return columnList;
 	}
 
+	public static <T> String getColumn(SSupplier<T> lambda) {
+		try {
+			SerializedLambda serializedLambda = getSerializedLambda(lambda);
+			return methodToColumn(ClassUtils.forName(serializedLambda.getImplClass(), SerializedLambda.class.getClassLoader()), serializedLambda.getImplMethodName());
+		} catch (Exception e) {
+			throw new SqlBuilderException(e);
+		}
+	}
+
 	public static <T> String getColumn(Class<?> beanClass, SSupplier<T> lambda) {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
@@ -100,7 +124,16 @@ public class SqlBuilderUtils {
 			throw new SqlBuilderException(e);
 		}
 	}
-	
+
+	public static <T, R> String getColumn(SFunction<T, R> lambda) {
+		try {
+			SerializedLambda serializedLambda = getSerializedLambda(lambda);
+			return methodToColumn(ClassUtils.forName(serializedLambda.getImplClass(), SerializedLambda.class.getClassLoader()), serializedLambda.getImplMethodName());
+		} catch (Throwable e) {
+			throw new SqlBuilderException(e);
+		}
+	}
+
 	public static <T, R> String getColumn(Class<?> beanClass, SFunction<T, R> lambda) {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
