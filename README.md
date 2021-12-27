@@ -60,7 +60,8 @@ Spring Boot：
     sqlBuilder.like(User::getName, user.getName()); 
 
     工具内部会判断user.getName()是否有效，只有有效时才会作为查询条件。
-    您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(true)，同样的调用sqlBuilder.ignoreInvalid(false)即恢复自动判断。
+    您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(fale)，同样的调用sqlBuilder.ignoreInvalid(true)即恢复自动判断。
+    **此特性应当只在为空时不做条件的情况下使用，若条件为空则不应执行查询时，请一定执行同样的调用sqlBuilder.ignoreInvalid(true)。**
    
 单对象查询：
 	
