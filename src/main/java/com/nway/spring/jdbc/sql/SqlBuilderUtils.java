@@ -197,7 +197,23 @@ public class SqlBuilderUtils {
 		}
 	}
 
+	/**
+	 * 先从obj中读取属性值，如果为null，则尝试通过FillStrategy读取，如果没有指定FillStrategy，则返回会null
+	 *
+	 * @param columnInfo
+	 * @param obj
+	 * @param sqlType
+	 * @return
+	 */
 	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) {
+		try {
+			Object objVal = columnInfo.getReadMethod().get(obj);
+			if (objVal != null) {
+				return objVal;
+			}
+		} catch (IllegalAccessException e) {
+			throw new SqlBuilderException(e);
+		}
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
 			Object value = columnInfo.getFillStrategy().getValue(sqlType);
 			try {
@@ -207,11 +223,7 @@ public class SqlBuilderUtils {
 			}
 			return value;
 		}
-		try {
-			return columnInfo.getReadMethod().get(obj);
-		} catch (IllegalAccessException e) {
-			throw new SqlBuilderException(e);
-		}
+		return null;
 	}
 	
 	public static String getTableNameFromCache(Class<?> entityClass) {
