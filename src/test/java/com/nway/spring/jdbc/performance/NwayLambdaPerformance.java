@@ -34,7 +34,7 @@ public class NwayLambdaPerformance implements Performance {
     @Override
     public Computer getComputerById(int id) {
 
-        SqlBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class).where().eq(ComputerSoftware::getComputerId, id);
+        SqlBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, id);
 
         Computer computer = sqlExecutor.queryById(id, Computer.class);
 
@@ -70,7 +70,7 @@ public class NwayLambdaPerformance implements Performance {
         Map<Integer, Keyboard> keyboardMap = keyboardList.stream().collect(Collectors.toMap(Keyboard::getId, Function.identity()));
 
         SqlBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class)
-                .where().in(ComputerSoftware::getComputerId, computers.stream().map(Computer::getId).collect(Collectors.toList()));
+                .in(ComputerSoftware::getComputerId, computers.stream().map(Computer::getId).collect(Collectors.toList()));
         List<ComputerSoftware> computerSoftwareList = sqlExecutor.queryList(computerSoftwareSql);
 
         Map<Integer, List<Software>> computerSoftwareMap = new HashMap<>();
@@ -106,7 +106,6 @@ public class NwayLambdaPerformance implements Performance {
 
     public List<Computer> lambdaTest() {
         SqlBuilder sqlBuilder = SQL.query(Computer.class).withColumn(Computer::getId)
-                .where()
                 .eq(Computer::getKeyboardId, 0)
                 .ne(Computer::getMainframeId, 1)
                 .ge(Computer::getMouseId, 100)
