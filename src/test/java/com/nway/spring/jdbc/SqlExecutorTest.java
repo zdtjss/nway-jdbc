@@ -107,8 +107,8 @@ class SqlExecutorTest extends BaseTest {
         ExampleEntity exampleEntity = new ExampleEntity();
         exampleEntity.setId(Double.valueOf(Math.random() * Integer.MAX_VALUE).intValue());
         exampleEntity.setString(UUID.randomUUID().toString());
-        int[] effectCount = sqlExecutor.batchInsert(Collections.singletonList(exampleEntity));
-        Assertions.assertEquals(effectCount[0], 1);
+        int effectCount = sqlExecutor.batchInsert(Collections.singletonList(exampleEntity));
+        Assertions.assertEquals(effectCount, 1);
         ExampleEntity exampleDb = sqlExecutor.queryById(exampleEntity.getId(), ExampleEntity.class);
         Assertions.assertEquals(exampleDb.getString(), exampleEntity.getString());
     }
