@@ -13,7 +13,6 @@ import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;

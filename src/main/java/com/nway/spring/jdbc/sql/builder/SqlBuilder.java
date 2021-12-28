@@ -25,7 +25,8 @@ public class SqlBuilder implements ISqlBuilder {
     // 查询条件一定是以where()方法开始，where后的第一个条件不要and
     private boolean canAppendAnd = false;
     private boolean canAppendWhere = true;
-    private boolean ignoreInvalid = true;
+    // false 表示不糊了无效值，即要在代码中使用if判断是否作为查询条件
+    private boolean ignoreInvalid = false;
 
     protected SqlBuilder(Class beanClass) {
         this.beanClass = beanClass;
@@ -663,9 +664,10 @@ public class SqlBuilder implements ISqlBuilder {
         canAppendAnd = true;
     }
 
-    public void appendWhereCondition(String whereCondition) {
+    public SqlBuilder appendWhereCondition(String whereCondition) {
         appendAnd();
-        sql.append(whereCondition);
+        sql.append(' ').append(whereCondition).append(' ');
+        return this;
     }
 
     private <T> void appendCondition(SSupplier<T> val, String op) {
@@ -683,11 +685,20 @@ public class SqlBuilder implements ISqlBuilder {
         param.add(val);
     }
 
+    /**
+     * @param val 是无效的吗
+     * @return
+     */
     private boolean isInvalid(Object val) {
-        if (!ignoreInvalid
-                || val instanceof String && !StringUtils.hasText((String) val)
-                || val instanceof Collection && !CollectionUtils.isEmpty((Collection) val)) {
+        // ignoreInvalid false 表示不忽略无效参数  不需要判断参数是否有效
+        // ignoreInvalid true 表示忽略无效参数  需要工具判断参数值是否有效
+        if (!ignoreInvalid) {
+            // 不需要工具判断参数是否有效时 返回false  则填充条件的方法会进行添加查询条件  当用户传入无效参数  程序会抛出异常  而不会导致数据越权
             return false;
+        }
+        if (val instanceof String && !StringUtils.hasText((String) val)
+                || val instanceof Collection && CollectionUtils.isEmpty((Collection) val)) {
+            return true;
         }
         return val == null;
     }
@@ -715,7 +726,12 @@ public class SqlBuilder implements ISqlBuilder {
 
     @Override
     public String getSql() {
-        return sql.toString();
+        String sql = this.sql.toString();
+        // 不能添加where 说明已经有where存在  但是如果参数为空  有可能是因为忽略无效条件导致的
+        if (!canAppendWhere && param.size() == 0) {
+            sql = sql.substring(0, sql.length() - 8);
+        }
+        return sql;
     }
 
     @Override
