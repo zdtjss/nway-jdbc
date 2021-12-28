@@ -123,9 +123,9 @@ public class SqlExecutor implements InitializingBean {
      * @param objs beans
      * @return
      */
-    public int[] batchUpdateById(List<?> objs) {
+    public int batchUpdateById(List<?> objs) {
         if (objs == null || objs.size() == 0) {
-            return new int[]{};
+            return 0;
         }
         Class<?> beanClass = objs.get(0).getClass();
         ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).use(objs);
@@ -136,7 +136,8 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params.toArray()));
         }
         saveMultiValue(beanClass, objs, true);
-        return jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
+        int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
+        return (int) Arrays.stream(effect).filter(c -> c > 0).count();
     }
 
     /**
@@ -194,9 +195,9 @@ public class SqlExecutor implements InitializingBean {
         return count == 0 ? (T) (key != null ? key : keyHolder.getKey()) : null;
     }*/
 
-    public int[] batchInsert(List<?> objs) {
+    public int batchInsert(List<?> objs) {
         if (objs == null || objs.size() == 0) {
-            return new int[]{};
+            return 0;
         }
         BatchInsertBuilder sqlBuilder = new BatchInsertBuilder(objs.get(0).getClass()).use(objs);
         String sql = sqlBuilder.getSql();
@@ -207,7 +208,7 @@ public class SqlExecutor implements InitializingBean {
         }
         int[] count = jdbcTemplate.batchUpdate(sql, params);
         saveMultiValue(sqlBuilder.getBeanClass(), objs, false);
-        return count;
+        return count.length;
     }
 
     public <T> T queryById(Serializable id, Class<T> type) {
