@@ -22,7 +22,7 @@ maven
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.3.16</version>
+		<version>1.5.0</version>
 	</dependency>
 
 基于xml配置的bean：
@@ -57,11 +57,11 @@ Spring Boot：
 
 上述代码可直接写成：
 
-    sqlBuilder.like(User::getName, user.getName()); 
+    sqlBuilder.ignoreInvalid(true).like(User::getName, user.getName()); 
 
-    工具内部会判断user.getName()是否有效，只有有效时才会作为查询条件。
-    您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(fale)，同样的调用sqlBuilder.ignoreInvalid(true)即恢复自动判断。
-    **此特性应当只在为空时不做条件的情况下使用，若条件为空则不应执行查询时，请一定执行同样的调用sqlBuilder.ignoreInvalid(true)。**
+    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。关于有效的定义：非空值字符串、非空Collection、其他非null数值。
+    您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(false)，同样的调用sqlBuilder.ignoreInvalid(true)即恢复自动判断。
+    **只应在传值为空时不做为条件的情况下使用ignoreInvalid(true)，否则将数据越权。默认为false**
    
 单对象查询：
 	
@@ -132,6 +132,7 @@ Map对象集分页：
 
    表名：
    @Table("t_user")
+   默认表名和类名的对应规则是首字母小写，其余大小字母变小写，前面加下划线。如UserRole默认对应的表名为user_role。
    
    字段：
    类属性和表列默认的对应规则是：删除下划线后首字符大写。表字段user_name对应属性userName，会通过类中setUserName方法赋值。
