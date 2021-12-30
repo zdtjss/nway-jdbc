@@ -73,7 +73,7 @@
                     <attach>true</attach>
                 </configuration>
             </plugin>
-            <!--<plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.3.1</version>
@@ -95,6 +95,7 @@
                 </executions>
             </plugin>
             <plugin>
+                <!--  https://central.sonatype.org/publish/publish-maven/ -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>3.0.1</version>
@@ -105,9 +106,14 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <!-- gpg \-\-list-signatures \-\-keyid-format 0xshort  打印的sig3行第一列去除x0 -->
+                            <keyname>18245EAB</keyname>
+                            <passphraseServerId>18245EAB</passphraseServerId>
+                        </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.mybatis.generator</groupId>
                 <artifactId>mybatis-generator-maven-plugin</artifactId>
@@ -364,13 +370,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <name>OSS Snapshots Repository</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <name>OSS Staging Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 </project>

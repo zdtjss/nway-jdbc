@@ -119,7 +119,7 @@ under the License.
     <server>
       <id>ossrh</id>
       <username>nway</username>
-      <password>Zdt1234567890#</password>
+      <password>Zdt1...0#</password>
     </server>
     
     
@@ -250,71 +250,14 @@ under the License.
       </properties>
     </profile>
     -->
-	<!-- jboss.org config start -->  
-    <profile>  
-      <id>jboss-public-repository</id>  
-      <repositories>  
-        <repository>  
-          <id>jboss-public-repository-group</id>  
-          <name>JBoss Public Maven Repository Group</name>  
-          <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>  
-          <layout>default</layout>  
-          <releases>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </releases>  
-          <snapshots>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </snapshots>  
-        </repository>  
-      </repositories>  
-      <pluginRepositories>  
-        <pluginRepository>  
-          <id>jboss-public-repository-group</id>  
-          <name>JBoss Public Maven Repository Group</name>  
-          <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>  
-          <layout>default</layout>  
-          <releases>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </releases>  
-          <snapshots>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </snapshots>  
-        </pluginRepository>  
-      </pluginRepositories>  
-    </profile>  
-  
-    <profile>  
-      <id>jboss-deprecated-repository</id>  
-      <repositories>  
-        <repository>  
-          <id>jboss-deprecated-repository</id>  
-          <name>JBoss Deprecated Maven Repository</name>  
-          <url>https://repository.jboss.org/nexus/content/repositories/deprecated/</url>  
-          <layout>default</layout>  
-          <releases>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </releases>  
-          <snapshots>  
-            <enabled>false</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </snapshots>  
-        </repository>  
-      </repositories>  
-    </profile>  
-    <!-- jboss.org config end -->  
     <profile>
       <id>ossrh</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-        <gpg.executable>gpg.exe</gpg.executable>
-        <gpg.passphrase>A9760CA4</gpg.passphrase>
+        <gpg.executable>gpg</gpg.executable>
+        <gpg.passphrase>gpg --gen-key输入的passphrase</gpg.passphrase>
       </properties>
     </profile>
   </profiles>
