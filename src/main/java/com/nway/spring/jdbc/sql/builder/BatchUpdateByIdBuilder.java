@@ -60,7 +60,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
         for (int i = 0; i < this.param.size(); i++) {
             Object idVal = SqlBuilderUtils.getColumnValue(entityInfo.getId(), this.data.get(i), SqlType.UPDATE);
             if (idVal == null) {
-                throw new SqlBuilderException("更新失败，批量更新时存在主键为空的数。");
+                throw new SqlBuilderException("更新失败，批量更新时存在主键为空的数据。");
             }
             ((List) this.param.get(i)).add(idVal);
         }
