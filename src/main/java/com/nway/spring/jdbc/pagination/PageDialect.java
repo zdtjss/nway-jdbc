@@ -3,10 +3,10 @@ package com.nway.spring.jdbc.pagination;
 public class PageDialect {
 
     private String sql;
-    private long firstParam;
-    private long secondParam;
+    private int firstParam;
+    private int secondParam;
 
-    public PageDialect(String sql, long firstParam, long secondParam) {
+    public PageDialect(String sql, int firstParam, int secondParam) {
         this.sql = sql;
         this.firstParam = firstParam;
         this.secondParam = secondParam;
@@ -20,19 +20,19 @@ public class PageDialect {
         this.sql = sql;
     }
 
-    public long getFirstParam() {
+    public int getFirstParam() {
         return firstParam;
     }
 
-    public void setFirstParam(long firstParam) {
+    public void setFirstParam(int firstParam) {
         this.firstParam = firstParam;
     }
 
-    public long getSecondParam() {
+    public int getSecondParam() {
         return secondParam;
     }
 
-    public void setSecondParam(long secondParam) {
+    public void setSecondParam(int secondParam) {
         this.secondParam = secondParam;
     }
 }

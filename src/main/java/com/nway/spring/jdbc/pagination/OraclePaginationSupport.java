@@ -23,7 +23,7 @@ public final class OraclePaginationSupport implements PaginationSupport {
 			throw new IllegalArgumentException("页数或页面数据量应该大于零");
 		}
 
-		long offset = (page - 1) * pageSize;
+		int offset = (page - 1) * pageSize;
 
 		String pageSql = "SELECT * FROM ( SELECT TMP.*, ROWNUM RN FROM ( " + sql + " ) TMP WHERE ROWNUM <= ? ) WHERE RN > ?";
 

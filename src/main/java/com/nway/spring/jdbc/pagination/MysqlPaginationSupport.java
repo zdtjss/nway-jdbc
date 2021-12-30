@@ -20,7 +20,7 @@ public final class MysqlPaginationSupport implements PaginationSupport {
         if (page <= 0 || pageSize <= 0) {
             throw new IllegalArgumentException("页数或页面数据量应该大于零");
         }
-        long limit = (page - 1) * pageSize;
+        int limit = (page - 1) * pageSize;
         return new PageDialect(sql + " LIMIT ?,?", limit, pageSize);
     }
 
