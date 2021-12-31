@@ -194,20 +194,6 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
                                 "' of type '" + ClassUtils.getQualifiedName(pdType) + "' index " + entry.getValue());
                     }
                     Object value = getColumnValue(rs, entry.getValue(), pdType);
-                    String typeName = pdType.getSimpleName();
-                    // 此处判断与spring jdbc匹配
-                    switch (typeName) {
-                        case "LocalDate":
-                            value = DateUtils.toLocalDate((java.sql.Date) value);
-                            break;
-                        case "LocalTime":
-                            value = DateUtils.toLocalTime((Time) value);
-                            break;
-                        case "LocalDateTime":
-                            value = DateUtils.toLocalDateTime((Timestamp) value);
-                            break;
-                        default:
-                    }
                     setVal(mappedObject, pd, value);
                 } catch (IllegalAccessException ex) {
                     throw new DataRetrievalFailureException(

@@ -92,12 +92,12 @@ public class Mouse {
 	}
 
 	@Column(name = "is_wireless")
-	public boolean getIsWireless() {
+	public boolean isWireless() {
 		return isWireless;
 	}
 
-	public void setIsWireless(boolean isWireless) {
-		this.isWireless = isWireless;
+	public void setWireless(boolean wireless) {
+		isWireless = wireless;
 	}
 
 	@Column

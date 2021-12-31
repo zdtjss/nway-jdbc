@@ -6,7 +6,7 @@ import com.nway.spring.jdbc.performance.entity.Monitor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MonitorAccess implements RowMapper<Monitor> {
+public class MonitorMapper extends RowMapper<Monitor> {
 
     @Override
     public Monitor mapRow(ResultSet rs) throws SQLException {

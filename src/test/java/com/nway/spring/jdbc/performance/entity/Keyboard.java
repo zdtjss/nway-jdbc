@@ -103,11 +103,11 @@ public class Keyboard {
 	}
 
 	@Column(name = "is_wireless")
-	public boolean getIsWireless() {
+	public boolean isWireless() {
 		return isWireless;
 	}
 
-	public void setIsWireless(boolean isWireless) {
+	public void setWireless(boolean isWireless) {
 		this.isWireless = isWireless;
 	}
 

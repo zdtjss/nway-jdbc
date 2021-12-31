@@ -117,7 +117,7 @@ public class HibernatePerformance implements Performance {
             mouse.setColor("black" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
             mouse.setModel("M-1" + UUID.randomUUID().toString().replace('-', ' ').toUpperCase());
             mouse.setType(Double.valueOf(Math.random() * 10).intValue());
-            mouse.setIsWireless(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue() % 2 == 1);
+            mouse.setWireless(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue() % 2 == 1);
             mouse.setProductionDate(new Date());
 
             Keyboard keyboard = new Keyboard();
@@ -127,7 +127,7 @@ public class HibernatePerformance implements Performance {
             keyboard.setType(Double.valueOf(Math.random() * 10).intValue());
             keyboard.setPrice(Double.valueOf(Math.random() * Integer.MAX_VALUE).floatValue());
             keyboard.setInterfaceType(Double.valueOf(Math.random() * 10).intValue());
-            keyboard.setIsWireless(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue() % 2 == 1);
+            keyboard.setWireless(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue() % 2 == 1);
             keyboard.setPhoto(null);
             keyboard.setProductionDate(new Date());
 

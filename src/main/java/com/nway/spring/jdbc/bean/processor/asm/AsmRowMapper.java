@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,13 +64,11 @@ import static org.objectweb.asm.Opcodes.*;
  * @see DataClassRowMapper
  * @since 2.5
  */
-public class AsmRowMapper<T> extends DefaultRowMapper<T> {
+public class AsmRowMapper<T> implements org.springframework.jdbc.core.RowMapper<T> {
 
     private static final Log log = LogFactory.getLog(AsmRowMapper.class);
 
     private RowMapper<T> beanAccess;
-
-    private Map<String, Integer> columnIndexMap;
 
     /**
      * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated
@@ -78,9 +77,6 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
      * @param mappedClass the class that each row should be mapped to
      */
     public AsmRowMapper(Class<T> mappedClass, LinkedHashMap<String, Integer> columnIndexMap) {
-        super(mappedClass);
-        setColumnIndexMap(columnIndexMap);
-        this.columnIndexMap = columnIndexMap;
         this.beanAccess = createBeanAccess(mappedClass, columnIndexMap);
     }
 
@@ -97,11 +93,11 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
         // "com/nway/spring/jdbc/performance/entity/Monitor"
         String beanClassName = type.getCanonicalName().replace('.', '/');
         String randomName = UUID.randomUUID().toString().replace("-", "");
-        String className = beanClassName + columnIndexMap.hashCode() + "Mapper";
+        String className = beanClassName + randomName + "Mapper";
 
         classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, "Lcom/nway/spring/jdbc/bean/processor/RowMapper<L" + beanClassName + ";>;", "com/nway/spring/jdbc/bean/processor/RowMapper", null);
 
-        classWriter.visitSource(type.getSimpleName() + columnIndexMap.hashCode() + "Mapper.java", null);
+        classWriter.visitSource(type.getSimpleName() + randomName + "Mapper.java", null);
 
         {
             methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -183,6 +179,10 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
                     methodVisitor.visitMethodInsn(INVOKEVIRTUAL, className, localGetter, "(Ljava/sql/ResultSet;I)" + getDescriptor(fieldType, true), false);
                     methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + getDescriptor(fieldType, false) + ")V", false);
                 }
+                else if(fieldType == Date.class) {
+                    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/sql/ResultSet", "getTimestamp", "(I)Ljava/sql/Timestamp;", true);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + getDescriptor(fieldType, false) + ")V", false);
+                }
                 else if(fieldType == LocalDate.class) {
                     methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/sql/ResultSet", "getDate", "(I)Ljava/sql/Date;", true);
                     methodVisitor.visitMethodInsn(INVOKESTATIC, "com/nway/spring/jdbc/util/DateUtils", "toLocalDate", "(Ljava/sql/Date;)Ljava/time/LocalDate;", false);
@@ -236,7 +236,7 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
         classWriter.visitEnd();
 
         try {
-            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(), "D:\\" + className);
+            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
             Class<?> processor = beanClassLoader.defineClass(className.replace('/', '.'), classWriter.toByteArray());
             return (RowMapper<T>) processor.getConstructor().newInstance();
         } catch (Exception e) {
