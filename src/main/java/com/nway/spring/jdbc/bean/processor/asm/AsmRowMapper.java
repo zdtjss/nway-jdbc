@@ -1,22 +1,33 @@
 package com.nway.spring.jdbc.bean.processor.asm;
 
-import com.nway.spring.jdbc.bean.processor.BeanAccess;
+import com.nway.spring.jdbc.bean.processor.RowMapper;
 import com.nway.spring.jdbc.bean.processor.DefaultRowMapper;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.*;
 import org.springframework.jdbc.core.DataClassRowMapper;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.objectweb.asm.Opcodes.*;
 
 
 /**
- * {@link RowMapper} implementation that converts a row into a new instance
+ * {@link org.springframework.jdbc.core.RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
  * top-level class and it must have a default or no-arg constructor.
  *
@@ -39,7 +50,7 @@ import static org.objectweb.asm.Opcodes.*;
  * will have been set to the primitive's default value instead of null.
  *
  * <p>Please note that this class is designed to provide convenience rather than high performance.
- * For best performance, consider using a custom {@link RowMapper} implementation.
+ * For best performance, consider using a custom {@link org.springframework.jdbc.core.RowMapper} implementation.
  *
  * <p>
  * 注：本类使用了{@link org.springframework.jdbc.core.BeanPropertyRowMapper}
@@ -56,7 +67,9 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
 
     private static final Log log = LogFactory.getLog(AsmRowMapper.class);
 
-    private BeanAccess beanAccess;
+    private RowMapper<T> beanAccess;
+
+    private Map<String, Integer> columnIndexMap;
 
     /**
      * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated
@@ -64,57 +77,40 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
      *
      * @param mappedClass the class that each row should be mapped to
      */
-    public AsmRowMapper(Class<T> mappedClass) {
+    public AsmRowMapper(Class<T> mappedClass, LinkedHashMap<String, Integer> columnIndexMap) {
         super(mappedClass);
-    }
-
-    /**
-     * Initialize the mapping meta-data for the given class.
-     *
-     * @param mappedClass the mapped class
-     */
-    @Override
-    protected void initialize(Class<T> mappedClass) {
-        super.initialize(mappedClass);
-        this.beanAccess = createBeanAccess(mappedClass);
+        setColumnIndexMap(columnIndexMap);
+        this.columnIndexMap = columnIndexMap;
+        this.beanAccess = createBeanAccess(mappedClass, columnIndexMap);
     }
 
     @Override
-    protected T getBeanInstance() {
-        return beanAccess.newInstance();
+    public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
+        return beanAccess.mapRow(rs);
     }
 
-    @Override
-    protected void setVal(Object mappedObject, Field field, Object value) {
-        beanAccess.setVal(field.getName(), value);
-    }
-
-    private BeanAccess createBeanAccess(Class<T> type) {
+    private RowMapper<T> createBeanAccess(Class<T> type, LinkedHashMap<String, Integer> columnIndexMap) {
 
         ClassWriter classWriter = new ClassWriter(0);
-        FieldVisitor fieldVisitor;
         MethodVisitor methodVisitor;
 
         // "com/nway/spring/jdbc/performance/entity/Monitor"
         String beanClassName = type.getCanonicalName().replace('.', '/');
-        String className = beanClassName + "Access";
+        String randomName = UUID.randomUUID().toString().replace("-", "");
+        String className = beanClassName + columnIndexMap.hashCode() + "Mapper";
 
-        classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, null, "java/lang/Object", new String[]{"com/nway/spring/jdbc/bean/processor/BeanAccess"});
+        classWriter.visit(V1_8, ACC_PUBLIC | ACC_SUPER, className, "Lcom/nway/spring/jdbc/bean/processor/RowMapper<L" + beanClassName + ";>;", "com/nway/spring/jdbc/bean/processor/RowMapper", null);
 
-        classWriter.visitSource(type.getSimpleName() + "Access.java", null);
+        classWriter.visitSource(type.getSimpleName() + columnIndexMap.hashCode() + "Mapper.java", null);
 
-        {
-            fieldVisitor = classWriter.visitField(ACC_PRIVATE, "bean", "L" + beanClassName + ";", null, null);
-            fieldVisitor.visitEnd();
-        }
         {
             methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             methodVisitor.visitCode();
             Label label0 = new Label();
             methodVisitor.visitLabel(label0);
-            methodVisitor.visitLineNumber(8, label0);
+            methodVisitor.visitLineNumber(9, label0);
             methodVisitor.visitVarInsn(ALOAD, 0);
-            methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            methodVisitor.visitMethodInsn(INVOKESPECIAL, "com/nway/spring/jdbc/bean/processor/RowMapper", "<init>", "()V", false);
             methodVisitor.visitInsn(RETURN);
             Label label1 = new Label();
             methodVisitor.visitLabel(label1);
@@ -123,201 +119,206 @@ public class AsmRowMapper<T> extends DefaultRowMapper<T> {
             methodVisitor.visitEnd();
         }
         {
-            methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "newInstance", "()Ljava/lang/Object;", "<T:Ljava/lang/Object;>()TT;", null);
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "mapRow", "(Ljava/sql/ResultSet;)L" + beanClassName + ";", null, new String[]{"java/sql/SQLException"});
             methodVisitor.visitCode();
+
+
             Label label0 = new Label();
             methodVisitor.visitLabel(label0);
-            methodVisitor.visitLineNumber(13, label0);
-            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitLineNumber(14, label0);
             methodVisitor.visitTypeInsn(NEW, beanClassName);
             methodVisitor.visitInsn(DUP);
             methodVisitor.visitMethodInsn(INVOKESPECIAL, beanClassName, "<init>", "()V", false);
-            methodVisitor.visitFieldInsn(PUTFIELD, className, "bean", "L" + beanClassName + ";");
-            Label label1 = new Label();
-            methodVisitor.visitLabel(label1);
-            methodVisitor.visitLineNumber(14, label1);
-            methodVisitor.visitVarInsn(ALOAD, 0);
-            methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
+            methodVisitor.visitVarInsn(ASTORE, 2);
+
+            int rowNum = 16;
+            Label labelFirst = new Label();
+            Map<String, ColumnInfo> fieldMap = SqlBuilderUtils.getEntityInfo(type).getColumnMap();
+            Map<String, Field> columnMap = fieldMap.values().stream().collect(Collectors.toMap(ColumnInfo::getColumnName, ColumnInfo::getReadMethod));
+
+            for (Map.Entry<String, Field> column : columnMap.entrySet()) {
+
+                Integer colIdx = columnIndexMap.get(column.getKey());
+                if (colIdx == null) {
+                    continue;
+                }
+
+                Field field = column.getValue();
+                Class<?> fieldType = field.getType();
+
+                String localGetter = getLocalGetter(fieldType);
+
+                Label label1 = colIdx == 1 ? labelFirst : new Label();
+                methodVisitor.visitLabel(label1);
+                methodVisitor.visitLineNumber(rowNum++, label1);
+                methodVisitor.visitVarInsn(ALOAD, 2);
+                if (localGetter != null) {
+                    methodVisitor.visitVarInsn(ALOAD, 0);
+                    methodVisitor.visitVarInsn(ALOAD, 1);
+                }
+                else {
+                    methodVisitor.visitVarInsn(ALOAD, 1);
+                }
+
+                switch (colIdx) {
+                    case 1:
+                        methodVisitor.visitInsn(ICONST_1);
+                        break;
+                    case 2:
+                        methodVisitor.visitInsn(ICONST_2);
+                        break;
+                    case 3:
+                        methodVisitor.visitInsn(ICONST_3);
+                        break;
+                    case 4:
+                        methodVisitor.visitInsn(ICONST_4);
+                        break;
+                    case 5:
+                        methodVisitor.visitInsn(ICONST_5);
+                        break;
+                    default:
+                        methodVisitor.visitIntInsn(BIPUSH, colIdx);
+                }
+                if (localGetter != null) {
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, className, localGetter, "(Ljava/sql/ResultSet;I)" + getDescriptor(fieldType, true), false);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + getDescriptor(fieldType, false) + ")V", false);
+                }
+                else if(fieldType == LocalDate.class) {
+                    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/sql/ResultSet", "getDate", "(I)Ljava/sql/Date;", true);
+                    methodVisitor.visitMethodInsn(INVOKESTATIC, "com/nway/spring/jdbc/util/DateUtils", "toLocalDate", "(Ljava/sql/Date;)Ljava/time/LocalDate;", false);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(Ljava/time/LocalDate;)V", false);
+                }
+                else if(fieldType == LocalDateTime.class) {
+                    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/sql/ResultSet", "getTimestamp", "(I)Ljava/sql/Timestamp;", true);
+                    methodVisitor.visitMethodInsn(INVOKESTATIC, "com/nway/spring/jdbc/util/DateUtils", "toLocalDateTime", "(Ljava/sql/Timestamp;)Ljava/time/LocalDateTime;", false);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(Ljava/time/LocalDateTime;)V", false);
+                }
+                else if(fieldType == LocalTime.class) {
+                    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/sql/ResultSet", "getTime", "(I)Ljava/sql/Time;", true);
+                    methodVisitor.visitMethodInsn(INVOKESTATIC, "com/nway/spring/jdbc/util/DateUtils", "toLocalTime", "(Ljava/sql/Time;)Ljava/time/LocalTime;", false);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(Ljava/time/LocalTime;)V", false);
+                }
+                else {
+                    methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/sql/ResultSet", "get" + fieldType.getSimpleName(), "(I)" + getDescriptor(fieldType, true), true);
+                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + getDescriptor(fieldType, false) + ")V", false);
+                }
+            }
+
+            Label label5 = new Label();
+            methodVisitor.visitLabel(label5);
+            methodVisitor.visitLineNumber(rowNum, label5);
+            methodVisitor.visitVarInsn(ALOAD, 2);
             methodVisitor.visitInsn(ARETURN);
-            Label label2 = new Label();
-            methodVisitor.visitLabel(label2);
-            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label2, 0);
-            methodVisitor.visitMaxs(3, 1);
+            Label label6 = new Label();
+            methodVisitor.visitLabel(label6);
+            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label6, 0);
+            methodVisitor.visitLocalVariable("rs", "Ljava/sql/ResultSet;", null, label0, label6, 1);
+            methodVisitor.visitLocalVariable("monitor", "L" + beanClassName + ";", null, labelFirst, label6, 2);
+            methodVisitor.visitMaxs(4, 3);
             methodVisitor.visitEnd();
         }
         {
-            methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "setVal", "(Ljava/lang/String;Ljava/lang/Object;)V", null, null);
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "mapRow", "(Ljava/sql/ResultSet;)Ljava/lang/Object;", null, new String[]{"java/sql/SQLException"});
             methodVisitor.visitCode();
-
-            Field[] fields = ReflectionUtils.getAllFields(type);
-            Field field = fields[0];
-            String fieldTypeStr = getClassName(field.getType());
-            String descriptor = getDescriptor(field.getType());
-
             Label label0 = new Label();
             methodVisitor.visitLabel(label0);
-            methodVisitor.visitLineNumber(18, label0);
-            methodVisitor.visitLdcInsn("id");
-            methodVisitor.visitVarInsn(ALOAD, 1);
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-            Label label1 = new Label();
-            methodVisitor.visitJumpInsn(IFEQ, label1);
-            Label label2 = new Label();
-            methodVisitor.visitLabel(label2);
-            methodVisitor.visitLineNumber(19, label2);
+            methodVisitor.visitLineNumber(9, label0);
             methodVisitor.visitVarInsn(ALOAD, 0);
-            methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
-            methodVisitor.visitVarInsn(ALOAD, 2);
-            methodVisitor.visitTypeInsn(CHECKCAST, "java/lang/Integer");
-            if (field.getType().isPrimitive()) {
-                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldTypeStr, getMethodName(field.getType()), "()" + descriptor, false);
-            }
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + (descriptor.startsWith("[") || field.getType().isPrimitive() ? descriptor : "L" + descriptor + ";") + ")V", false);
-
-            Label label3 = new Label();
-            methodVisitor.visitJumpInsn(GOTO, label3);
+            methodVisitor.visitVarInsn(ALOAD, 1);
+            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, className, "mapRow", "(Ljava/sql/ResultSet;)L" + beanClassName + ";", false);
+            methodVisitor.visitInsn(ARETURN);
+            Label label1 = new Label();
             methodVisitor.visitLabel(label1);
-            methodVisitor.visitLineNumber(21, label1);
-            methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-
-            int rowNum = 21;
-            for (int i = 1; i < fields.length; i++) {
-
-                field = fields[i];
-                fieldTypeStr = getClassName(field.getType());
-                descriptor = getDescriptor(field.getType());
-
-                methodVisitor.visitLdcInsn(field.getName());
-                methodVisitor.visitVarInsn(ALOAD, 1);
-                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-                Label label4 = new Label();
-                methodVisitor.visitJumpInsn(IFEQ, label4);
-                Label label5 = new Label();
-                methodVisitor.visitLabel(label5);
-                methodVisitor.visitLineNumber(rowNum++, label5);
-                methodVisitor.visitVarInsn(ALOAD, 0);
-                methodVisitor.visitFieldInsn(GETFIELD, className, "bean", "L" + beanClassName + ";");
-                methodVisitor.visitVarInsn(ALOAD, 2);
-                methodVisitor.visitTypeInsn(CHECKCAST, fieldTypeStr);
-                if (field.getType().isPrimitive()) {
-                    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, fieldTypeStr, getMethodName(field.getType()), "()" + descriptor, false);
-                }
-                methodVisitor.visitMethodInsn(INVOKEVIRTUAL, beanClassName, getSetter(field), "(" + (descriptor.startsWith("[") || field.getType().isPrimitive() ? descriptor : "L" + descriptor + ";") + ")V", false);
-                methodVisitor.visitJumpInsn(GOTO, label3);
-                methodVisitor.visitLabel(label4);
-                methodVisitor.visitLineNumber(rowNum++, label4);
-                methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            }
-
-            methodVisitor.visitLabel(label3);
-            methodVisitor.visitLineNumber(rowNum + 2, label3);
-            methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            methodVisitor.visitInsn(RETURN);
-
-            Label label15 = new Label();
-            methodVisitor.visitLabel(label15);
-            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label15, 0);
-            methodVisitor.visitLocalVariable("fieldName", "Ljava/lang/String;", null, label0, label15, 1);
-            methodVisitor.visitLocalVariable("val", "Ljava/lang/Object;", null, label0, label15, 2);
-            methodVisitor.visitMaxs(3, 3);
+            methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label1, 0);
+            methodVisitor.visitMaxs(2, 2);
             methodVisitor.visitEnd();
         }
         classWriter.visitEnd();
 
         try {
-            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
+            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader(), "D:\\" + className);
             Class<?> processor = beanClassLoader.defineClass(className.replace('/', '.'), classWriter.toByteArray());
-            return (BeanAccess) processor.getConstructor().newInstance();
+            return (RowMapper<T>) processor.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("使用ASM创建 [ " + className + " ] 失败", e);
         }
     }
 
-    private String toPrimitiveMethod(Class<?> clazz) {
-        if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
-            return "parseInt";
-        } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
-            return "parseLong";
-        } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
-            return "parseBoolean";
-        } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
-            return "parseFloat";
-        } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
-            return "parseDouble";
-        } else if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
-            return "parseByte";
-        } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
-            return "parseShort";
-        }
-        return "";
-    }
-
-    private String getMethodName(Class<?> clazz) {
-        if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
-            return "intValue";
-        } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
-            return "longValue";
-        } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
-            return "booleanValue";
-        } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
-            return "floatValue";
-        } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
-            return "doubleValue";
-        } else if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
-            return "byteValue";
-        } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
-            return "shortValue";
-        }
-        return "";
-    }
-
-    private String getClassName(Class<?> clazz) {
+    private String getLocalGetter(Class<?> clazz) {
         if (Integer.TYPE.equals(clazz)) {
-            return "java/lang/Integer";
+            return "getPrimitiveInteger";
+        } else if (Integer.class.equals(clazz)) {
+            return "getInteger";
         } else if (Long.TYPE.equals(clazz)) {
-            return "java/lang/Long";
-        } else if (Boolean.TYPE.equals(clazz)) {
-            return "java/lang/Boolean";
+            return "getPrimitiveLong";
+        } else if (Long.class.equals(clazz)) {
+            return "getLong";
         } else if (Float.TYPE.equals(clazz)) {
-            return "java/lang/Float";
+            return "getPrimitiveFloat";
+        } else if (Float.class.equals(clazz)) {
+            return "getFloat";
         } else if (Double.TYPE.equals(clazz)) {
-            return "java/lang/DOUBLE";
-        } else if (Byte.TYPE.equals(clazz)) {
-            return "java/lang/Byte";
+            return "getPrimitiveDouble";
+        } else if (Double.class.equals(clazz)) {
+            return "getDouble";
         } else if (Short.TYPE.equals(clazz)) {
-            return "java/lang/Short";
+            return "getPrimitiveShort";
+        } else if (Short.class.equals(clazz)) {
+            return "getShort";
+        } else if (Byte.TYPE.equals(clazz)) {
+            return "getPrimitiveByte";
+        } else if (Byte.class.equals(clazz)) {
+            return "getByte";
+        } else if (Boolean.TYPE.equals(clazz)) {
+            return "getPrimitiveBoolean";
+        } else if (Boolean.class.equals(clazz)) {
+            return "getBoolean";
         }
-        return clazz.getName().replace('.', '/');
+        else if (byte[].class.equals(clazz)) {
+            return "getByteArr";
+        }
+        return null;
     }
 
-    private String getDescriptor(Class<?> clazz) {
+    /**
+     * 实体类set方法的参数类型
+     *
+     * @param clazz
+     * @return
+     */
+    private String getDescriptor(Class<?> clazz, boolean forRs) {
         if (Integer.TYPE.equals(clazz)) {
             return "I";
         } else if (Long.TYPE.equals(clazz)) {
             return "J";
-        } else if (Boolean.TYPE.equals(clazz)) {
-            return "Z";
+        } else if (forRs && java.util.Date.class.equals(clazz)) {
+            return "Ljava/sql/Date;";
         } else if (Float.TYPE.equals(clazz)) {
             return "F";
         } else if (Double.TYPE.equals(clazz)) {
             return "D";
-        } else if (Byte.TYPE.equals(clazz)) {
+        } else if (Boolean.TYPE.equals(clazz)) {
+            return "Z";
+        }  else if (Byte.TYPE.equals(clazz)) {
             return "B";
         } else if (Short.TYPE.equals(clazz)) {
             return "S";
+        } else if (byte[].class.equals(clazz)) {
+            return "[B";
         }
-        return clazz.getName().replace('.', '/');
+        return "L" + clazz.getName().replace('.', '/') + ";";
     }
 
     private String getSetter(Field field) {
-        if (field.getType().isPrimitive() && field.getType().equals(Boolean.class)) {
-            return field.getName();
+        String fieldName = field.getName();
+        if (field.getType() == Boolean.TYPE && fieldName.startsWith("is")) {
+            return "set" + fieldName.substring(2);
         }
         return "set" + upperFirst(field.getName());
     }
 
-    private String upperFirst(String str) {
-        char[] chars = str.toCharArray();
+    private String upperFirst(String name) {
+        char[] chars = name.toCharArray();
         return Character.toUpperCase(chars[0]) + new String(chars, 1, chars.length - 1);
     }
 }

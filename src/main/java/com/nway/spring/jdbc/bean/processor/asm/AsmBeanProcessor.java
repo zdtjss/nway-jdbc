@@ -13,29 +13,26 @@ import java.util.concurrent.ConcurrentMap;
 
 public class AsmBeanProcessor implements BeanProcessor {
 
-    private static final ConcurrentMap<Class, AsmRowMapper> localCache = new ConcurrentHashMap<>(256);
+    private static final ConcurrentMap<String, AsmRowMapper> localCache = new ConcurrentHashMap<>(256);
 
     @Override
     public <T> List<T> toBeanList(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
-//        long begin = System.currentTimeMillis();
-
         int rowNum = 0;
-        Map<String, Integer> columnIndex = getColumnIndex(rs);
+        LinkedHashMap<String, Integer> columnIndexMap = getColumnIndex(rs);
+        String cacheKey = columnIndexMap.keySet().toString() + mappedClass.hashCode();
 
-        AsmRowMapper<T> mapper = (AsmRowMapper<T>) Optional.ofNullable(localCache.get(mappedClass))
+        AsmRowMapper<T> mapper = (AsmRowMapper<T>) Optional.ofNullable(localCache.get(cacheKey))
                 .orElseGet(() -> {
-                    AsmRowMapper<T> rowMapper = new AsmRowMapper<>(mappedClass);
-                    localCache.put(mappedClass, rowMapper);
+                    AsmRowMapper<T> rowMapper = new AsmRowMapper<>(mappedClass, columnIndexMap);
+                    localCache.put(cacheKey, rowMapper);
                     return rowMapper;
-                }).setColumnIndexMap(columnIndex);
+                });
 
         final List<T> results = new ArrayList<>();
         while (rs.next()) {
             results.add(mapper.mapRow(rs, rowNum++));
         }
-
-//        System.out.printf("%d\t%s%n", System.currentTimeMillis() - begin, Thread.currentThread().getName());
 
         return results;
     }
@@ -43,14 +40,16 @@ public class AsmBeanProcessor implements BeanProcessor {
     @Override
     public <T> T toBean(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
-        Map<String, Integer> columnIndex = getColumnIndex(rs);
+        LinkedHashMap<String, Integer> columnIndex = getColumnIndex(rs);
 
-        AsmRowMapper<T> mapper = (AsmRowMapper<T>) Optional.ofNullable(localCache.get(mappedClass))
+        String cacheKey = columnIndex.keySet().toString() + mappedClass.hashCode();
+
+        AsmRowMapper<T> mapper = (AsmRowMapper<T>) Optional.ofNullable(localCache.get(cacheKey))
                 .orElseGet(() -> {
-                    AsmRowMapper<T> rowMapper = new AsmRowMapper<>(mappedClass);
-                    localCache.put(mappedClass, rowMapper);
+                    AsmRowMapper<T> rowMapper = new AsmRowMapper<T>(mappedClass, columnIndex);
+                    localCache.put(cacheKey, rowMapper);
                     return rowMapper;
-                }).setColumnIndexMap(columnIndex);
+                });
 
         T row = mapper.mapRow(rs, 0);
         if (rs.next()) {
@@ -59,15 +58,14 @@ public class AsmBeanProcessor implements BeanProcessor {
         return row;
     }
 
-    private Map<String, Integer> getColumnIndex(ResultSet rs) throws SQLException {
+    private LinkedHashMap<String, Integer> getColumnIndex(ResultSet rs) throws SQLException {
 
         ResultSetMetaData rsmd = rs.getMetaData();
         int columnCount = rsmd.getColumnCount();
-        Map<String, Integer> columnIndex = new HashMap<>(columnCount);
+        LinkedHashMap<String, Integer> columnIndex = new LinkedHashMap<>(columnCount);
 
         for (int index = 1; index <= columnCount; index++) {
-            String column = JdbcUtils.lookupColumnName(rsmd, index);
-            columnIndex.put(column, index);
+            columnIndex.put(JdbcUtils.lookupColumnName(rsmd, index), index);
         }
         return columnIndex;
     }

@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.bean.processor;
 
 import com.nway.spring.jdbc.annotation.Column;
 import com.nway.spring.jdbc.sql.builder.SqlBuilderException;
+import com.nway.spring.jdbc.util.DateUtils;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,10 +19,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 /**
@@ -186,11 +188,26 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
             Field pd = (this.mappedFields != null ? this.mappedFields.get(column) : null);
             if (pd != null) {
                 try {
+                    Class<?> pdType = pd.getType();
                     if (logger.isTraceEnabled()) {
                         logger.trace("Mapping column '" + column + "' to property '" + pd.getName() +
-                                "' of type '" + ClassUtils.getQualifiedName(pd.getType()) + "' index " + entry.getValue());
+                                "' of type '" + ClassUtils.getQualifiedName(pdType) + "' index " + entry.getValue());
                     }
-                    Object value = getColumnValue(rs, entry.getValue(), pd.getType());
+                    Object value = getColumnValue(rs, entry.getValue(), pdType);
+                    String typeName = pdType.getSimpleName();
+                    // 此处判断与spring jdbc匹配
+                    switch (typeName) {
+                        case "LocalDate":
+                            value = DateUtils.toLocalDate((java.sql.Date) value);
+                            break;
+                        case "LocalTime":
+                            value = DateUtils.toLocalTime((Time) value);
+                            break;
+                        case "LocalDateTime":
+                            value = DateUtils.toLocalDateTime((Timestamp) value);
+                            break;
+                        default:
+                    }
                     setVal(mappedObject, pd, value);
                 } catch (IllegalAccessException ex) {
                     throw new DataRetrievalFailureException(
