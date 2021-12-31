@@ -54,19 +54,17 @@ public class AsmBeanProcessor implements BeanProcessor {
     private <T> RowMapper<T> getMapper(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
         String cacheKey = null;
-        LinkedHashMap<String, Integer> columnIndexMap = null;
         if(sqlExtractor != null) {
             cacheKey = sqlExtractor.apply(rs);
         }
 
-        AsmRowMapper<T> mapper = null;
-        if (cacheKey != null) {
-            mapper = localCache.get(cacheKey);
-        } else {
+        LinkedHashMap<String, Integer> columnIndexMap = null;
+        if (cacheKey == null) {
             columnIndexMap = getColumnIndex(rs);
             cacheKey = columnIndexMap.keySet().toString() + mappedClass.hashCode();
         }
 
+        AsmRowMapper<T> mapper = localCache.get(cacheKey);
         if(mapper == null) {
             columnIndexMap = columnIndexMap == null ? getColumnIndex(rs) : columnIndexMap;
             mapper = new AsmRowMapper<>(mappedClass, columnIndexMap);
