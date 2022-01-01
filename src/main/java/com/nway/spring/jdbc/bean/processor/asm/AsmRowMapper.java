@@ -1,14 +1,13 @@
 package com.nway.spring.jdbc.bean.processor.asm;
 
 import com.nway.spring.jdbc.bean.processor.RowMapper;
-import com.nway.spring.jdbc.bean.processor.DefaultRowMapper;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
-import com.nway.spring.jdbc.sql.meta.EntityInfo;
-import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.util.ClassUtils;
 
