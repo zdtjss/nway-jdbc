@@ -18,7 +18,8 @@ import org.springframework.util.StringUtils;
 
 public class SqlBuilder implements ISqlBuilder {
 
-    protected StringBuilder sql = new StringBuilder(128);
+    protected StringBuilder preWhere = new StringBuilder(128);
+    protected StringBuilder afterWhere = new StringBuilder(128);
     protected List<Object> param = new ArrayList<>();
     protected Class beanClass;
 
@@ -37,14 +38,9 @@ public class SqlBuilder implements ISqlBuilder {
         return this.beanClass;
     }
 
-    public SqlBuilder distinct() {
-        sql.append(" distinct ");
-        return this;
-    }
-
     protected SqlBuilder where() {
         if (canAppendWhere) {
-            sql.append(" where ");
+            preWhere.append(" where ");
         }
         canAppendWhere = false;
         return this;
@@ -170,6 +166,7 @@ public class SqlBuilder implements ISqlBuilder {
         if(isInvalid(val.get())) {
             return this;
         }
+        appendAnd();
         appendCondition( val, " < ?");
         return this;
     }
@@ -368,7 +365,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return this;
@@ -379,7 +376,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return this;
@@ -390,7 +387,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return this;
@@ -401,7 +398,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(column).append(" between").append(" ? and ?");
+        preWhere.append(column).append(" between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return this;
@@ -412,7 +409,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(column).append(" between").append(" ? and ?");
+        preWhere.append(column).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return this;
@@ -423,7 +420,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return this;
@@ -434,7 +431,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(column).append(" not between").append(" ? and ?");
+        preWhere.append(column).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return this;
@@ -445,7 +442,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(column).append(" not between").append(" ? and ?");
+        preWhere.append(column).append(" not between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return this;
@@ -456,7 +453,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return this;
@@ -467,7 +464,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return this;
@@ -477,7 +474,7 @@ public class SqlBuilder implements ISqlBuilder {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
         // 5代表" and "的长度
-        sql.append(" and (").append(lq.getSql()).append(")");
+        preWhere.append(" and (").append(lq.getSql().substring(7)).append(")");
         param.addAll(lq.getParam());
         return this;
     }
@@ -486,13 +483,13 @@ public class SqlBuilder implements ISqlBuilder {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
         // 5代表" and "的长度
-        sql.append(" or (").append(lq.getSql()).append(")");
+        preWhere.append(" or (").append(lq.getSql().substring(7)).append(")");
         param.addAll(lq.getParam());
         return this;
     }
 
     public <T> SqlBuilder or() {
-        sql.append(" or ");
+        preWhere.append(" or ");
         canAppendAnd = false;
         return this;
     }
@@ -502,13 +499,13 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(column).append(" in (");
+        preWhere.append(column).append(" in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?,");
+            preWhere.append("?,");
         }
         if (!val.isEmpty()) {
-            sql.setCharAt(sql.length() - 1, ')');
+            preWhere.setCharAt(preWhere.length() - 1, ')');
         }
         return this;
     }
@@ -518,13 +515,13 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?,");
+            preWhere.append("?,");
         }
         if (!val.isEmpty()) {
-            sql.setCharAt(sql.length() - 1, ')');
+            preWhere.setCharAt(preWhere.length() - 1, ')');
         }
         return this;
     }
@@ -534,13 +531,13 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(column).append(" not in (");
+        preWhere.append(column).append(" not in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?,");
+            preWhere.append("?,");
         }
         if (!val.isEmpty()) {
-            sql.setCharAt(sql.length() - 1, ')');
+            preWhere.setCharAt(preWhere.length() - 1, ')');
         }
         return this;
     }
@@ -550,90 +547,90 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            sql.append("?,");
+            preWhere.append("?,");
         }
         if (!val.isEmpty()) {
-            sql.setCharAt(sql.length() - 1, ')');
+            preWhere.setCharAt(preWhere.length() - 1, ')');
         }
         return this;
     }
 
     public <T> SqlBuilder groupBy(String... column) {
-        sql.append(" group by ").append(Arrays.stream(column).collect(Collectors.joining(",")));
+        afterWhere.append(" group by ").append(Arrays.stream(column).collect(Collectors.joining(",")));
         return this;
     }
 
     @SafeVarargs
     public final <T, R> SqlBuilder groupBy(SFunction<T, R>... columns) {
-        sql.append(" group by ");
+        afterWhere.append(" group by ");
         for (SFunction<T, R> column : columns) {
-            sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
+            afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
         }
-        sql.deleteCharAt(sql.length() - 1);
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
         return this;
     }
 
     @SafeVarargs
     public final <T, R> SqlBuilder orderBy(SFunction<T, R>... columns) {
-        sql.append(" order by ");
+        afterWhere.append(" order by ");
         for (SFunction<T, R> column : columns) {
-            sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
+            afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
         }
-        sql.deleteCharAt(sql.length() - 1);
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
         return this;
     }
 
     public SqlBuilder orderBy(String... columns) {
-        sql.append(" order by ");
+        afterWhere.append(" order by ");
         for (String column : columns) {
-            sql.append(column).append(",");
+            afterWhere.append(column).append(",");
         }
-        sql.deleteCharAt(sql.length() - 1);
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
         return this;
     }
 
     public <T, R> SqlBuilder andOrderByAsc(SFunction<T, R> column) {
-        sql.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" asc");
+        afterWhere.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" asc");
         return this;
     }
 
     public SqlBuilder andOrderByAsc(String... columns) {
         for (String column : columns) {
-            sql.append(",").append(column).append(" asc");
+            afterWhere.append(",").append(column).append(" asc");
         }
         return this;
     }
 
     @SafeVarargs
     public final <T, R> SqlBuilder orderByDesc(SFunction<T, R>... columns) {
-        sql.append(" order by ");
+        afterWhere.append(" order by ");
         for (SFunction<T, R> column : columns) {
-            sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc,");
+            afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc,");
         }
-        sql.deleteCharAt(sql.length() - 1);
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
         return this;
     }
 
     public SqlBuilder orderByDesc(String... columns) {
-        sql.append(" order by ");
+        afterWhere.append(" order by ");
         for (String column : columns) {
-            sql.append(column).append(" desc,");
+            afterWhere.append(column).append(" desc,");
         }
-        sql.deleteCharAt(sql.length() - 1);
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
         return this;
     }
 
     public <T, R> SqlBuilder andOrderByDesc(SFunction<T, R> column) {
-        sql.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc");
+        afterWhere.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc");
         return this;
     }
 
     public SqlBuilder andOrderByDesc(String... columns) {
         for (String column : columns) {
-            sql.append(",").append(column).append(" desc");
+            afterWhere.append(",").append(column).append(" desc");
         }
         return this;
     }
@@ -641,7 +638,7 @@ public class SqlBuilder implements ISqlBuilder {
     public <T> SqlBuilder having(Consumer<SqlBuilder> lambdaWhereBuilder) {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
-        sql.append(" having ").append(lq.getSql());
+        afterWhere.append(" having ").append(lq.getSql());
         param.addAll(lq.getParam());
         return this;
     }
@@ -656,7 +653,7 @@ public class SqlBuilder implements ISqlBuilder {
 
     private void appendAnd() {
         if (canAppendAnd) {
-            sql.append(" and ");
+            preWhere.append(" and ");
         } else {
             where();
         }
@@ -666,22 +663,22 @@ public class SqlBuilder implements ISqlBuilder {
 
     public SqlBuilder appendWhereCondition(String whereCondition) {
         appendAnd();
-        sql.append(' ').append(whereCondition).append(' ');
+        preWhere.append(' ').append(whereCondition).append(' ');
         return this;
     }
 
     private <T> void appendCondition(SSupplier<T> val, String op) {
-        sql.append(SqlBuilderUtils.getColumn(beanClass, val)).append(op);
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, val)).append(op);
         param.add(val.get());
     }
 
     private <T, R> void appendCondition(SFunction<T, R> column, Object val,String op) {
-        sql.append(SqlBuilderUtils.getColumn(beanClass, column)).append(op);
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(op);
         param.add(val);
     }
 
     private void appendCondition(String column, Object val, String op) {
-        sql.append(column).append(op);
+        preWhere.append(column).append(op);
         param.add(val);
     }
 
@@ -724,14 +721,18 @@ public class SqlBuilder implements ISqlBuilder {
         }
     }
 
+    protected StringBuilder getPreWhere() {
+        return this.preWhere;
+    }
+
     @Override
     public String getSql() {
-        String sql = this.sql.toString();
+        String sql = this.preWhere.toString();
         // 不能添加where 说明已经有where存在  但是如果参数为空  有可能是因为忽略无效条件导致的
         if (!canAppendWhere && param.size() == 0) {
             sql = sql.substring(0, sql.length() - 8);
         }
-        return sql;
+        return sql + afterWhere.toString();
     }
 
     @Override
