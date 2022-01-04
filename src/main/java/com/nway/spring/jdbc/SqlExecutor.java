@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.core.*;
@@ -261,7 +262,7 @@ public class SqlExecutor implements InitializingBean {
     /**
      * 基于分页原理减少数据扫描以提高查询性能，适用于从大量数据中通过非索引字段查询预期返回单行数据的情况。
      * <p>
-     * 注意：但当满足查询条件的数据不止条时，返回的数据可能不是所预期的。
+     * 注意：但当满足查询条件的数据不止条时，返回的数据可能不是所预期的。适合用于查询最新的一条记录。
      *
      * @return
      * @throws DataAccessException 数据访问异常
@@ -270,6 +271,30 @@ public class SqlExecutor implements InitializingBean {
         String sql = sqlBuilder.getSql();
         List<Object> params = Optional.ofNullable(sqlBuilder.getParam()).orElse(new ArrayList<>());
         PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 1);
+        params.add(pageDialect.getFirstParam());
+        params.add(pageDialect.getSecondParam());
+        if (isDebugEnabled) {
+            logger.debug("sql = " + pageDialect.getSql());
+            logger.debug("params = " + objToStr(params));
+        }
+        Object[] realParams = params.toArray();
+        T bean = jdbcTemplate.query(pageDialect.getSql(), realParams, getSqlType(realParams), new BeanHandler<>(sqlBuilder.getBeanClass(), beanProcessor));
+        fillMultiValue(sqlBuilder, Collections.singletonList(bean));
+        return bean;
+    }
+
+    /**
+     * 与{@link #queryFirst(ISqlBuilder)}的区别是，当查询到多条数据此方法将抛出异常
+     *
+     * @return
+     * @throws DataAccessException 数据访问异常
+     * @throws IncorrectResultSizeDataAccessException 查询到多条数据时
+     */
+    public <T> T queryOne(ISqlBuilder sqlBuilder) throws DataAccessException {
+        String sql = sqlBuilder.getSql();
+        List<Object> params = Optional.ofNullable(sqlBuilder.getParam()).orElse(new ArrayList<>());
+        // 最多查询2条  是为了提高性能的同时  当有多条符合条件时 程序可以抛出异常
+        PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 2);
         params.add(pageDialect.getFirstParam());
         params.add(pageDialect.getSecondParam());
         if (isDebugEnabled) {

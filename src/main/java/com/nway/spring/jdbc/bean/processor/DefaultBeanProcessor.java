@@ -48,7 +48,7 @@ public class DefaultBeanProcessor implements BeanProcessor {
 
         T row = mapper.mapRow(rs, 0);
         if (rs.next()) {
-            throw new IncorrectResultSizeDataAccessException("发现了多条符合条件的数据", 1);
+            throw new IncorrectResultSizeDataAccessException("查询到多条符合条件的数据", 1);
         }
         return row;
     }
