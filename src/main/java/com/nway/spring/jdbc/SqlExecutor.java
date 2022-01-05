@@ -221,7 +221,8 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params));
         }
         T bean = jdbcTemplate.query(sql, params, getSqlType(params), new BeanHandler<>(type, beanProcessor));
-        fillMultiValue(queryBuilder, Collections.singletonList(bean));
+        // 默认不查子表数据
+//        fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
     }
 
@@ -633,6 +634,9 @@ public class SqlExecutor implements InitializingBean {
         List<String> multiValColumn = null;
         if(queryBuilder instanceof QueryBuilder) {
             multiValColumn = ((QueryBuilder) queryBuilder).getMultiValColumn();
+            if (CollectionUtils.isEmpty(multiValColumn)) {
+                return;
+            }
         }
         Class<T> type = queryBuilder.getBeanClass();
         List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
