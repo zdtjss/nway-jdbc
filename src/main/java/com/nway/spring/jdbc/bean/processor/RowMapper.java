@@ -34,7 +34,7 @@ public abstract class RowMapper<T> {
     }
 
     protected Short getShort(ResultSet rs, int columnIndex) throws SQLException {
-        short val = rs.getByte(columnIndex);
+        short val = rs.getShort(columnIndex);
         return rs.wasNull() ? null : val;
     }
 

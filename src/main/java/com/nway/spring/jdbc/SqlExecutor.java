@@ -652,11 +652,11 @@ public class SqlExecutor implements InitializingBean {
                 }
 
                 StringBuilder subSql = new StringBuilder(64)
-                        .append("select foreign_key,")
+                        .append("select fk,")
                         .append(columnName)
                         .append(" from ")
                         .append(SqlBuilderUtils.getTableNameFromCache(type)).append('_').append(columnName)
-                        .append(" where foreign_key in (");
+                        .append(" where fk in (");
                 String placeholder = IntStream.range(0, beanList.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
                 subSql.append(placeholder).append(") order by idx");
                 Object[] idValueArr = rows.keySet().toArray(new Object[0]);
@@ -667,7 +667,7 @@ public class SqlExecutor implements InitializingBean {
                 List<Map<String, Object>> subVal = jdbcTemplate.queryForList(subSql.toString(), idValueArr);
                 Map<Object, List<Object>> group = new HashMap<>(idValueArr.length);
                 for (Map<String, Object> map : subVal) {
-                    Object foreignKey = map.get("foreign_key");
+                    Object foreignKey = map.get("fk");
                     List<Object> row = group.computeIfAbsent(foreignKey, k -> new ArrayList<>());
                     row.add(map.get(columnName));
                 }
@@ -717,7 +717,7 @@ public class SqlExecutor implements InitializingBean {
                     StringBuilder delSql = new StringBuilder(64)
                             .append("delete from ")
                             .append(tableName)
-                            .append(" where foreign_key in (");
+                            .append(" where fk in (");
                     String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
                     delSql.append(placeholder).append(")");
                     Object[] idValueArr = idValMap.values().toArray(new Object[0]);
@@ -731,7 +731,7 @@ public class SqlExecutor implements InitializingBean {
                 StringBuilder insertSql = new StringBuilder(64)
                         .append("insert into ")
                         .append(tableName)
-                        .append("(id, foreign_key,").append(columnName).append(",idx) values (?,?,?,?)");
+                        .append("(id, fk,").append(columnName).append(",idx) values (?,?,?,?)");
 
                 for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
                     Collection<Object> entryValue = entry.getValue();

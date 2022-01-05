@@ -320,7 +320,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val, " like ?");
+        appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val.get(), " like ?");
         return this;
     }
 
@@ -329,7 +329,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        appendCondition(SqlBuilderUtils.getColumn(beanClass, val), val + "%", " like ?");
+        appendCondition(SqlBuilderUtils.getColumn(beanClass, val), val.get() + "%", " like ?");
         return this;
     }
 
@@ -356,7 +356,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        appendCondition(SqlBuilderUtils.getColumn(beanClass, column), val + "%", " like ?");
+        appendCondition(SqlBuilderUtils.getColumn(beanClass, column), val.get() + "%", " like ?");
         return this;
     }
 
@@ -473,18 +473,22 @@ public class SqlBuilder implements ISqlBuilder {
     public SqlBuilder and(Consumer<SqlBuilder> lambdaWhereBuilder) {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
-        // 5代表" and "的长度
-        preWhere.append(" and (").append(lq.getSql().substring(7)).append(")");
-        param.addAll(lq.getParam());
+        String sql = lq.getSql();
+        if (sql.length() > 7) {
+            preWhere.append(" and (").append(sql.substring(7)).append(")");
+            param.addAll(lq.getParam());
+        }
         return this;
     }
 
     public <T> SqlBuilder or(Consumer<SqlBuilder> lambdaWhereBuilder) {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
-        // 5代表" and "的长度
-        preWhere.append(" or (").append(lq.getSql().substring(7)).append(")");
-        param.addAll(lq.getParam());
+        String sql = lq.getSql();
+        if (sql.length() > 7) {
+            preWhere.append(" or (").append(sql.substring(7)).append(")");
+            param.addAll(lq.getParam());
+        }
         return this;
     }
 
@@ -638,8 +642,11 @@ public class SqlBuilder implements ISqlBuilder {
     public <T> SqlBuilder having(Consumer<SqlBuilder> lambdaWhereBuilder) {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
-        afterWhere.append(" having ").append(lq.getSql());
-        param.addAll(lq.getParam());
+        String sql = lq.getSql();
+        if (sql.length() > 7) {
+            afterWhere.append(" having ").append(lq.getSql().substring(7));
+            param.addAll(lq.getParam());
+        }
         return this;
     }
 

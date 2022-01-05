@@ -41,8 +41,9 @@ public class UpdateBuilder extends SqlBuilder {
     private void initFilled() {
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
         for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
-            if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())) {
-                Object value = columnInfo.getFillStrategy().getValue(SqlType.INSERT);
+            if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
+                    && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
+                Object value = columnInfo.getFillStrategy().getValue(SqlType.UPDATE);
                 sets.add(columnInfo.getColumnName() + " = ?");
                 param.add(value);
             }

@@ -156,8 +156,8 @@ Map对象集分页：
 对于ColumnType.MULTI_VALUE类型的字段，程序自动从所属类表名加当前字段名命名的表里读写，上述powerList数据对应的表为t_user_power，其表结构为
 
     CREATE TABLE `t_computer_user` (
-        `pk_id` int NOT NULL,               --固定字段，主键
-        `foreign_key` int DEFAULT NULL,     --固定字段，主表主键
+        `id` bigint NOT NULL,                  --固定字段，主键
+        `fk` int DEFAULT NULL,              --固定字段，主表主键 类型可根据主表主键类型定义
         `power` varchar(255) DEFAULT NULL,  --固定字段，@Column配置的字段名（遵从默认下划线命名规则）
         `idx` int DEFAULT NULL,             --固定字段，排序用
         PRIMARY KEY (`pk_id`)

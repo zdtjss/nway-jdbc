@@ -3,9 +3,11 @@ package com.nway.spring.jdbc;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -125,13 +127,21 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     void queryList() {
-        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).le(ExampleEntity::getId, 100));
         Assertions.assertTrue(objectList.size() > 0);
     }
 
     @Test
+    public void withColumnTest() {
+        ExampleEntity first = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getId));
+        Assertions.assertNotNull(first.getId());
+        Assertions.assertNull(first.getString());
+        Assertions.assertNull(first.getMv());
+    }
+
+    @Test
     void queryListMap() {
-        Map<Integer, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class), ExampleEntity::getId);
+        Map<Integer, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class).le(ExampleEntity::getId, 100), ExampleEntity::getId);
         Assertions.assertTrue(objectMap.size() > 0);
     }
 
@@ -207,9 +217,9 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     void mvInsertTest() {
-        ExampleEntity obj = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+        ExampleEntity obj = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getId));
         obj.setMv(Arrays.asList(UUID.randomUUID().toString().substring(0, 3), "2", UUID.randomUUID().toString().substring(0, 3)));
-        obj.setId(null);
+        obj.setId(obj.getId() + 1);
         sqlExecutor.insert(obj);
         Assertions.assertFalse(obj.getMv().isEmpty());
     }
@@ -217,26 +227,30 @@ class SqlExecutorTest extends BaseTest {
     @Test
     void mvQueryTest() {
         mvInsertTest();
-        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct foreign_key from t_nway_mv", String.class);
+        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv", String.class);
         ExampleEntity obj = sqlExecutor.queryById(fks.get(0), ExampleEntity.class, ExampleEntity::getMv);
         Assertions.assertFalse(obj.getMv().isEmpty());
     }
 
     @Test
     void mvListTest() {
-        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
+        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv limit 10", String.class);
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).in(ExampleEntity::getId, fks));
         boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv() != null && !obj.getMv().isEmpty());
         Assertions.assertTrue(anyMatch);
     }
 
     @Test
     public void queryFirstTest() {
-        ExampleEntity first = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate));
+        ExampleEntity first = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).ne(ExampleEntity::getString, "b").orderByDesc(ExampleEntity::getUtilDate));
+        Assertions.assertNotNull(first);
+        first = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate));
+        Assertions.assertNotNull(first);
     }
 
     @Test
     public void queryOneTest() {
-        ExampleEntity one = sqlExecutor.queryOne(SQL.query(ExampleEntity.class));
+        Assertions.assertThrows(IncorrectResultSizeDataAccessException.class, () -> sqlExecutor.queryOne(SQL.query(ExampleEntity.class)));
     }
 
     @Test
@@ -280,7 +294,7 @@ class SqlExecutorTest extends BaseTest {
     }
 
     private void arg(Object... abc) {
-        System.out.println(abc);
+        System.out.println(Arrays.deepToString(abc));
     }
 
     @Test
@@ -341,6 +355,9 @@ class SqlExecutorTest extends BaseTest {
                 .or()
                 .eq(exampleEntity::getId)
                 .or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
+                .and(e -> e.eq(ExampleEntity::getId, 1))
+                .groupBy(ExampleEntity::getUtilDate)
+                .having(e -> e.eq(ExampleEntity::getString, 100))
 //				.orderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
 //				.appendOrderBy("string", "p_double")
                 .orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
@@ -348,6 +365,9 @@ class SqlExecutorTest extends BaseTest {
                 .andOrderByAsc(ExampleEntity::getString)
                 .andOrderByDesc(ExampleEntity::getPpDouble);
 
+        sqlExecutor.queryFirst(builder);
+
+        builder = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
         sqlExecutor.queryFirst(builder);
     }
 
@@ -368,7 +388,7 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     public void initData() throws InterruptedException {
-        int times = 100;
+        int times = 1;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         Collection<Callable<Void>> initDataTask = new ArrayList<>(times);
 
@@ -386,7 +406,7 @@ class SqlExecutorTest extends BaseTest {
     private void initTable() throws SQLException, SQLException {
 
         List<ExampleEntity> exampleEntityList = new ArrayList<>();
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 3; i++) {
 
             ExampleEntity example = new ExampleEntity();
             example.setId(atomicInteger.getAndIncrement());
