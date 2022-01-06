@@ -118,9 +118,9 @@ class SqlExecutorTest extends BaseTest {
     @Test
     void queryById() {
 
-        ExampleEntity2 example = sqlExecutor.queryFirst(SQL.query(ExampleEntity2.class));
+        ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
 
-        ExampleEntity2 example1 = sqlExecutor.queryById(example.getId(), ExampleEntity2.class);
+        ExampleEntity example1 = sqlExecutor.queryById(example.getId(), ExampleEntity.class);
 
 //        Assertions.assertEquals(example.getString(), example1.getString());
     }
