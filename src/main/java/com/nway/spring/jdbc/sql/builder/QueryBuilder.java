@@ -65,7 +65,7 @@ public class QueryBuilder<T> extends SqlBuilder {
         return this;
     }
 
-    public void ignorePower() {
+    public void ignorePermission() {
         this.ignorePower = true;
     }
 
