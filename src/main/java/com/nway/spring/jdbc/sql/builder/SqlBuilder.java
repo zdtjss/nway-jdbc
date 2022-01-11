@@ -719,9 +719,10 @@ public class SqlBuilder implements ISqlBuilder {
                 if (whereCondition.getValue() instanceof Collection) {
                     getParam().addAll((Collection) whereCondition.getValue());
                 }
-                if (ObjectUtils.isArray(whereCondition.getValue())) {
+                else if (ObjectUtils.isArray(whereCondition.getValue())) {
                     getParam().addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
-                } else {
+                }
+                else {
                     getParam().add(whereCondition.getValue());
                 }
             }
