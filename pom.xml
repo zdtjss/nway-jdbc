@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.zdtjss</groupId>
     <artifactId>nway-jdbc</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.3</version>
     <packaging>jar</packaging>
     <name>nway-jdbc</name>
-    <description>简单易用的jdbc实用工具</description>
+    <description>简单易用的单表操作工具</description>
 
     <url>https://github.com/zdtjss/nway-jdbc</url>
 
@@ -108,8 +108,8 @@
                         </goals>
                         <configuration>
                             <!-- gpg \-\-list-signatures \-\-keyid-format 0xshort  打印的sig3行第一列去除x0 -->
-                            <keyname>18245EAB</keyname>
-                            <passphraseServerId>18245EAB</passphraseServerId>
+                            <keyname>FED0AADE</keyname>
+                            <passphraseServerId>FED0AADE</passphraseServerId>
                         </configuration>
                     </execution>
                 </executions>
