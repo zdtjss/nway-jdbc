@@ -59,7 +59,7 @@ Spring Boot：
 
     sqlBuilder.ignoreInvalid(true).like(User::getName, user.getName()); 
 
-    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。关于有效的定义：非空值字符串、非空Collection、其他非null数值。
+    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。null和空集合为无效值，空字符串和基本类型的默认值是有效值。
     您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(false)，同样的调用sqlBuilder.ignoreInvalid(true)即恢复自动判断。
     **只应在传值为空时不做为条件的情况下使用ignoreInvalid(true)，否则将数据越权。默认为false**
    

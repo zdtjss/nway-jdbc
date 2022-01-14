@@ -654,7 +654,7 @@ public class SqlBuilder implements ISqlBuilder {
         throw new UnsupportedOperationException("此方法只有update时使用");
     }
 
-    public <T, R> SqlBuilder set(SFunction<T, R> val) {
+    public <T, R> SqlBuilder set(SFunction<T, R> column, Object val) {
         throw new UnsupportedOperationException("此方法只有update时使用");
     }
 
@@ -690,18 +690,22 @@ public class SqlBuilder implements ISqlBuilder {
     }
 
     /**
+     *
+     * 当ignoreInvalid为true时，说明需要程序自动判断参数是否有效，否则，需要调用者判断。
+     *
+     * 判断逻辑：null和空集合为无效值，空字符串和基本类型的默认值是有效值
+     *
      * @param val 是无效的吗
      * @return
      */
-    private boolean isInvalid(Object val) {
+    protected boolean isInvalid(Object val) {
         // ignoreInvalid false 表示不忽略无效参数  不需要判断参数是否有效
         // ignoreInvalid true 表示忽略无效参数  需要工具判断参数值是否有效
         if (!ignoreInvalid) {
             // 不需要工具判断参数是否有效时 返回false  则填充条件的方法会进行添加查询条件  当用户传入无效参数  程序会抛出异常  而不会导致数据越权
             return false;
         }
-        if (val instanceof String && !StringUtils.hasText((String) val)
-                || val instanceof Collection && CollectionUtils.isEmpty((Collection) val)) {
+        if (val instanceof Collection && CollectionUtils.isEmpty((Collection) val)) {
             return true;
         }
         return val == null;

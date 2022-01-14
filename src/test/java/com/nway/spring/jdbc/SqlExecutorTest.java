@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.test.context.jdbc.Sql;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -406,6 +407,14 @@ class SqlExecutorTest extends BaseTest {
 //				.groupBy("string", "p_double")
                 .having(e -> e.eq(exampleEntity::getString).ne(exampleEntity::getUtilDate));
         sqlExecutor.queryFirst(builder);
+    }
+
+    @Test
+    public void updateSqlTest() {
+
+        SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).ignoreInvalid(true).set(ExampleEntity::getString, null).set(ExampleEntity::getId, "");
+        Assertions.assertFalse(sqlBuilder.getSql().contains(" string = "));
+        Assertions.assertTrue(sqlBuilder.getSql().contains(" pk_id = "));
     }
 
     private final AtomicInteger atomicInteger = new AtomicInteger(5041731);

@@ -22,12 +22,19 @@ public class UpdateBuilder extends SqlBuilder {
 
     @Override
     public <T> SqlBuilder set(SSupplier<T> val) {
+        if(isInvalid(val.get())) {
+            return this;
+        }
         sets.add(SqlBuilderUtils.getColumn(beanClass, val) + " = ?");
         param.add(val.get());
         return this;
     }
 
+    @Override
     public <T, R> SqlBuilder set(SFunction<T, R> column, Object val) {
+        if(isInvalid(val)) {
+            return this;
+        }
         sets.add(SqlBuilderUtils.getColumn(beanClass, column) + " = ?");
         param.add(val);
         return this;
