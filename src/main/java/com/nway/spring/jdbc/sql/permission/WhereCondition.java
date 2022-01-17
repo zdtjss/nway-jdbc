@@ -8,7 +8,7 @@ public class WhereCondition {
     public WhereCondition() {
     }
 
-    public WhereCondition( String expr, Object value) {
+    public WhereCondition(String expr, Object value) {
         this.value = value;
         this.expr = expr;
     }

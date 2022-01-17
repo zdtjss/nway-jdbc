@@ -28,6 +28,7 @@ import java.util.stream.IntStream;
 import javax.sql.DataSource;
 
 import com.nway.spring.jdbc.bean.processor.BeanProcessor;
+import com.nway.spring.jdbc.bean.processor.ColumnMapRowMapper;
 import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
 import com.nway.spring.jdbc.pagination.*;
 import com.nway.spring.jdbc.sql.SqlType;
@@ -77,6 +78,8 @@ public class SqlExecutor implements InitializingBean {
     private JdbcTemplate jdbcTemplate;
     private DataSource dataSource;
     private BeanProcessor beanProcessor;
+
+    private static final ColumnMapRowMapper COLUMN_MAP_ROW_MAPPER = new ColumnMapRowMapper();
     /**
      * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
      */
@@ -452,7 +455,7 @@ public class SqlExecutor implements InitializingBean {
                 logger.debug("sql = " + pageDialect.getSql());
                 logger.debug("params = " + objToStr(realParam));
             }
-            item = jdbcTemplate.queryForList(pageDialect.getSql(), realParam, getSqlType(realParam));
+            item = jdbcTemplate.query(pageDialect.getSql(), realParam, getSqlType(realParam), COLUMN_MAP_ROW_MAPPER);
         }
         return new Page<>(item, totalCount, page, pageSize);
     }

@@ -668,7 +668,29 @@ public class SqlBuilder implements ISqlBuilder {
         canAppendAnd = true;
     }
 
-    public SqlBuilder appendWhereCondition(String whereCondition) {
+    /**
+     * 此方法应谨慎使用，如果有用户输入值，则可能存在SQL注入的风险。
+     *
+     * @param whereCondition
+     * @return
+     */
+    public SqlBuilder appendCondition(WhereCondition whereCondition) {
+        if (whereCondition != null && whereCondition.getExpr().length() > 0) {
+            this.appendWhereCondition(whereCondition.getExpr());
+            if (whereCondition.getValue() instanceof Collection) {
+                getParam().addAll((Collection) whereCondition.getValue());
+            }
+            else if (ObjectUtils.isArray(whereCondition.getValue())) {
+                getParam().addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
+            }
+            else {
+                getParam().add(whereCondition.getValue());
+            }
+        }
+        return this;
+    }
+
+    private SqlBuilder appendWhereCondition(String whereCondition) {
         appendAnd();
         preWhere.append(' ').append(whereCondition).append(' ');
         return this;
@@ -679,7 +701,7 @@ public class SqlBuilder implements ISqlBuilder {
         param.add(val.get());
     }
 
-    private <T, R> void appendCondition(SFunction<T, R> column, Object val,String op) {
+    private <T, R> void appendCondition(SFunction<T, R> column, Object val, String op) {
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(op);
         param.add(val);
     }
@@ -717,19 +739,7 @@ public class SqlBuilder implements ISqlBuilder {
             if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
                 continue;
             }
-            WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(columnInfo);
-            if (whereCondition != null && whereCondition.getExpr().length() > 0) {
-                this.appendWhereCondition(whereCondition.getExpr());
-                if (whereCondition.getValue() instanceof Collection) {
-                    getParam().addAll((Collection) whereCondition.getValue());
-                }
-                else if (ObjectUtils.isArray(whereCondition.getValue())) {
-                    getParam().addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
-                }
-                else {
-                    getParam().add(whereCondition.getValue());
-                }
-            }
+            appendCondition(SqlBuilderUtils.getWhereCondition(columnInfo));
         }
     }
 

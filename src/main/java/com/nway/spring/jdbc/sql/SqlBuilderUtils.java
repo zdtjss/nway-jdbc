@@ -253,6 +253,22 @@ public class SqlBuilderUtils {
 		}
 		return columnName.charAt(0) == '_' ? columnName.substring(1) : columnName.toString();
 	}
+
+	public static String columnToFieldName(String columnName) {
+		StringBuilder str = new StringBuilder();
+		char[] chars = columnName.toLowerCase().toCharArray();
+		int underLineIdx = -1;
+		for (int i = 0; i < chars.length; i++) {
+			if (chars[i] == '_') {
+				underLineIdx = i + 1;
+			} else if (i == underLineIdx) {
+				str.append(String.valueOf(chars[i]).toUpperCase());
+			} else {
+				str.append(chars[i]);
+			}
+		}
+		return str.toString();
+	}
 	
 	public static String methodToColumn(Class<?> beanClass, String methodName) {
 		String fieldName = "";
