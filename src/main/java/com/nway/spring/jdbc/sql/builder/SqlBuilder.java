@@ -86,7 +86,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        appendCondition(val, " != ?");
+        appendCondition(val, " <> ?");
         return this;
     }
 
@@ -95,7 +95,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        appendCondition(column, val, " != ?");
+        appendCondition(column, val, " <> ?");
         return this;
     }
 
@@ -104,7 +104,7 @@ public class SqlBuilder implements ISqlBuilder {
             return this;
         }
         appendAnd();
-        appendCondition(column, val, " != ?");
+        appendCondition(column, val, " <> ?");
         return this;
     }
 
