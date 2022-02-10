@@ -1,34 +1,29 @@
 package com.nway.spring.jdbc.performance;
 
-import java.io.FileReader;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
+import com.nway.spring.jdbc.SqlExecutor;
+import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.performance.entity.Monitor;
 import org.apache.ibatis.io.Resources;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
-import com.nway.spring.jdbc.SqlExecutor;
-import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.performance.entity.Monitor;
+import javax.annotation.PostConstruct;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.FileReader;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service("scriptSolutionPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class ScriptSolutionPerformance implements Performance, JsonQueryPerformance
 {
     private ScriptEngine engine;
-    
-    private Gson gson = new Gson();
     
     @Value("script-sql.js")
     private String sqlConfigFile;
@@ -45,15 +40,11 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
         {
             ((Invocable) engine).invokeFunction(functionName, inParam, jdbcSql);
         }
-        catch (NoSuchMethodException e)
+        catch (NoSuchMethodException | ScriptException e)
         {
             e.printStackTrace();
         }
-        catch(ScriptException e) {
-        	
-        	e.printStackTrace();
-        }
-        
+
         return jdbcSql;
     }
     
@@ -104,11 +95,6 @@ public class ScriptSolutionPerformance implements Performance, JsonQueryPerforma
         return monitors;
     }
     
-    public String queryMonitorJsonList1()
-    {
-        return gson.toJson(listMonitor());
-    }
-
 	@Override
 	public String queryMonitorJsonList() {
 

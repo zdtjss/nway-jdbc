@@ -1,31 +1,24 @@
 package com.nway.spring.jdbc.performance;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.nway.spring.jdbc.performance.entity.*;
+import com.nway.spring.jdbc.performance.mybatisplus.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.nway.spring.jdbc.performance.entity.*;
-import com.nway.spring.jdbc.performance.mybatisplus.*;
-import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.builder.QueryBuilder;
-import com.nway.spring.jdbc.sql.builder.SqlBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.google.gson.Gson;
-import org.springframework.util.CollectionUtils;
-
 @Service("myBatisPlusPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)
 public class MyBatisPlusPerformance implements Performance {
 
-    private Gson gson = new Gson();
-    
 	@Autowired
 	private MonitorDao monitorDao;
 	@Autowired
@@ -61,7 +54,7 @@ public class MyBatisPlusPerformance implements Performance {
 		LambdaQueryWrapper<ComputerSoftware> computerSoftwareSql = Wrappers.lambdaQuery();
 		computerSoftwareSql.eq(ComputerSoftware::getComputerId, computer.getId());
 		List<ComputerSoftware> computerSoftwareList = computerSoftwareDao.selectList(computerSoftwareSql);
-		List<Integer> softwareIdList = computerSoftwareList.stream().map(e -> e.getSoftwareId()).collect(Collectors.toList());
+		List<Integer> softwareIdList = computerSoftwareList.stream().map(ComputerSoftware::getSoftwareId).collect(Collectors.toList());
 		computer.setSoftware(softwareDao.selectList(softwareSql.in(Software::getId, softwareIdList)));
 
 		return computer;

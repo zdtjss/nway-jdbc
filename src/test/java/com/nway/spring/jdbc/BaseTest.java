@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -38,12 +37,4 @@ public class BaseTest {
         builder.activate();
     }
 
-    @AfterAll
-    public static void tearDownAfterClass() throws Exception {
-
-        if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-
-            ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).close();
-        }
-    }
 }

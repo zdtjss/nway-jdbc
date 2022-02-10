@@ -1,19 +1,12 @@
 package com.nway.spring.jdbc.performance;
 
-import java.util.List;
-
+import com.nway.spring.jdbc.SqlExecutor;
+import com.nway.spring.jdbc.performance.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
-import com.nway.spring.jdbc.SqlExecutor;
-import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.performance.entity.Keyboard;
-import com.nway.spring.jdbc.performance.entity.Mainframe;
-import com.nway.spring.jdbc.performance.entity.Monitor;
-import com.nway.spring.jdbc.performance.entity.Mouse;
-import com.nway.spring.jdbc.performance.entity.Software;
+import java.util.List;
 
 @Service("nwayPerformance")
 @Transactional(transactionManager = "jdbcTxManager", readOnly = true)

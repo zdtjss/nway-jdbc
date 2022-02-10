@@ -173,7 +173,7 @@ class SqlExecutorTest extends BaseTest {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         Page<Map<String, Object>> mapPage = sqlExecutor.queryPage("select * from t_nway where pk_id = ?", new Object[]{example.getId()}, 1, 1);
         Assertions.assertEquals(mapPage.getPageData().size(), 1);
-        Assertions.assertEquals(mapPage.getPageData().get(0).get("pk_id"), example.getId());
+        Assertions.assertEquals(mapPage.getPageData().get(0).get("pkId"), example.getId());
     }
 
     @Test
