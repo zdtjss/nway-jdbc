@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.zdtjss</groupId>
     <artifactId>nway-jdbc</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <packaging>jar</packaging>
     <name>nway-jdbc</name>
     <description>简单易用的单表操作工具</description>
