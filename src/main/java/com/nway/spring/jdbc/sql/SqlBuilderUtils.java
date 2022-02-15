@@ -12,7 +12,6 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
-import org.springframework.util.ClassUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
@@ -88,7 +87,7 @@ public class SqlBuilderUtils {
 	public static <T, R> EntityInfo getEntityInfo(SFunction<T, R> lambda) {
 		SerializedLambda serializedLambda = getSerializedLambda(lambda);
 		try {
-			final Class<?> claszz = ClassUtils.forName(serializedLambda.getImplClass(), SerializedLambda.class.getClassLoader());
+			final Class<?> claszz = Class.forName(serializedLambda.getImplClass().replace("/", "."));
 			return Optional.ofNullable(ENTITY_INFO_MAP.get(claszz))
 					.orElseGet(() -> {
 						initEntityInfo(claszz);
@@ -114,7 +113,7 @@ public class SqlBuilderUtils {
 	public static <T> String getColumn(SSupplier<T> lambda) {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
-			return methodToColumn(ClassUtils.forName(serializedLambda.getImplClass(), SerializedLambda.class.getClassLoader()), serializedLambda.getImplMethodName());
+			return methodToColumn(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
 		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
@@ -132,7 +131,7 @@ public class SqlBuilderUtils {
 	public static <T, R> String getColumn(SFunction<T, R> lambda) {
 		try {
 			SerializedLambda serializedLambda = getSerializedLambda(lambda);
-			return methodToColumn(ClassUtils.forName(serializedLambda.getImplClass(), SerializedLambda.class.getClassLoader()), serializedLambda.getImplMethodName());
+			return methodToColumn(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
 		} catch (Throwable e) {
 			throw new SqlBuilderException(e);
 		}
