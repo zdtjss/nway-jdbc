@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class AsmBeanProcessor implements BeanProcessor {
 
@@ -61,7 +62,7 @@ public class AsmBeanProcessor implements BeanProcessor {
         LinkedHashMap<String, Integer> columnIndexMap = null;
         if (cacheKey == null) {
             columnIndexMap = getColumnIndex(rs);
-            cacheKey = columnIndexMap.keySet().toString() + mappedClass.hashCode();
+            cacheKey = columnIndexMap.keySet().stream().sorted().collect(Collectors.joining()) + mappedClass.hashCode();
         }
 
         AsmRowMapper<T> mapper = localCache.get(cacheKey);
