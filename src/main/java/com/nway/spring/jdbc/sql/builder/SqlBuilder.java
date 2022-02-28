@@ -498,7 +498,7 @@ public class SqlBuilder implements ISqlBuilder {
             canAppendAnd = true;
             // where() 方法添加的 " where " 长度
             if(preWhere.length() == 7) {
-                preWhere.append(sql.substring(6));
+                preWhere.append("(").append(sql.substring(6)).append(")");
             }
             else {
                 preWhere.append(" or (").append(sql.substring(6)).append(")");
