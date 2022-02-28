@@ -45,16 +45,16 @@ public class QueryBuilderTest {
     public void orExpTest2() {
         QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
 
-        queryBuilder.eq(Computer::getId, 11).or((sql) -> sql.eq(Computer::getBrand, "abc"));
+        queryBuilder.eq(Computer::getId, 11).or((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or ( brand = ?)"));
+        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or ( brand = ?) and model = ?"));
     }
 
     @Test
     public void orTest() {
         QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
-        queryBuilder.eq(Computer::getId, 123).or().eq(Computer::getBrand, "abc");
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or brand = ?"));
+        queryBuilder.eq(Computer::getId, 123).or().eq(Computer::getBrand, "abc").eq(Computer::getModel, "aa");
+        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or brand = ? and model = ?"));
     }
 
     @Test
@@ -70,9 +70,9 @@ public class QueryBuilderTest {
     public void andExpTest2() {
         QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
 
-        queryBuilder.eq(Computer::getId, 11).or((sql) -> sql.eq(Computer::getBrand, "abc"));
+        queryBuilder.eq(Computer::getId, 11).and((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? and ( brand = ?)"));
+        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? and  ( brand = ?) and model = ?"));
     }
 
 }

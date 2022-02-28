@@ -475,13 +475,13 @@ public class SqlBuilder implements ISqlBuilder {
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();
         if (sql.length() > 7) {
-            where();
+            appendAnd();
             // where() 方法添加的 " where " 长度
             if(preWhere.length() == 7) {
                 preWhere.append(sql.substring(6));
             }
             else {
-                preWhere.append(" and (").append(sql.substring(6)).append(")");
+                preWhere.append(" (").append(sql.substring(6)).append(")");
             }
             param.addAll(lq.getParam());
         }
@@ -495,6 +495,7 @@ public class SqlBuilder implements ISqlBuilder {
         // where 的长度
         if (sql.length() > 7) {
             where();
+            canAppendAnd = true;
             // where() 方法添加的 " where " 长度
             if(preWhere.length() == 7) {
                 preWhere.append(sql.substring(6));
