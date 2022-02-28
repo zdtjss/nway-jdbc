@@ -22,7 +22,7 @@ maven
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.5.6</version>
+		<version>1.5.8</version>
 	</dependency>
 
 基于xml配置的bean：
