@@ -475,7 +475,14 @@ public class SqlBuilder implements ISqlBuilder {
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();
         if (sql.length() > 7) {
-            preWhere.append(" and (").append(sql.substring(7)).append(")");
+            where();
+            // where() 方法添加的 " where " 长度
+            if(preWhere.length() == 7) {
+                preWhere.append(sql.substring(6));
+            }
+            else {
+                preWhere.append(" and (").append(sql.substring(6)).append(")");
+            }
             param.addAll(lq.getParam());
         }
         return this;
@@ -485,8 +492,16 @@ public class SqlBuilder implements ISqlBuilder {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();
+        // where 的长度
         if (sql.length() > 7) {
-            preWhere.append(" or (").append(sql.substring(7)).append(")");
+            where();
+            // where() 方法添加的 " where " 长度
+            if(preWhere.length() == 7) {
+                preWhere.append(sql.substring(6));
+            }
+            else {
+                preWhere.append(" or (").append(sql.substring(6)).append(")");
+            }
             param.addAll(lq.getParam());
         }
         return this;
