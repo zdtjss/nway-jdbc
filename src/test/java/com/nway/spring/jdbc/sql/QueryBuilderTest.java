@@ -99,7 +99,7 @@ public class QueryBuilderTest {
 
         queryBuilder.and((sql) -> sql.eq(Computer::getBrand, "abc")).like(Computer::getKeyboardId, "dd");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where  brand = ? and keyboard_id like ?"));
+        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where ( brand = ?) and keyboard_id like ?"));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class QueryBuilderTest {
 
         queryBuilder.eq(Computer::getId, 11).and((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? and  ( brand = ?) and model = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? and ( brand = ?) and model = ?"));
     }
 
 }
