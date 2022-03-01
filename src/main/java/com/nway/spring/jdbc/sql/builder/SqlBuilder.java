@@ -476,13 +476,7 @@ public class SqlBuilder implements ISqlBuilder {
         String sql = lq.getSql();
         if (sql.length() > 7) {
             appendAnd();
-            // where() 方法添加的 " where " 长度
-            if(preWhere.length() == 7) {
-                preWhere.append(sql.substring(6));
-            }
-            else {
-                preWhere.append(" (").append(sql.substring(6)).append(")");
-            }
+            preWhere.append("(").append(sql.substring(6)).append(")");
             param.addAll(lq.getParam());
         }
         return this;
