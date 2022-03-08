@@ -14,12 +14,17 @@
 package com.nway.spring.jdbc;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,15 +32,6 @@ import java.util.stream.IntStream;
 
 import javax.sql.DataSource;
 
-import com.nway.spring.jdbc.bean.processor.BeanProcessor;
-import com.nway.spring.jdbc.bean.processor.ColumnMapRowMapper;
-import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
-import com.nway.spring.jdbc.pagination.*;
-import com.nway.spring.jdbc.sql.SqlType;
-import com.nway.spring.jdbc.sql.builder.*;
-import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
-import com.nway.spring.jdbc.sql.function.SFunction;
-import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,18 +39,36 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import com.nway.spring.jdbc.bean.BeanHandler;
 import com.nway.spring.jdbc.bean.BeanListHandler;
+import com.nway.spring.jdbc.bean.processor.BeanProcessor;
+import com.nway.spring.jdbc.bean.processor.ColumnMapRowMapper;
+import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
+import com.nway.spring.jdbc.pagination.MysqlPaginationSupport;
+import com.nway.spring.jdbc.pagination.OraclePaginationSupport;
+import com.nway.spring.jdbc.pagination.Page;
+import com.nway.spring.jdbc.pagination.PageDialect;
+import com.nway.spring.jdbc.pagination.PaginationSupport;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.IdGenerator;
-import org.springframework.util.ObjectUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
+import com.nway.spring.jdbc.sql.builder.BatchUpdateByIdBuilder;
+import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
+import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
+import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import com.nway.spring.jdbc.sql.builder.UpdateBeanBuilder;
+import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
+import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 
 /**
  * 注意：
@@ -83,11 +97,11 @@ public class SqlExecutor implements InitializingBean {
     /**
      * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
      */
-    private static final Pattern SQL_ORDER_BY_PATTERN = Pattern.compile(".+\\p{Blank}+(ORDER|order)\\p{Blank}+(BY|by)[\\,\\p{Blank}\\w\\.]+");
+    private static final Pattern SQL_ORDER_BY_PATTERN = Pattern.compile(".+\\p{Blank}+(order|ORDER)\\p{Blank}+(by|BY)[\\,\\p{Blank}\\w\\.]+");
     /**
      * SQL 语句中top匹配
      */
-    private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+(TOP|top)\\p{Blank}+\\d+\\p{Blank}+.+");
+    private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+(top|TOP)\\p{Blank}+\\d+\\p{Blank}+.+");
 
     public SqlExecutor() {
     }
@@ -439,13 +453,12 @@ public class SqlExecutor implements InitializingBean {
 
         List<Map<String, Object>> item = new ArrayList<>();
 
-        String upperCaseSql = sql.toUpperCase();
-        String countSql = buildPaginationCountSql(upperCaseSql);
+        String countSql = buildPaginationCountSql(sql);
 
         int totalCount = queryCount(countSql, params);
 
         if (totalCount != 0) {
-            PageDialect pageDialect = paginationSupport.buildPaginationSql(upperCaseSql, page, pageSize);
+            PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, page, pageSize);
             int paramsLength = params == null ? 0 : params.length;
             Object[] realParam = new Object[paramsLength + 2];
             System.arraycopy(params == null ? new Object[0] : params, 0, realParam, 0, paramsLength);
@@ -521,9 +534,9 @@ public class SqlExecutor implements InitializingBean {
 
         if ((!selectedColumns.contains(" DISTINCT ") || !selectedColumns.contains(" distinct "))
                 && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
-            countSql.delete(0, firstFromIndex).insert(0, "SELECT COUNT(*) ");
+            countSql.delete(0, firstFromIndex).insert(0, "select count(*) ");
         } else {
-            countSql.insert(0, "SELECT COUNT(*) FROM (").append(')');
+            countSql.insert(0, "select count(*) from (").append(')');
         }
 
         return countSql.toString();
@@ -620,13 +633,10 @@ public class SqlExecutor implements InitializingBean {
     }
 
     private int firstFromIndex(String sql, int startIndex) {
-        int fromIndex = sql.toUpperCase().indexOf("FROM", startIndex);
-        char previousChar = sql.charAt(fromIndex - 1);
-        char nextChar = sql.charAt(fromIndex + 4);
-        if (!(previousChar == ' ' || previousChar == '*' || previousChar == '\t' || previousChar == '\n')
-                && !(nextChar == ' ' || nextChar == '(' || nextChar == '\t' || nextChar == '\n')) {
-            fromIndex = firstFromIndex(sql, fromIndex + 4);
-        }
+        int fromIndex = sql.indexOf(" from ", startIndex);
+		if (fromIndex == -1) {
+			fromIndex = sql.indexOf(" FROM ", startIndex);
+		}
         return fromIndex;
     }
 
