@@ -1,5 +1,6 @@
 package com.nway.spring.jdbc.performance.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 
@@ -25,6 +26,7 @@ import javax.persistence.TemporalType;
 @com.nway.spring.jdbc.annotation.Table("t_mainframe")
 public class Mainframe {
 
+	@TableId
 	/** 编号 **/
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.ID)
 	private int id;

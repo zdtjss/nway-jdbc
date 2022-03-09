@@ -22,6 +22,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -34,6 +35,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 @com.nway.spring.jdbc.annotation.Table("t_computer")
 public class Computer {
 
+	@TableId
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.ID)
 	private int id;
 	/** 品牌 **/

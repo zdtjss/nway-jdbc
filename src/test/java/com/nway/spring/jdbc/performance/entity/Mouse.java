@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.performance.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 
@@ -24,6 +25,7 @@ import javax.persistence.TemporalType;
 public class Mouse {
 
 	/** 编号 **/
+	@TableId
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.ID)
 	private int id;
 	/** 品牌 **/
