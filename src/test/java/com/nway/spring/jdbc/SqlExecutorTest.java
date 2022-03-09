@@ -303,6 +303,49 @@ class SqlExecutorTest extends BaseTest {
     }
 
     @Test
+    public void countTest2() {
+
+        String sql = "select * from t_nway";
+        Page<Map<String, Object>> page = sqlExecutor.queryPage(sql, null, 1, 3);
+        Assertions.assertEquals(page.getPageData().size(), 3);
+
+        sql = "select * from t_nway order by pk_id";
+        page = sqlExecutor.queryPage(sql, null, 1, 3);
+        Assertions.assertEquals(page.getPageData().size(), 3);
+
+        ExampleEntity first = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+
+        sql = "select * from t_nway where pk_id = ? order by pk_id";
+        page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
+        Assertions.assertEquals(page.getPageData().size(), 1);
+
+        sql = "select distinct pk_id,p_int from t_nway where pk_id = ? order by pk_id";
+        page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
+        Assertions.assertEquals(page.getPageData().size(), 1);
+
+
+        sql = "select * FROM t_nway";
+        page = sqlExecutor.queryPage(sql, null, 1, 3);
+        Assertions.assertEquals(page.getPageData().size(), 3);
+
+        sql = "select * FROM t_nway ORDER BY pk_id";
+        page = sqlExecutor.queryPage(sql, null, 1, 3);
+        Assertions.assertEquals(page.getPageData().size(), 3);
+
+        sql = "select * FROM t_nway WHERE pk_id = ? ORDER BY pk_id";
+        page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
+        Assertions.assertEquals(page.getPageData().size(), 1);
+
+        sql = "select DISTINCT pk_id,p_int FROM t_nway WHERE pk_id = ? ORDER BY pk_id";
+        page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
+        Assertions.assertEquals(page.getPageData().size(), 1);
+
+        sql = "select a.pk_id,a.p_int from t_nway a, (select * from t_nway where pk_id <> 100 order by pk_id) b where a.pk_id = b.pk_id and a.pk_id = ? order by a.pk_id";
+        page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
+        Assertions.assertEquals(page.getPageData().size(), 1);
+    }
+
+    @Test
     public void regex() {
 
         String input = "a order by abc1,a.ab2  ";

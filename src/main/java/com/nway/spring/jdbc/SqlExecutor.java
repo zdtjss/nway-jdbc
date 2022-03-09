@@ -101,7 +101,7 @@ public class SqlExecutor implements InitializingBean {
     /**
      * SQL 语句中top匹配
      */
-    private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+(top|TOP)\\p{Blank}+\\d+\\p{Blank}+.+");
+    private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+\\p{Blank}+(top|TOP)\\p{Blank}+\\d+\\p{Blank}+.+");
 
     public SqlExecutor() {
     }
@@ -524,19 +524,27 @@ public class SqlExecutor implements InitializingBean {
 
         StringBuilder countSql = new StringBuilder(sql);
 
+        // order by 大小写混合  最后一个不是小写的时候  有问题  非常规情况  不考虑
         if (SQL_ORDER_BY_PATTERN.matcher(sql).matches()) {
             int orderIdx = countSql.lastIndexOf(" order ");
             countSql.delete(orderIdx == -1 ? countSql.lastIndexOf(" ORDER ") : orderIdx, countSql.length());
         }
 
-        int firstFromIndex = firstFromIndex(countSql.toString(), 0);
-        String selectedColumns = countSql.substring(0, firstFromIndex);
+        int firstFromIndex = firstFromIndex(countSql);
+        int lastFromIndex = lastFromIndex(countSql);
 
-        if ((!selectedColumns.contains(" DISTINCT ") || !selectedColumns.contains(" distinct "))
-                && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
-            countSql.delete(0, firstFromIndex).insert(0, "select count(*) ");
-        } else {
-            countSql.insert(0, "select count(*) from (").append(')');
+        // 两个下标值不相等  说明有多个from
+        if (firstFromIndex != lastFromIndex) {
+            countSql.insert(0, "select count(*) from (").append(") nway_count");
+        } //
+        else {
+            String selectedColumns = countSql.substring(0, firstFromIndex);
+            if (!(selectedColumns.contains(" distinct ") || selectedColumns.contains(" DISTINCT "))
+                    && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
+                countSql.delete(0, firstFromIndex).insert(0, "select count(*) ");
+            } else {
+                countSql.insert(0, "select count(*) from (").append(") nway_count");
+            }
         }
 
         return countSql.toString();
@@ -544,7 +552,7 @@ public class SqlExecutor implements InitializingBean {
 
     private void initPaginationSupport() {
         Connection conn = null;
-        String databaseProductName = "";
+        String databaseProductName;
         try {
             conn = dataSource.getConnection();
             databaseProductName = conn.getMetaData().getDatabaseProductName().toUpperCase();
@@ -632,10 +640,30 @@ public class SqlExecutor implements InitializingBean {
         }
     }
 
-    private int firstFromIndex(String sql, int startIndex) {
-        int fromIndex = sql.indexOf(" from ", startIndex);
+    /**
+     * from 大小写混合时，如果大写form在小写后会导致问题，但是非常规，不考虑
+     *
+     * @param sql
+     * @return
+     */
+    private int firstFromIndex(StringBuilder sql) {
+        int fromIndex = sql.indexOf(" from ");
 		if (fromIndex == -1) {
-			fromIndex = sql.indexOf(" FROM ", startIndex);
+			fromIndex = sql.indexOf(" FROM ");
+		}
+        return fromIndex;
+    }
+
+    /**
+     * from 大小写混合时，如果大写form在小写后会导致问题，但是非常规，不考虑
+     *
+     * @param sql
+     * @return
+     */
+    private int lastFromIndex(StringBuilder sql) {
+        int fromIndex = sql.lastIndexOf(" from ");
+		if (fromIndex == -1) {
+			fromIndex = sql.lastIndexOf(" FROM ");
 		}
         return fromIndex;
     }
