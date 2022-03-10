@@ -79,6 +79,9 @@ public class ExampleEntity {
 	@com.nway.spring.jdbc.annotation.Column(name = "mv", type = ColumnType.MULTI_VALUE)
 	private List<String> mv;
 
+	@com.nway.spring.jdbc.annotation.Column(name = "mv2", type = ColumnType.MULTI_VALUE)
+	private List<String> mv2;
+
 	@Transient
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private List<String> list = Collections.singletonList("aa");
@@ -328,6 +331,15 @@ public class ExampleEntity {
 
 	public void setMv(List<String> mv) {
 		this.mv = mv;
+	}
+
+	@Transient
+	public List<String> getMv2() {
+		return mv2;
+	}
+
+	public void setMv2(List<String> mv2) {
+		this.mv2 = mv2;
 	}
 
 	@Transient

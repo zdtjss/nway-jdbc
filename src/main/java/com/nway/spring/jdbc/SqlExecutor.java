@@ -237,16 +237,13 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
-        T bean = jdbcTemplate.query(sql, params, getSqlType(params), new BeanHandler<>(type, beanProcessor));
-        // 默认不查子表数据
-//        fillMultiValue(queryBuilder, Collections.singletonList(bean));
-        return bean;
+        return jdbcTemplate.query(sql, params, getSqlType(params), new BeanHandler<>(type, beanProcessor));
     }
 
     public <T> T queryById(Serializable id, Class<T> type, String... mvColNames) {
         ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
         ((QueryBuilder<T>) queryBuilder).withMVColumn(mvColNames);
-        T bean = queryFirst(queryBuilder);
+        T bean = queryById(id, type);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
     }
@@ -255,7 +252,7 @@ public class SqlExecutor implements InitializingBean {
     public final <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
         ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
         ((QueryBuilder<T>) queryBuilder).withMVColumn(mvFields);
-        T bean = queryFirst(queryBuilder);
+        T bean = queryById(id, type);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
     }

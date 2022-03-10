@@ -220,6 +220,7 @@ class SqlExecutorTest extends BaseTest {
     void mvInsertTest() {
         ExampleEntity obj = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getId));
         obj.setMv(Arrays.asList(UUID.randomUUID().toString().substring(0, 3), "2", UUID.randomUUID().toString().substring(0, 3)));
+        obj.setMv2(Arrays.asList(UUID.randomUUID().toString().substring(0, 3), "2", UUID.randomUUID().toString().substring(0, 3)));
         obj.setId(obj.getId() + 1);
         sqlExecutor.insert(obj);
         Assertions.assertFalse(obj.getMv().isEmpty());
@@ -229,8 +230,9 @@ class SqlExecutorTest extends BaseTest {
     void mvQueryTest() {
         mvInsertTest();
         List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv", String.class);
-        ExampleEntity obj = sqlExecutor.queryById(fks.get(0), ExampleEntity.class, ExampleEntity::getMv);
+        ExampleEntity obj = sqlExecutor.queryById(fks.get(0), ExampleEntity.class, ExampleEntity::getMv, ExampleEntity::getMv2);
         Assertions.assertFalse(obj.getMv().isEmpty());
+        Assertions.assertFalse(obj.getMv2().isEmpty());
     }
 
     @Test
@@ -239,6 +241,7 @@ class SqlExecutorTest extends BaseTest {
         List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv", String.class);
         ExampleEntity obj = sqlExecutor.queryById(fks.get(0), ExampleEntity.class, "mv");
         Assertions.assertFalse(obj.getMv().isEmpty());
+        Assertions.assertNull(obj.getMv2());
     }
 
     @Test
@@ -247,6 +250,7 @@ class SqlExecutorTest extends BaseTest {
         List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv", String.class);
         ExampleEntity obj = sqlExecutor.queryById(fks.get(0), ExampleEntity.class);
         Assertions.assertNull(obj.getMv());
+        Assertions.assertNull(obj.getMv2());
     }
 
     @Test
@@ -254,15 +258,29 @@ class SqlExecutorTest extends BaseTest {
         List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv limit 10", String.class);
         List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).withMVColumn(ExampleEntity::getMv).in(ExampleEntity::getId, fks));
         boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv() != null && !obj.getMv().isEmpty());
+        boolean anyMatch2 = objectList.stream().anyMatch(obj -> obj.getMv2() != null && !obj.getMv2().isEmpty());
         Assertions.assertTrue(anyMatch);
+        Assertions.assertFalse(anyMatch2);
     }
 
     @Test
     void mvListTest2() {
         List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv limit 10", String.class);
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).withMVColumn(ExampleEntity::getMv, ExampleEntity::getMv2).in(ExampleEntity::getId, fks));
+        boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv() != null && !obj.getMv().isEmpty());
+        boolean anyMatch2 = objectList.stream().anyMatch(obj -> obj.getMv2() != null && !obj.getMv2().isEmpty());
+        Assertions.assertTrue(anyMatch);
+        Assertions.assertTrue(anyMatch2);
+    }
+
+    @Test
+    void mvListTest3() {
+        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv limit 10", String.class);
         List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).in(ExampleEntity::getId, fks));
         boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv() == null || obj.getMv().isEmpty());
+        boolean anyMatch2 = objectList.stream().anyMatch(obj -> obj.getMv2() == null || obj.getMv2().isEmpty());
         Assertions.assertTrue(anyMatch);
+        Assertions.assertTrue(anyMatch2);
     }
 
     @Test
