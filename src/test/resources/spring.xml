@@ -141,7 +141,7 @@
     </bean>-->
 
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
-        <property name="url" value="jdbc:mysql://localhost:3306/nway?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false" />
+        <property name="url" value="jdbc:mysql://localhost:3306/nway?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
         <property name="username" value="root" />
         <property name="password" value="Nway@2022" />
 

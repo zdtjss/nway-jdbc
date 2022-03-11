@@ -7,9 +7,8 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class QueryBuilder<T> extends SqlBuilder {
+public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder {
 
     private boolean ignorePower = false;
 
@@ -73,6 +72,7 @@ public class QueryBuilder<T> extends SqlBuilder {
         return columns;
     }
 
+    @Override
     public List<String> getMultiValColumn() {
         return multiValColumn;
     }

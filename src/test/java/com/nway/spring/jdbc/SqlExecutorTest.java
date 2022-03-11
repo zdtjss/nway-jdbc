@@ -3,12 +3,10 @@ package com.nway.spring.jdbc;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.test.context.jdbc.Sql;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -95,7 +93,7 @@ class SqlExecutorTest extends BaseTest {
         Assertions.assertEquals(exampleDb.getString(), exampleEntity.getString());
     }
 
-//    @Test
+    //    @Test
     void insertAndGetKey() {
         ExampleEntity exampleEntity = new ExampleEntity();
         exampleEntity.setString(UUID.randomUUID().toString());
@@ -391,7 +389,7 @@ class SqlExecutorTest extends BaseTest {
         exampleEntity.setString("strcolumn");
 
         SqlBuilder builder = SQL.query(ExampleEntity.class)
-                
+
                 .eq(ExampleEntity::getId, 1)
                 .eq(exampleEntity::getId)
                 .eq("pk_id", exampleEntity.getId())

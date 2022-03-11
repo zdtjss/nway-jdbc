@@ -64,6 +64,7 @@ import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
 import com.nway.spring.jdbc.sql.builder.BatchUpdateByIdBuilder;
 import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
+import com.nway.spring.jdbc.sql.builder.MultiValQueryBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.UpdateBeanBuilder;
 import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
@@ -269,9 +270,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(args));
         }
-        T bean = jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<>(type, beanProcessor));
-//        fillMultiValue(sql, type, Collections.singletonList(bean));
-        return bean;
+        return jdbcTemplate.query(sql, args, getSqlType(args), new BeanHandler<>(type, beanProcessor));
     }
 
     /**
@@ -351,9 +350,7 @@ public class SqlExecutor implements InitializingBean {
 
     public <T> List<T> queryList(List<? extends Serializable> ids, Class<T> type) {
         ISqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
-        List<T> dataList = queryList(queryBuilder);
-        fillMultiValue(queryBuilder, dataList);
-        return dataList;
+        return queryList(queryBuilder);
     }
 
     /**
@@ -388,7 +385,6 @@ public class SqlExecutor implements InitializingBean {
         if (isDebugEnabled) {
             logger.debug("total = " + (retVal == null ? 0 : retVal.size()));
         }
-//        fillMultiValue(sql, type, retVal);
         return retVal;
     }
 
@@ -670,11 +666,11 @@ public class SqlExecutor implements InitializingBean {
             return;
         }
         List<String> multiValColumn = null;
-        if(queryBuilder instanceof QueryBuilder) {
-            multiValColumn = ((QueryBuilder) queryBuilder).getMultiValColumn();
-            if (CollectionUtils.isEmpty(multiValColumn)) {
-                return;
-            }
+        if(queryBuilder instanceof MultiValQueryBuilder) {
+            multiValColumn = ((MultiValQueryBuilder) queryBuilder).getMultiValColumn();
+        }
+        if (CollectionUtils.isEmpty(multiValColumn)) {
+            return;
         }
         Class<T> type = queryBuilder.getBeanClass();
         List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
