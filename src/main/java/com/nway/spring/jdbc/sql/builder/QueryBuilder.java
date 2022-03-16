@@ -11,7 +11,7 @@ import java.util.List;
 public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder {
 
     private boolean ignorePower = false;
-
+    private String distinct = "";
     private final List<String> columns = new ArrayList<>();
     private final List<String> excludeColumns = new ArrayList<>();
     private final List<String> multiValColumn = new ArrayList<>();
@@ -20,8 +20,8 @@ public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder 
         super(beanClass);
     }
 
-    public SqlBuilder distinct() {
-        getPreWhere().append(" distinct ");
+    public QueryBuilder<T> distinct() {
+        this.distinct = " distinct ";
         return this;
     }
 
@@ -88,11 +88,11 @@ public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder 
     private String getSelectStmt() {
         StringBuilder sql = new StringBuilder(64);
         if (getColumns().size() > 0) {
-            sql.append("select ").append(String.join(",", getColumns())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+            sql.append("select ").append(this.distinct).append(String.join(",", getColumns())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         } else {
             EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
             entityInfo.getColumnList().removeAll(excludeColumns);
-            sql.append("select ").append(String.join(",", entityInfo.getColumnList())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+            sql.append("select ").append(this.distinct).append(String.join(",", entityInfo.getColumnList())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         }
         return sql.toString();
     }

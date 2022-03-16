@@ -2,6 +2,7 @@ package com.nway.spring.jdbc;
 
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
+import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -193,7 +194,11 @@ class SqlExecutorTest extends BaseTest {
     @Test
     void testQueryPage2() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
-        Page<ExampleEntity> mapPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class).eq(example::getId).orderBy(ExampleEntity::getUtilDate, ExampleEntity::getString), 1, 1);
+        QueryBuilder<ExampleEntity> queryBuilder = SQL.query(ExampleEntity.class);
+        queryBuilder.distinct().withColumn(ExampleEntity::getId,ExampleEntity::getUtilDate, ExampleEntity::getString)
+                .eq(example::getId)
+                .orderBy(ExampleEntity::getUtilDate, ExampleEntity::getString);
+        Page<ExampleEntity> mapPage = sqlExecutor.queryPage(queryBuilder, 1, 1);
         Assertions.assertEquals(mapPage.getPageData().size(), 1);
         Assertions.assertEquals(mapPage.getPageData().get(0).getId(), example.getId());
     }

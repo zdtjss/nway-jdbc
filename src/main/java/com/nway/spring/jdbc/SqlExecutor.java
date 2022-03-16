@@ -498,30 +498,20 @@ public class SqlExecutor implements InitializingBean {
 
         StringBuilder countSql = new StringBuilder(sql);
 
-        // order by 大小写混合  最后一个不是小写的时候  有问题  非常规情况  不考虑
-       /* if (SQL_ORDER_BY_PATTERN.matcher(sql).matches()) {
-            int orderIdx = countSql.lastIndexOf(" order ");
-            countSql.delete(orderIdx == -1 ? countSql.lastIndexOf(" ORDER ") : orderIdx, countSql.length());
-        }*/
         int indexOfOrderBy = indexOfOrderBy(sql);
         if (indexOfOrderBy == -1) {
-            indexOfOrderBy = indexOfOrderByUpper(sql);
-        }
-        if (indexOfOrderBy != -1) {
             countSql.delete(indexOfOrderBy - 9, countSql.length());
         }
 
-        int firstFromIndex = firstFromIndex(countSql);
-        int lastFromIndex = lastFromIndex(countSql);
+        int firstFromIndex = countSql.indexOf(" from ");
+        int lastFromIndex = countSql.lastIndexOf(" from ");
 
         // 两个下标值不相等  说明有多个from
         if (firstFromIndex != lastFromIndex) {
             countSql.insert(0, "select count(*) from (").append(") nway_count");
         } //
         else {
-            String selectedColumns = countSql.substring(0, firstFromIndex);
-            if (!(selectedColumns.contains(" distinct ") || selectedColumns.contains(" DISTINCT "))
-                    && !SQL_TOP_PATTERN.matcher(selectedColumns).matches()) {
+            if (indexOfDistinct(sql, firstFromIndex) != -1) {
                 countSql.delete(0, firstFromIndex).insert(0, "select count(*) ");
             } else {
                 countSql.insert(0, "select count(*) from (").append(") nway_count");
@@ -561,23 +551,28 @@ public class SqlExecutor implements InitializingBean {
         return idx;
     }
 
-    private int indexOfOrderByUpper(String sql) {
-
+    /**
+     * SELECT DISTINCT column_name,column_name FROM table_name;
+     * <p>
+     * 匹配到 “ distinct ” 即可
+     *
+     * @param sql
+     * @return
+     */
+    private int indexOfDistinct(String sql, int end) {
         int idx = -1;
-        char[] orderChar = new char[]{' ', 'R', 'E', 'D', 'R', 'O'};
+        char[] disChar = new char[]{'i', 's', 't', 'i', 'n', 'c', 't', ' '};
 
         char[] sqlChars = sql.toCharArray();
         outer:
-        for (int i = sqlChars.length - 1; i > -1; i--) {
-            // etad_noitcudorp yb redro rotinom_t morf  ==> from t_monitor order by production_date
-            if (i + 2 < sqlChars.length && sqlChars[i] == 'Y' && sqlChars[i - 1] == 'B' && sqlChars[i + 1] == ' ' && sqlChars[i - 2] == ' ') {
-                // 如果匹配到 by  则继续匹配 order
-                for (int n = 0; n < orderChar.length; n++) {
-                    if (sqlChars[i - n - 2] != orderChar[n]) {
-                        break;
-                    }
-                    if (n == orderChar.length - 1) {
-                        idx = i;
+        // select 之后
+        for (int i = 6; i < end; i++) {
+            // select distinct id from abc
+            if (i + 10 < end && sqlChars[i] == ' ' && sqlChars[i + 1] == 'd') {
+                // 继续匹配 instinct
+                for (int n = 0; n < disChar.length; n++) {
+                    if (sqlChars[i + n + 2] != disChar[n]) {
+                        idx = i + n;
                         break outer;
                     }
                 }
