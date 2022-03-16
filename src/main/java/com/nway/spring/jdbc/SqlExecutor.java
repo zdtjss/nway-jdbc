@@ -13,25 +13,19 @@
  */
 package com.nway.spring.jdbc;
 
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import javax.sql.DataSource;
-
+import com.nway.spring.jdbc.bean.BeanHandler;
+import com.nway.spring.jdbc.bean.BeanListHandler;
+import com.nway.spring.jdbc.bean.processor.BeanProcessor;
+import com.nway.spring.jdbc.bean.processor.ColumnMapRowMapper;
+import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
+import com.nway.spring.jdbc.pagination.*;
+import com.nway.spring.jdbc.sql.SQL;
+import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.builder.*;
+import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
+import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,29 +41,16 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import com.nway.spring.jdbc.bean.BeanHandler;
-import com.nway.spring.jdbc.bean.BeanListHandler;
-import com.nway.spring.jdbc.bean.processor.BeanProcessor;
-import com.nway.spring.jdbc.bean.processor.ColumnMapRowMapper;
-import com.nway.spring.jdbc.bean.processor.DefaultBeanProcessor;
-import com.nway.spring.jdbc.pagination.MysqlPaginationSupport;
-import com.nway.spring.jdbc.pagination.OraclePaginationSupport;
-import com.nway.spring.jdbc.pagination.Page;
-import com.nway.spring.jdbc.pagination.PageDialect;
-import com.nway.spring.jdbc.pagination.PaginationSupport;
-import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.SqlBuilderUtils;
-import com.nway.spring.jdbc.sql.SqlType;
-import com.nway.spring.jdbc.sql.builder.BatchInsertBuilder;
-import com.nway.spring.jdbc.sql.builder.BatchUpdateByIdBuilder;
-import com.nway.spring.jdbc.sql.builder.DeleteBuilder;
-import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
-import com.nway.spring.jdbc.sql.builder.MultiValQueryBuilder;
-import com.nway.spring.jdbc.sql.builder.QueryBuilder;
-import com.nway.spring.jdbc.sql.builder.UpdateBeanBuilder;
-import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
-import com.nway.spring.jdbc.sql.function.SFunction;
-import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import javax.sql.DataSource;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 注意：
@@ -518,9 +499,16 @@ public class SqlExecutor implements InitializingBean {
         StringBuilder countSql = new StringBuilder(sql);
 
         // order by 大小写混合  最后一个不是小写的时候  有问题  非常规情况  不考虑
-        if (SQL_ORDER_BY_PATTERN.matcher(sql).matches()) {
+       /* if (SQL_ORDER_BY_PATTERN.matcher(sql).matches()) {
             int orderIdx = countSql.lastIndexOf(" order ");
             countSql.delete(orderIdx == -1 ? countSql.lastIndexOf(" ORDER ") : orderIdx, countSql.length());
+        }*/
+        int indexOfOrderBy = indexOfOrderBy(sql);
+        if (indexOfOrderBy == -1) {
+            indexOfOrderBy = indexOfOrderByUpper(sql);
+        }
+        if (indexOfOrderBy != -1) {
+            countSql.delete(indexOfOrderBy - 9, countSql.length());
         }
 
         int firstFromIndex = firstFromIndex(countSql);
@@ -541,6 +529,61 @@ public class SqlExecutor implements InitializingBean {
         }
 
         return countSql.toString();
+    }
+
+    /**
+     *
+     * @param sql
+     * @return
+     */
+    private int indexOfOrderBy(String sql) {
+
+        int idx = -1;
+        char[] orderChar = new char[]{' ', 'r', 'e', 'd', 'r', 'o'};
+
+        char[] sqlChars = sql.toCharArray();
+        outer:
+        for (int i = sqlChars.length - 1; i > -1; i--) {
+            // etad_noitcudorp yb redro rotinom_t morf  ==> from t_monitor order by production_date
+            if (i + 2 < sqlChars.length && sqlChars[i] == 'y' && sqlChars[i - 1] == 'b' && sqlChars[i + 1] == ' ' && sqlChars[i - 2] == ' ') {
+                // 如果匹配到 by  则继续匹配 order
+                for (int n = 0; n < orderChar.length; n++) {
+                    if (sqlChars[i - n - 2] != orderChar[n] ) {
+                        break;
+                    }
+                    if (n == orderChar.length - 1) {
+                        idx = i;
+                        break outer;
+                    }
+                }
+            }
+        }
+        return idx;
+    }
+
+    private int indexOfOrderByUpper(String sql) {
+
+        int idx = -1;
+        char[] orderChar = new char[]{' ', 'R', 'E', 'D', 'R', 'O'};
+
+        char[] sqlChars = sql.toCharArray();
+        outer:
+        for (int i = sqlChars.length - 1; i > -1; i--) {
+            // etad_noitcudorp yb redro rotinom_t morf  ==> from t_monitor order by production_date
+            if (i + 2 < sqlChars.length && sqlChars[i] == 'Y' && sqlChars[i - 1] == 'B' && sqlChars[i + 1] == ' ' && sqlChars[i - 2] == ' ') {
+                // 如果匹配到 by  则继续匹配 order
+                for (int n = 0; n < orderChar.length; n++) {
+                    if (sqlChars[i - n - 2] != orderChar[n]) {
+                        break;
+                    }
+                    if (n == orderChar.length - 1) {
+                        idx = i;
+                        break outer;
+                    }
+                }
+            }
+        }
+        return idx;
     }
 
     private void initPaginationSupport() {

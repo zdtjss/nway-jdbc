@@ -193,7 +193,7 @@ class SqlExecutorTest extends BaseTest {
     @Test
     void testQueryPage2() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
-        Page<ExampleEntity> mapPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class).eq(example::getId), 1, 1);
+        Page<ExampleEntity> mapPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class).eq(example::getId).orderBy(ExampleEntity::getUtilDate, ExampleEntity::getString), 1, 1);
         Assertions.assertEquals(mapPage.getPageData().size(), 1);
         Assertions.assertEquals(mapPage.getPageData().get(0).getId(), example.getId());
     }
