@@ -499,7 +499,8 @@ public class SqlExecutor implements InitializingBean {
         StringBuilder countSql = new StringBuilder(sql);
 
         int indexOfOrderBy = indexOfOrderBy(sql);
-        if (indexOfOrderBy == -1) {
+        if (indexOfOrderBy != -1) {
+            // 9 是order by的长度
             countSql.delete(indexOfOrderBy - 9, countSql.length());
         }
 
