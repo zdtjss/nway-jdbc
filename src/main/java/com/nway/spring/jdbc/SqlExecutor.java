@@ -76,14 +76,6 @@ public class SqlExecutor implements InitializingBean {
     private BeanProcessor beanProcessor;
 
     private static final ColumnMapRowMapper COLUMN_MAP_ROW_MAPPER = new ColumnMapRowMapper();
-    /**
-     * 最后一个不以 ) 结尾的 order by 匹配正则 <br>
-     */
-    private static final Pattern SQL_ORDER_BY_PATTERN = Pattern.compile(".+\\p{Blank}+(order|ORDER)\\p{Blank}+(by|BY)[\\,\\p{Blank}\\w\\.]+");
-    /**
-     * SQL 语句中top匹配
-     */
-    private static final Pattern SQL_TOP_PATTERN = Pattern.compile(".+\\p{Blank}+(top|TOP)\\p{Blank}+\\d+\\p{Blank}+.+");
 
     public SqlExecutor() {
     }
@@ -511,14 +503,11 @@ public class SqlExecutor implements InitializingBean {
         if (firstFromIndex != lastFromIndex) {
             countSql.insert(0, "select count(*) from (").append(") nway_count");
         } //
-        else {
-            if (indexOfDistinct(sql, firstFromIndex) != -1) {
-                countSql.delete(0, firstFromIndex).insert(0, "select count(*) ");
-            } else {
-                countSql.insert(0, "select count(*) from (").append(") nway_count");
-            }
+        else if (indexOfDistinct(sql, firstFromIndex) == -1) {
+            countSql.delete(0, firstFromIndex).insert(0, "select count(*) ");
+        } else {
+            countSql.insert(0, "select count(*) from (").append(") nway_count");
         }
-
         return countSql.toString();
     }
 
