@@ -500,8 +500,8 @@ public class SqlExecutor implements InitializingBean {
 
         int indexOfOrderBy = indexOfOrderBy(sql);
         if (indexOfOrderBy != -1) {
-            // 9 是order by的长度
-            countSql.delete(indexOfOrderBy - 9, countSql.length());
+            // 8 是order by的长度
+            countSql.delete(indexOfOrderBy - 8, countSql.length());
         }
 
         int firstFromIndex = countSql.indexOf(" from ");
