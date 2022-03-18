@@ -519,7 +519,7 @@ public class SqlExecutor implements InitializingBean {
     private int indexOfOrderBy(String sql) {
 
         int idx = -1;
-        char[] orderChar = new char[]{' ', 'r', 'e', 'd', 'r', 'o'};
+        char[] orderChar = new char[]{'r', 'e', 'd', 'r', 'o'};
 
         char[] sqlChars = sql.toCharArray();
         outer:
@@ -532,10 +532,10 @@ public class SqlExecutor implements InitializingBean {
             if (i + 2 < sqlChars.length && sqlChars[i] == 'y' && sqlChars[i - 1] == 'b' && sqlChars[i + 1] == ' ' && sqlChars[i - 2] == ' ') {
                 // 如果匹配到 by  则继续匹配 order
                 for (int n = 0; n < orderChar.length; n++) {
-                    if (sqlChars[i - n - 2] != orderChar[n] ) {
+                    if (sqlChars[i - n - 3] != orderChar[n] ) {
                         break;
                     }
-                    if (n == orderChar.length - 1) {
+                    if (n == orderChar.length - 1 && (sqlChars[i - n - 4] == ' ' || sqlChars[i - n - 4] == '\n')) {
                         idx = i;
                         break outer;
                     }
