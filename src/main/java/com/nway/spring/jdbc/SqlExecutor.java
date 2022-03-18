@@ -524,6 +524,10 @@ public class SqlExecutor implements InitializingBean {
         char[] sqlChars = sql.toCharArray();
         outer:
         for (int i = sqlChars.length - 1; i > -1; i--) {
+            // 如果发现 ) 则认为order by不可删除，则不查询order by位置
+            if (sqlChars[i] == ')') {
+                break;
+            }
             // etad_noitcudorp yb redro rotinom_t morf  ==> from t_monitor order by production_date
             if (i + 2 < sqlChars.length && sqlChars[i] == 'y' && sqlChars[i - 1] == 'b' && sqlChars[i + 1] == ' ' && sqlChars[i - 2] == ' ') {
                 // 如果匹配到 by  则继续匹配 order
