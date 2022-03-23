@@ -8,6 +8,7 @@ import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -43,6 +44,11 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
             }
         }
         this.param.addAll(batchParam);
+        return this;
+    }
+
+    public BatchUpdateByIdBuilder columns(String... columns) {
+        columnNameList.addAll(Arrays.asList(columns));
         return this;
     }
 

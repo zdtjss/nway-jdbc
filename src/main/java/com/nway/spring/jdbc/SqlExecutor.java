@@ -25,6 +25,7 @@ import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.builder.*;
 import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
 import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,16 +112,36 @@ public class SqlExecutor implements InitializingBean {
         return count;
     }
 
+    public <T> int batchUpdateById(List<?> objs) {
+        return batchUpdateById(objs, new String[0]);
+    }
+
+    @SafeVarargs
+    public final <T> int batchUpdateById(List<?> objs, SSupplier<T>... columns) {
+        Class<?> beanClass = objs.get(0).getClass();
+        String[] columnArr = Arrays.stream(columns)
+                .map(column -> SqlBuilderUtils.getColumn(beanClass, column)).toArray(String[]::new);
+        return batchUpdateById(objs, columnArr);
+    }
+
+    @SafeVarargs
+    public final <T, R> int batchUpdateById(List<?> objs, SFunction<T, R>... columns) {
+        Class<?> beanClass = objs.get(0).getClass();
+        String[] columnArr = Arrays.stream(columns)
+                .map(column -> SqlBuilderUtils.getColumn(beanClass, column)).toArray(String[]::new);
+        return batchUpdateById(objs, columnArr);
+    }
+
     /**
      * @param objs beans
      * @return
      */
-    public int batchUpdateById(List<?> objs) {
+    public int batchUpdateById(List<?> objs, String... columns) {
         if (objs == null || objs.size() == 0) {
             return 0;
         }
         Class<?> beanClass = objs.get(0).getClass();
-        ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).use(objs);
+        ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).columns(columns).use(objs);
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();
         if (isDebugEnabled) {

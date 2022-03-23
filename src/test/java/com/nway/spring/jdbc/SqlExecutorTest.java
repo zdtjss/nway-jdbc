@@ -66,6 +66,20 @@ class SqlExecutorTest extends BaseTest {
     }
 
     @Test
+    void batchUpdateById2() {
+        Page<ExampleEntity> examplePage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
+        List<ExampleEntity> exampleList = examplePage.getPageData().stream().map(entity -> {
+            ExampleEntity example = new ExampleEntity();
+            example.setId(entity.getId());
+            example.setString(UUID.randomUUID().toString());
+            return example;
+        }).collect(Collectors.toList());
+        sqlExecutor.batchUpdateById(exampleList, ExampleEntity::getString);
+        ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
+        Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
+    }
+
+    @Test
     void deleteById() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         int effectCount = sqlExecutor.deleteById(example.getId(), ExampleEntity.class);
