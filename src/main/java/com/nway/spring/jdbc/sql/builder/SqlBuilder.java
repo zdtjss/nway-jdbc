@@ -47,7 +47,7 @@ public class SqlBuilder implements ISqlBuilder {
     }
 
     /**
-     * 设置为true后，需要自己判断参数是否为空
+     * 设置为false后，需要自己判断参数是否为空
      */
     public SqlBuilder ignoreInvalid(boolean ignoreInvalid) {
         this.ignoreInvalid = ignoreInvalid;
