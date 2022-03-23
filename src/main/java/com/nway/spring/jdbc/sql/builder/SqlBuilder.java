@@ -649,7 +649,7 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T> SqlBuilder having(Consumer<SqlBuilder> lambdaWhereBuilder) {
+    public SqlBuilder having(Consumer<SqlBuilder> lambdaWhereBuilder) {
         SqlBuilder lq = new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();

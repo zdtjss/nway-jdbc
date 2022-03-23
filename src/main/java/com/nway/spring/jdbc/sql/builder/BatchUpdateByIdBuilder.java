@@ -2,6 +2,8 @@ package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.function.SFunction;
+import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
@@ -23,7 +25,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
         this.beanClass = beanClass;
     }
 
-    public ISqlBuilder use(List<?> data) {
+    public BatchUpdateByIdBuilder use(List<?> data) {
         this.data = data;
         List<List<Object>> batchParam = new ArrayList<>(data.size());
         for (int i = 0; i < data.size(); i++) {
@@ -41,6 +43,22 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
             }
         }
         this.param.addAll(batchParam);
+        return this;
+    }
+
+    @SafeVarargs
+    public final <T> BatchUpdateByIdBuilder columns(SSupplier<T>... columns) {
+        for (SSupplier<T> column : columns) {
+            columnNameList.add(SqlBuilderUtils.getColumn(this.beanClass, column));
+        }
+        return this;
+    }
+
+    @SafeVarargs
+    public final <T, R> BatchUpdateByIdBuilder columns(SFunction<T, R>... columns) {
+        for (SFunction<T, R> column : columns) {
+            columnNameList.add(SqlBuilderUtils.getColumn(this.beanClass, column));
+        }
         return this;
     }
 
