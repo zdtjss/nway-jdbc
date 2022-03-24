@@ -4,6 +4,7 @@ import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
+import com.nway.spring.jdbc.sql.builder.UpdateBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -491,7 +492,9 @@ class SqlExecutorTest extends BaseTest {
     @Test
     public void updateSqlTest() {
 
-        SqlBuilder sqlBuilder = SQL.update(ExampleEntity.class).ignoreInvalid(true).set(ExampleEntity::getString, null).set(ExampleEntity::getId, "");
+        UpdateBuilder sqlBuilder = SQL.update(ExampleEntity.class);
+        sqlBuilder.ignoreInvalid(true);
+        sqlBuilder.set(ExampleEntity::getString, null).set(ExampleEntity::getId, "");
         Assertions.assertFalse(sqlBuilder.getSql().contains(" string = "));
         Assertions.assertTrue(sqlBuilder.getSql().contains(" pk_id = "));
     }

@@ -20,8 +20,7 @@ public class UpdateBuilder extends SqlBuilder {
         initFilled();
     }
 
-    @Override
-    public <T> SqlBuilder set(SSupplier<T> val) {
+    public <T> UpdateBuilder set(SSupplier<T> val) {
         if(isInvalid(val.get())) {
             return this;
         }
@@ -30,8 +29,7 @@ public class UpdateBuilder extends SqlBuilder {
         return this;
     }
 
-    @Override
-    public <T, R> SqlBuilder set(SFunction<T, R> column, Object val) {
+    public <T, R> UpdateBuilder set(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
             return this;
         }
