@@ -112,16 +112,15 @@ public class SqlExecutor implements InitializingBean {
         return count;
     }
 
+    /**
+     * 注意：此方法将更新所有字段
+     *
+     * @param objs
+     * @param <T>
+     * @return
+     */
     public <T> int batchUpdateById(List<?> objs) {
         return batchUpdateById(objs, new String[0]);
-    }
-
-    @SafeVarargs
-    public final <T> int batchUpdateById(List<?> objs, SSupplier<T>... columns) {
-        Class<?> beanClass = objs.get(0).getClass();
-        String[] columnArr = Arrays.stream(columns)
-                .map(column -> SqlBuilderUtils.getColumn(beanClass, column)).toArray(String[]::new);
-        return batchUpdateById(objs, columnArr);
     }
 
     @SafeVarargs
@@ -149,6 +148,20 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params.toArray()));
         }
         saveMultiValue(beanClass, objs, true);
+        int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
+        return (int) Arrays.stream(effect).filter(c -> c > 0).count();
+    }
+
+    public int batchUpdate(ISqlBuilder sqlBuilder) {
+        String sql = sqlBuilder.getSql();
+        List params = sqlBuilder.getParam();
+        if (isDebugEnabled) {
+            logger.debug("sql = " + sql);
+            logger.debug("params = " + objToStr(params.toArray()));
+        }
+        if (sqlBuilder instanceof BatchUpdateBuilder) {
+            saveMultiValue(sqlBuilder.getBeanClass(), ((BatchUpdateBuilder) sqlBuilder).getData(), true);
+        }
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
         return (int) Arrays.stream(effect).filter(c -> c > 0).count();
     }

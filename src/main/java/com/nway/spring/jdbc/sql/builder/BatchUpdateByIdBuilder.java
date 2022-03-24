@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
     protected List<?> data;
-    protected StringBuilder sql = new StringBuilder();
     protected List<Object> param = new ArrayList<>();
     private List<String> columnNameList = new ArrayList<>();
     protected Class beanClass;
@@ -73,12 +72,12 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ");
+        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         int initLength = sql.length();
 
         List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
         for (String col : columnList) {
-            sql.append(col).append(" = ?,");
+            sql.append(" set ").append(col).append(" = ?,");
         }
         if (sql.length() > initLength) {
             sql.deleteCharAt(sql.length() - 1);

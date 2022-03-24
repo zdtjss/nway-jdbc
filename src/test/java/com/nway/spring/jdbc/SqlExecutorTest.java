@@ -2,6 +2,7 @@ package com.nway.spring.jdbc;
 
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
+import com.nway.spring.jdbc.sql.builder.BatchUpdateBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import com.nway.spring.jdbc.sql.builder.SqlBuilder;
 import com.nway.spring.jdbc.sql.builder.UpdateBuilder;
@@ -77,6 +78,27 @@ class SqlExecutorTest extends BaseTest {
             return example;
         }).collect(Collectors.toList());
         sqlExecutor.batchUpdateById(exampleList, ExampleEntity::getPpInt, ExampleEntity::getString);
+        ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
+        Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
+    }
+
+    @Test
+    void batchUpdate() {
+        Page<ExampleEntity> examplePage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
+        List<ExampleEntity> exampleList = examplePage.getPageData().stream().map(entity -> {
+            ExampleEntity example = new ExampleEntity();
+            example.setId(entity.getId());
+            example.setSqlDate(entity.getSqlDate());
+            example.setString(UUID.randomUUID().toString());
+            example.setPpInt((int) (Math.random() * 1000));
+            return example;
+        }).collect(Collectors.toList());
+        BatchUpdateBuilder updateBuilder = SQL.batchUpdate(ExampleEntity.class)
+                .columns(ExampleEntity::getPpInt, ExampleEntity::getString)
+                .addCondition(ExampleEntity::getId, "=")
+                .addCondition(ExampleEntity::getSqlDate, "=")
+                .use(exampleList);
+        sqlExecutor.batchUpdate(updateBuilder);
         ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
         Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
     }
