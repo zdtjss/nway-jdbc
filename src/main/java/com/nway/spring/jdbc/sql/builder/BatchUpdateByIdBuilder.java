@@ -73,13 +73,19 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
         StringBuilder sql = new StringBuilder();
 
-        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
-        String setExp = columnList.stream().map(column -> column + " = ?").collect(Collectors.joining(","));
+        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ");
+        int initLength = sql.length();
 
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ").append(setExp).append(" where ");
+        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
+        for (String col : columnList) {
+            sql.append(col).append(" = ?,");
+        }
+        if (sql.length() > initLength) {
+            sql.deleteCharAt(sql.length() - 1);
+        }
 
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-        sql.append(entityInfo.getId().getColumnName()).append(" = ?");
+        sql.append(" where ").append(entityInfo.getId().getColumnName()).append(" = ?");
 
         for (int i = 0; i < this.param.size(); i++) {
             Object idVal = SqlBuilderUtils.getColumnValue(entityInfo.getId(), this.data.get(i), SqlType.UPDATE);

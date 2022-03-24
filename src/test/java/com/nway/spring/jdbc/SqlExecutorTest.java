@@ -72,9 +72,10 @@ class SqlExecutorTest extends BaseTest {
             ExampleEntity example = new ExampleEntity();
             example.setId(entity.getId());
             example.setString(UUID.randomUUID().toString());
+            example.setPpInt((int) (Math.random() * 1000));
             return example;
         }).collect(Collectors.toList());
-        sqlExecutor.batchUpdateById(exampleList, ExampleEntity::getString);
+        sqlExecutor.batchUpdateById(exampleList, ExampleEntity::getPpInt, ExampleEntity::getString);
         ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
         Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
     }
