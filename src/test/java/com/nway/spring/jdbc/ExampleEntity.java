@@ -74,7 +74,7 @@ public class ExampleEntity {
 	private BigDecimal bigDecimal;
 
 	@com.nway.spring.jdbc.annotation.Column(fillStrategy = LogicFieldStrategy.class, permissionStrategy = LogicFieldStrategy.class)
-	private int delFlag;
+	private Integer delFlag;
 
 	@com.nway.spring.jdbc.annotation.Column(name = "mv", type = ColumnType.MULTI_VALUE)
 	private List<String> mv;

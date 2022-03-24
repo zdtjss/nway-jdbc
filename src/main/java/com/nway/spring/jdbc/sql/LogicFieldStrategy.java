@@ -11,12 +11,12 @@ public class LogicFieldStrategy implements FillStrategy, PermissionStrategy {
 
     @Override
     public boolean isSupport(SqlType sqlType) {
-        return SqlType.DELETE == sqlType;
+        return SqlType.INSERT == sqlType || SqlType.DELETE == sqlType;
     }
 
     @Override
     public Object getValue(SqlType sqlType) {
-        return 1;
+        return SqlType.INSERT == sqlType ? 0 : 1;
     }
 
     @Override
