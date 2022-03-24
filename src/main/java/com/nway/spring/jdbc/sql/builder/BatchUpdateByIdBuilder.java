@@ -81,12 +81,12 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ");
         int initLength = sql.length();
 
         List<String> columnList = getColumnNameList(SqlBuilderUtils.getEntityInfo(beanClass));
         for (String col : columnList) {
-            sql.append(" set ").append(col).append(" = ?,");
+            sql.append(col).append(" = ?,");
         }
         if (sql.length() > initLength) {
             sql.deleteCharAt(sql.length() - 1);

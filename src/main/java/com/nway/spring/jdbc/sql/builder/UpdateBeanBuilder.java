@@ -57,7 +57,7 @@ public class UpdateBeanBuilder extends SqlBuilder {
         List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
         for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
             if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
-                    && columnInfo.getFillStrategy().isSupport(SqlType.INSERT)) {
+                    && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
                 if(!columnList.contains(columnInfo.getColumnName())) {
                     columnList.add(columnInfo.getColumnName());
                 }

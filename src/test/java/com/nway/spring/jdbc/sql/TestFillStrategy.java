@@ -6,7 +6,7 @@ public class TestFillStrategy implements FillStrategy {
 
     @Override
     public boolean isSupport(SqlType sqlType) {
-        return SqlType.INSERT.equals(sqlType);
+        return SqlType.INSERT == sqlType || SqlType.UPDATE == sqlType;
     }
 
     @Override

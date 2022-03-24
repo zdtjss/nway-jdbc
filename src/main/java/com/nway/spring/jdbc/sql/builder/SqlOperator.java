@@ -6,11 +6,13 @@ public enum SqlOperator {
     GE(">="),
     LE("<="),
     GT(">"),
-    LT("<");
+    LT("<"),
+    IS_NULL("is null"),
+    IS_NOT_NULL("is not null");
 
     private String operator;
 
-    private SqlOperator(String operator) {
+    SqlOperator(String operator) {
         this.operator = operator;
     }
 

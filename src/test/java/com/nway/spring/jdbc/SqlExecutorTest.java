@@ -55,6 +55,22 @@ class SqlExecutorTest extends BaseTest {
     }
 
     @Test
+    void updateById2() {
+
+        ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+
+        ExampleEntity exampleEntity = new ExampleEntity();
+        exampleEntity.setId(example.getId());
+        exampleEntity.setString(UUID.randomUUID().toString());
+
+        sqlExecutor.updateById(exampleEntity, ExampleEntity::getString);
+
+        ExampleEntity exampleUpdated = sqlExecutor.queryById(example.getId(), ExampleEntity.class);
+
+        Assertions.assertEquals(exampleEntity.getString(), exampleUpdated.getString());
+    }
+
+    @Test
     void batchUpdateById() {
         Page<ExampleEntity> examplePage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
         String str = UUID.randomUUID().toString();
@@ -93,10 +109,10 @@ class SqlExecutorTest extends BaseTest {
         BatchUpdateBuilder updateBuilder = SQL.batchUpdate(ExampleEntity.class)
                 .columns(ExampleEntity::getPpInt, ExampleEntity::getString)
                 .addCondition(ExampleEntity::getId, SqlOperator.EQ)
-                .addCondition(ExampleEntity::getSqlDate, SqlOperator.EQ)
+                .addCondition(ExampleEntity::getSqlDate, SqlOperator.IS_NULL)
                 .use(exampleList);
         sqlExecutor.batchUpdate(updateBuilder);
-        ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
+        ExampleEntity exampleUpdated = sqlExecutor.queryById(exampleList.get(0).getId(), ExampleEntity.class);
         Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
     }
 

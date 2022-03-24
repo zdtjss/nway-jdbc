@@ -75,7 +75,11 @@ public class BatchUpdateBuilder implements ISqlBuilder {
                 sql.append(" and ");
             }
             CondExp condExp = whereCondList.get(i);
-            sql.append(condExp.column).append(' ').append(condExp.operator).append(' ').append('?');
+            sql.append(condExp.column).append(' ').append(condExp.operator);
+            if (!(SqlOperator.IS_NULL.getOperator().equals(condExp.operator)
+                    || SqlOperator.IS_NOT_NULL.getOperator().equals(condExp.operator))) {
+                sql.append(' ').append('?');
+            }
         }
         return sql.toString();
     }
@@ -111,6 +115,10 @@ public class BatchUpdateBuilder implements ISqlBuilder {
             }
         }
         for (CondExp condExp : whereCondList) {
+            if (SqlOperator.IS_NULL.getOperator().equals(condExp.operator)
+                    || SqlOperator.IS_NOT_NULL.getOperator().equals(condExp.operator)) {
+                continue;
+            }
             ColumnInfo columnInfo = columnMap.get(condExp.column);
             for (int i = 0; i < dataSize; i++) {
                 Object columnValue = SqlBuilderUtils.getColumnValue(columnInfo, this.data.get(i), SqlType.UPDATE);
