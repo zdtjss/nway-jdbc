@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 public class BatchUpdateBuilder implements ISqlBuilder {
 
-    protected Class beanClass;
-    protected List<Object> param = new ArrayList<>();
+    private Class beanClass;
+    private List<Object> param = new ArrayList<>();
     protected List<? extends Object> data;
-    private final List<String> columnNameList = new ArrayList<>();
-    private final List<CondExp> whereCondList = new ArrayList<>();
+    protected final List<String> columnNameList = new ArrayList<>();
+    protected final List<CondExp> whereCondList = new ArrayList<>();
 
     public BatchUpdateBuilder(Class<?> beanClass) {
         this.beanClass = beanClass;
