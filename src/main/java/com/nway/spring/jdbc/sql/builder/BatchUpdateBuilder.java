@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
@@ -12,6 +13,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 请谨慎使用此类，因为where条件约束的数据可能是一个范围，此范围可能包含非预期数据。
+ */
 public class BatchUpdateBuilder implements ISqlBuilder {
 
     private Class beanClass;
@@ -37,8 +41,13 @@ public class BatchUpdateBuilder implements ISqlBuilder {
         return this;
     }
 
-    public <T, R> BatchUpdateBuilder addCondition(SFunction<T, R> column, String exp) {
-        this.whereCondList.add(new CondExp(SqlBuilderUtils.getColumn(beanClass, column), exp));
+    /**
+     * 只支持and连接，对于SqlOperator建议慎重使用范围类，最好只使用SqlOperator.EQ类型
+     *
+     * @return
+     */
+    public <T, R> BatchUpdateBuilder addCondition(SFunction<T, R> column, SqlOperator operator) {
+        this.whereCondList.add(new CondExp(SqlBuilderUtils.getColumn(beanClass, column), operator));
         return this;
     }
 
@@ -53,7 +62,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
         sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ");
         int initLength = sql.length();
 
-        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
+        List<String> columnList = getColumnNameList(SqlBuilderUtils.getEntityInfo(beanClass));
         for (String col : columnList) {
             sql.append(col).append(" = ?,");
         }
@@ -66,7 +75,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
                 sql.append(" and ");
             }
             CondExp condExp = whereCondList.get(i);
-            sql.append(condExp.column).append(' ').append(condExp.exp).append(' ').append('?');
+            sql.append(condExp.column).append(' ').append(condExp.operator).append(' ').append('?');
         }
         return sql.toString();
     }
@@ -92,7 +101,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
             batchParam.add(new ArrayList<>());
         }
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-        List<String> columnList = columnNameList.size() != 0 ? columnNameList : entityInfo.getColumnList();
+        List<String> columnList = getColumnNameList(entityInfo);
         Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap().values().stream().collect(Collectors.toMap(ColumnInfo::getColumnName, Function.identity()));
         for (String column : columnList) {
             ColumnInfo columnInfo = columnMap.get(column);
@@ -111,15 +120,27 @@ public class BatchUpdateBuilder implements ISqlBuilder {
         this.param.addAll(batchParam);
     }
 
+    private List<String> getColumnNameList(EntityInfo entityInfo) {
+        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
+        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
+            if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
+                    && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
+                if(!columnList.contains(columnInfo.getColumnName())) {
+                    columnList.add(columnInfo.getColumnName());
+                }
+            }
+        }
+        return columnList;
+    }
 
     private static class CondExp {
 
         private final String column;
-        private final String exp;
+        private final String operator;
 
-        public CondExp(String column, String exp) {
+        public CondExp(String column, SqlOperator operator) {
             this.column = column;
-            this.exp = exp;
+            this.operator = operator.getOperator();
         }
     }
 }

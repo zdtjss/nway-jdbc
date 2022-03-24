@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
@@ -32,8 +33,16 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
             batchParam.add(new ArrayList<>());
         }
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+        List<String> columnList = getColumnNameList(entityInfo);
+        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
+            if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
+                    && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
+                if(!columnList.contains(columnInfo.getColumnName())) {
+                    columnList.add(columnInfo.getColumnName());
+                }
+            }
+        }
 
-        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
         Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap().values().stream().collect(Collectors.toMap(ColumnInfo::getColumnName, Function.identity()));
         for (String column : columnList) {
             ColumnInfo columnInfo = columnMap.get(column);
@@ -75,7 +84,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
         sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         int initLength = sql.length();
 
-        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
+        List<String> columnList = getColumnNameList(SqlBuilderUtils.getEntityInfo(beanClass));
         for (String col : columnList) {
             sql.append(" set ").append(col).append(" = ?,");
         }
@@ -104,5 +113,18 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
     @Override
     public List<Object> getParam() {
         return param.stream().map(e -> ((List<Object>) e).toArray()).collect(Collectors.toList());
+    }
+
+    private List<String> getColumnNameList(EntityInfo entityInfo) {
+        List<String> columnList = columnNameList.size() != 0 ? columnNameList : SqlBuilderUtils.getColumnsWithoutId(beanClass);
+        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
+            if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
+                    && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
+                if(!columnList.contains(columnInfo.getColumnName())) {
+                    columnList.add(columnInfo.getColumnName());
+                }
+            }
+        }
+        return columnList;
     }
 }

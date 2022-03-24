@@ -152,6 +152,12 @@ public class SqlExecutor implements InitializingBean {
         return (int) Arrays.stream(effect).filter(c -> c > 0).count();
     }
 
+    /**
+     * 请谨慎使用本方法，因为where条件约束的数据可能是一个范围，此范围可能包含非预期数据。
+     *
+     * @param sqlBuilder
+     * @return
+     */
     public int batchUpdate(ISqlBuilder sqlBuilder) {
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();

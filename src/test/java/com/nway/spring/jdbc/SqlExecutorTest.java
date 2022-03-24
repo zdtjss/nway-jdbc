@@ -2,10 +2,7 @@ package com.nway.spring.jdbc;
 
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
-import com.nway.spring.jdbc.sql.builder.BatchUpdateBuilder;
-import com.nway.spring.jdbc.sql.builder.QueryBuilder;
-import com.nway.spring.jdbc.sql.builder.SqlBuilder;
-import com.nway.spring.jdbc.sql.builder.UpdateBuilder;
+import com.nway.spring.jdbc.sql.builder.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,8 +92,8 @@ class SqlExecutorTest extends BaseTest {
         }).collect(Collectors.toList());
         BatchUpdateBuilder updateBuilder = SQL.batchUpdate(ExampleEntity.class)
                 .columns(ExampleEntity::getPpInt, ExampleEntity::getString)
-                .addCondition(ExampleEntity::getId, "=")
-                .addCondition(ExampleEntity::getSqlDate, "=")
+                .addCondition(ExampleEntity::getId, SqlOperator.EQ)
+                .addCondition(ExampleEntity::getSqlDate, SqlOperator.EQ)
                 .use(exampleList);
         sqlExecutor.batchUpdate(updateBuilder);
         ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
