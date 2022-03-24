@@ -99,13 +99,29 @@ public class SqlExecutor implements InitializingBean {
         return jdbcTemplate.update(sql, params);
     }
 
+    public int updateById(Object obj) {
+        return updateById(obj, new String[0]);
+    }
+
     /**
      * @param obj bean
      * @return
      */
-    public int updateById(Object obj) {
+    @SafeVarargs
+    public final <T, R> int updateById(Object obj, SFunction<T, R>... columns) {
         Class<?> beanClass = obj.getClass();
-        UpdateBeanBuilder sqlBuilder = new UpdateBeanBuilder(obj);
+        String[] columnArr = Arrays.stream(columns)
+                .map(column -> SqlBuilderUtils.getColumn(beanClass, column)).toArray(String[]::new);
+        return updateById(obj, columnArr);
+    }
+
+    /**
+     * @param obj bean
+     * @return
+     */
+    private int updateById(Object obj, String... columns) {
+        Class<?> beanClass = obj.getClass();
+        UpdateBeanBuilder sqlBuilder = new UpdateBeanBuilder(obj).columns(columns);
         sqlBuilder.eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
         int count = update(sqlBuilder);
         saveMultiValue(beanClass, Collections.singletonList(obj), true);
