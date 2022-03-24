@@ -24,7 +24,8 @@ public class BatchUpdateBuilder implements ISqlBuilder {
         this.beanClass = beanClass;
     }
 
-    public <T, R> BatchUpdateBuilder columns(SFunction<T, R>... columns) {
+    @SafeVarargs
+    public final <T, R> BatchUpdateBuilder columns(SFunction<T, R>... columns) {
         for (SFunction<T, R> column : columns) {
             columnNameList.add(SqlBuilderUtils.getColumn(beanClass, column));
         }
