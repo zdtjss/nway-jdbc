@@ -111,4 +111,32 @@ public class QueryBuilderTest {
         Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? and ( brand = ?) and model = ?"));
     }
 
+    @Test
+    public void ignoreInvalidTest() {
+
+        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        queryBuilder.le(Computer::getModel, null).eq(Computer::getBrand, "").eq(Computer::getId, "abc");
+
+        String sql = queryBuilder.getSql();
+        String where = sql.substring(sql.indexOf(" where "));
+
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getModel) + " "));
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getBrand) + " "));
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getId) + " "));
+    }
+
+    @Test
+    public void ignoreInvalidTest2() {
+
+        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        queryBuilder.ignoreInvalid(true).le(Computer::getModel, null).eq(Computer::getBrand, "").eq(Computer::getId, "abc");
+
+        String sql = queryBuilder.getSql();
+        String where = sql.substring(sql.indexOf(" where "));
+
+        Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getModel) + " "));
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getBrand) + " "));
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getId) + " "));
+    }
+
 }
