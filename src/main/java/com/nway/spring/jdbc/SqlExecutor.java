@@ -25,7 +25,6 @@ import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.builder.*;
 import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
 import com.nway.spring.jdbc.sql.function.SFunction;
-import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +48,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
