@@ -21,7 +21,7 @@ public class UpdateBuilder extends SqlBuilder {
     }
 
     public <T> UpdateBuilder set(SSupplier<T> val) {
-        if(isInvalid(val.get())) {
+        if (isInvalid(val.get())) {
             return this;
         }
         sets.add(SqlBuilderUtils.getColumn(beanClass, val) + " = ?");
@@ -30,11 +30,17 @@ public class UpdateBuilder extends SqlBuilder {
     }
 
     public <T, R> UpdateBuilder set(SFunction<T, R> column, Object val) {
-        if(isInvalid(val)) {
+        if (isInvalid(val)) {
             return this;
         }
         sets.add(SqlBuilderUtils.getColumn(beanClass, column) + " = ?");
         param.add(val);
+        return this;
+    }
+
+    public <T, R extends Number> UpdateBuilder increase(SFunction<T, R> column) {
+        String columnName = SqlBuilderUtils.getColumn(beanClass, column);
+        sets.add(columnName + " = " + columnName + " + 1");
         return this;
     }
 

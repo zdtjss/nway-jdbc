@@ -534,6 +534,18 @@ class SqlExecutorTest extends BaseTest {
         Assertions.assertTrue(sqlBuilder.getSql().contains(" pk_id = "));
     }
 
+    @Test
+    public void increaseTest() {
+
+        ExampleEntity first = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+
+        sqlExecutor.update(SQL.update(ExampleEntity.class).increase(ExampleEntity::getPpLong).eq(first::getId));
+
+        ExampleEntity example = sqlExecutor.queryById(first.getId(), ExampleEntity.class);
+
+        Assertions.assertEquals(first.getPpLong() + 1, example.getPpLong());
+    }
+
     private final AtomicInteger atomicInteger = new AtomicInteger(5041731);
 
     @Test
