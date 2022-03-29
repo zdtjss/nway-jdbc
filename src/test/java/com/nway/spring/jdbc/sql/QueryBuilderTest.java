@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.List;
 
 public class QueryBuilderTest {
 
@@ -139,4 +141,16 @@ public class QueryBuilderTest {
         Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getId) + " "));
     }
 
+    @Test
+    public void permissionTest() {
+        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        String sql = queryBuilder.getSql();
+        String where = sql.substring(sql.indexOf(" where "));
+        List<Object> params = queryBuilder.getParam();
+
+        Assertions.assertTrue(where.contains("( production_date = ? or creator_id = ? )"));
+        Assertions.assertEquals(2, params.size());
+        Assertions.assertTrue(params.get(0).getClass().isAssignableFrom(Date.class));
+        Assertions.assertTrue(params.get(1).getClass().isAssignableFrom(String.class));
+    }
 }

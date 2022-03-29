@@ -24,6 +24,7 @@ import javax.persistence.Transient;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
+import com.nway.spring.jdbc.sql.MultiColumnPermissionStrategy;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -69,6 +70,7 @@ public class Computer {
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
 	private Keyboard keyboard;
 	/** 生产日期 **/
+	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = MultiColumnPermissionStrategy.class)
 	private Date productionDate;
 	/** 设备图片 **/
 	private byte[] photo;
