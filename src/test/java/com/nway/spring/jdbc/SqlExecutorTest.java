@@ -529,7 +529,8 @@ class SqlExecutorTest extends BaseTest {
 
         UpdateBuilder sqlBuilder = SQL.update(ExampleEntity.class);
         sqlBuilder.ignoreInvalid(true);
-        sqlBuilder.set(ExampleEntity::getString, null).set(ExampleEntity::getId, "");
+        sqlBuilder.set(ExampleEntity::getString, null)
+                .set(ExampleEntity::getId, 0);
         Assertions.assertFalse(sqlBuilder.getSql().contains(" string = "));
         Assertions.assertTrue(sqlBuilder.getSql().contains(" pk_id = "));
     }

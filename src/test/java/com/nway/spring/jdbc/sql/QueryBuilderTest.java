@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -125,6 +127,27 @@ public class QueryBuilderTest {
         Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getModel) + " "));
         Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getBrand) + " "));
         Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getId) + " "));
+    }
+
+    @Test
+    public void ignoreInvalidDeepTest2() {
+
+        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        queryBuilder.ignoreInvalidDeep(true)
+                .le(Computer::getModel, null)
+                .eq(Computer::getBrand, "")
+                .eq(Computer::getId, "abc")
+                .in(Computer::getKeyboardId, Arrays.asList(null, null))
+                .in(Computer::getMouseId, Collections.singleton(""));
+
+        String sql = queryBuilder.getSql();
+        String where = sql.substring(sql.indexOf(" where "));
+
+        Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getModel) + " "));
+        Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getBrand) + " "));
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getId) + " "));
+        Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getKeyboardId) + " "));
+        Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getMouseId) + " "));
     }
 
     @Test

@@ -28,6 +28,8 @@ public class SqlBuilder implements ISqlBuilder {
     private boolean canAppendWhere = true;
     // false 表示不糊了无效值，即要在代码中使用if判断是否作为查询条件
     private boolean ignoreInvalid = false;
+    // true 判断空字符串和全null集合
+    private boolean ignoreInvalidDeep = false;
 
     protected SqlBuilder(Class beanClass) {
         this.beanClass = beanClass;
@@ -51,6 +53,15 @@ public class SqlBuilder implements ISqlBuilder {
      */
     public SqlBuilder ignoreInvalid(boolean ignoreInvalid) {
         this.ignoreInvalid = ignoreInvalid;
+        return this;
+    }
+
+    /**
+     * true 忽略空字符串和全null的集合作为查询条件
+     */
+    public SqlBuilder ignoreInvalidDeep(boolean ignoreInvalidDeep) {
+        this.ignoreInvalid = ignoreInvalidDeep;
+        this.ignoreInvalidDeep = ignoreInvalidDeep;
         return this;
     }
 
@@ -720,7 +731,7 @@ public class SqlBuilder implements ISqlBuilder {
      * 判断逻辑：null和空集合为无效值，空字符串和基本类型的默认值是有效值
      *
      * @param val 是无效的吗
-     * @return
+     * @return true 无效
      */
     protected boolean isInvalid(Object val) {
         // ignoreInvalid false 表示不忽略无效参数  不需要判断参数是否有效
@@ -731,6 +742,14 @@ public class SqlBuilder implements ISqlBuilder {
         }
         if (val instanceof Collection && CollectionUtils.isEmpty((Collection) val)) {
             return true;
+        }
+        if (ignoreInvalidDeep) {
+            if (val instanceof String) {
+                return val.toString().length() == 0;
+            }
+            if (val instanceof Collection) {
+                return ((Collection) val).stream().noneMatch(Objects::nonNull);
+            }
         }
         return val == null;
     }
