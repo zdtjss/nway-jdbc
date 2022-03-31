@@ -7,6 +7,7 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder {
 
@@ -91,8 +92,8 @@ public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder 
             sql.append("select ").append(this.distinct).append(String.join(",", getColumns())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         } else {
             EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-            entityInfo.getColumnList().removeAll(excludeColumns);
-            sql.append("select ").append(this.distinct).append(String.join(",", entityInfo.getColumnList())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+            String columnList = entityInfo.getColumnList().stream().filter(column -> !excludeColumns.contains(column)).collect(Collectors.joining(","));
+            sql.append("select ").append(this.distinct).append(columnList).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         }
         return sql.toString();
     }
