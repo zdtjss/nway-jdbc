@@ -22,7 +22,7 @@ public class BatchInsertBuilder implements ISqlBuilder {
         this.beanClass = beanClass;
     }
 
-    public BatchInsertBuilder use(List<? extends Object> objList) {
+    public BatchInsertBuilder use(List<?> objList) {
         List<List<Object>> batchParam = new ArrayList<>(objList.size());
         for (int i = 0; i < objList.size(); i++) {
             batchParam.add(new ArrayList<>());

@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public class BatchUpdateBuilder implements ISqlBuilder {
 
     private Class beanClass;
-    private List<Object> param = new ArrayList<>();
-    protected List<? extends Object> data;
+    protected List<?> data;
+    private final List<Object> param = new ArrayList<>();
     protected final List<String> columnNameList = new ArrayList<>();
     protected final List<CondExp> whereCondList = new ArrayList<>();
 
@@ -36,7 +36,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
         return this;
     }
 
-    public BatchUpdateBuilder use(List<? extends Object> params) {
+    public BatchUpdateBuilder use(List<?> params) {
         this.data = params;
         return this;
     }
@@ -94,7 +94,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
         return param.stream().map(e -> ((List<Object>) e).toArray()).collect(Collectors.toList());
     }
 
-    public List<? extends Object> getData() {
+    public List<?> getData() {
         return data;
     }
 
