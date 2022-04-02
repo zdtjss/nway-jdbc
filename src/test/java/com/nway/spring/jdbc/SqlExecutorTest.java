@@ -526,7 +526,7 @@ class SqlExecutorTest extends BaseTest {
 
         exampleEntity.setString("strcolumn");
 
-        QueryBuilder<ExampleEntity> builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
+        SqlBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
                 .groupBy(ExampleEntity::getString, ExampleEntity::getUtilDate)
 //				.groupBy("string", "p_double")
                 .having(e -> e.eq(exampleEntity::getString).ne(exampleEntity::getUtilDate));
