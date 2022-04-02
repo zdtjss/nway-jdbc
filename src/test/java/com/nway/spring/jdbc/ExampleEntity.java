@@ -1,18 +1,20 @@
 package com.nway.spring.jdbc;
 
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
+import com.nway.spring.jdbc.sql.LogicFieldStrategy;
+import com.nway.spring.jdbc.sql.TestFillStrategy;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-
-import javax.persistence.*;
-
-import com.nway.spring.jdbc.annotation.enums.ColumnType;
-import com.nway.spring.jdbc.sql.LogicFieldStrategy;
-import com.nway.spring.jdbc.sql.TestFillStrategy;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "t_nway")

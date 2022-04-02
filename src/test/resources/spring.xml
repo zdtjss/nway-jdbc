@@ -24,8 +24,16 @@
     </bean>
 
     <bean id="entityManagerFactory"
-          class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="nway.perfomance.jpa"/>
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="com.nway.spring.jdbc.performance.entity"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="true"/>
+                <property name="generateDdl" value="false"/>
+                <property name="databasePlatform" value="org.hibernate.dialect.MySQLDialect"/>
+            </bean>
+        </property>
     </bean>
 
     <bean id="jpaTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
@@ -42,7 +50,7 @@
         </property>
         <property name="hibernateProperties">
             <value>
-                hibernate.hbm2ddl.auto=update
+                hibernate.hbm2ddl.auto=none
             </value>
         </property>
     </bean>
@@ -102,7 +110,7 @@
     <bean id="sqlSessionFactoryMybatisPlus"
           class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="mapperLocations" value="classpath*:mapper/mybatisplus/*.xml" />
+        <property name="mapperLocations" value="classpath*:mapper/mybatisplus/*.xml"/>
     </bean>
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
@@ -141,26 +149,27 @@
     </bean>-->
 
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
-        <property name="url" value="jdbc:mysql://localhost:3306/nway?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
-        <property name="username" value="root" />
-        <property name="password" value="Nway@2022" />
+        <property name="url"
+                  value="jdbc:mysql://localhost:3306/nway?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+        <property name="username" value="root"/>
+        <property name="password" value="Nway@2022"/>
 
-        <property name="maxActive" value="50" />
-        <property name="initialSize" value="50" />
-        <property name="maxWait" value="60000" />
-        <property name="minIdle" value="1" />
+        <property name="maxActive" value="50"/>
+        <property name="initialSize" value="50"/>
+        <property name="maxWait" value="60000"/>
+        <property name="minIdle" value="1"/>
 
-        <property name="timeBetweenEvictionRunsMillis" value="60000" />
-        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
 
-        <property name="testWhileIdle" value="true" />
-        <property name="testOnBorrow" value="false" />
-        <property name="testOnReturn" value="false" />
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
 
-        <property name="poolPreparedStatements" value="true" />
-        <property name="maxOpenPreparedStatements" value="20" />
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxOpenPreparedStatements" value="20"/>
 
-        <property name="asyncInit" value="true" />
+        <property name="asyncInit" value="true"/>
     </bean>
 
     <!--<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">

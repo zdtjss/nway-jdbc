@@ -64,10 +64,6 @@ public class OrderPerformanceTest extends BaseTest {
     @Qualifier("jdbcPerformance")
     private JdbcPerformance jdbcPerformance;
 
-    @Autowired
-    @Qualifier("scriptSolutionPerformance")
-    private ScriptSolutionPerformance scriptPerformance;
-
     @Test
     public void testGetMonitor() {
 
@@ -121,8 +117,6 @@ public class OrderPerformanceTest extends BaseTest {
             myBatisPlusPerformance.listMonitor();
 
             myBatisGePerformance.listMonitor();
-
-            scriptPerformance.listMonitor();
 
             System.out.println();
         }

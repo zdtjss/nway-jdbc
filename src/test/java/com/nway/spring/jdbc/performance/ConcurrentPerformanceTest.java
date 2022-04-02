@@ -66,10 +66,6 @@ public class ConcurrentPerformanceTest extends BaseTest {
     @Qualifier("jdbcPerformance")
     private JdbcPerformance jdbcPerformance;
 
-    @Autowired
-    @Qualifier("scriptSolutionPerformance")
-    private ScriptSolutionPerformance scriptPerformance;
-
     @Test
     public void testGetMonitor() throws InterruptedException {
 
@@ -198,7 +194,6 @@ public class ConcurrentPerformanceTest extends BaseTest {
 
             jdbcTask.add(() -> jdbcPerformance.listMonitor());
 
-            scriptTask.add(() -> scriptPerformance.listMonitor());
         }
 
         nwayPerformance.listMonitor();
@@ -209,7 +204,6 @@ public class ConcurrentPerformanceTest extends BaseTest {
         springDataJpaPerformance.listMonitor();
 		myBatisPerformance.listMonitor();
         myBatisPlusPerformance.listMonitor();
-        scriptPerformance.listMonitor();
         myBatisGePerformance.listMonitor();
 
         for(int i = 0;i<10;i++) {
