@@ -45,9 +45,9 @@ Spring Boot：
 
 增、改、删：  
 
-	SqlBuilder builder = SQL.insert(Class beanClass);
-	SqlBuilder builder = SQL.delete(Class beanClass);
-	SqlBuilder builder = SQL.update(Class beanClass);
+	QueryBuilder builder = SQL.insert(Class beanClass);
+	DeleteBuilder builder = SQL.delete(Class beanClass);
+	UpdateBuilder builder = SQL.update(Class beanClass);
 	
 	int effectCount = sqlExecutor.update(builder);
 
@@ -61,13 +61,14 @@ Spring Boot：
 
     sqlBuilder.ignoreInvalid(true).like(User::getName, user.getName()); 
 
-    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。null和空集合为无效值，空字符串和基本类型的默认值是有效值。
+    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。null和空集合为无效值，空字符串和基本类型的默认值是有效值
+    （如需要忽略空字符串和全null集合可以使用方法ignoreInvalidDeep(true)）。
     您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(false)，同样的调用sqlBuilder.ignoreInvalid(true)即恢复自动判断。
     **只应在传值为空时不做为条件的情况下使用ignoreInvalid(true)，否则将数据越权。默认为false**
    
 单对象查询：
 	
-    SqlBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName);
+    QueryBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName);
     User user = sqlExecutor.queryBean(builder);
     User user = sqlExecutor.queryById(100, User.class);
     
@@ -77,7 +78,7 @@ Spring Boot：
         
 对象集查询：
 	
-    SqlBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName);
+    QueryBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName);
     List<User> users = sqlExecutor.queryList(builder);
     List<User> users = sqlExecutor.queryList(Arrays.asList(100), User.class);
     Map<String, User> userMap = queryListMap(builder, User::getId)
@@ -89,7 +90,7 @@ Spring Boot：
     
 分页对象集查询：
 
-    SqlBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName).orderBy(usrQuery::getId);
+    QueryBuilder builder = SQL.query(User.class).eq(usrQuery::getStatus).like(usrQuery::getName).orderBy(usrQuery::getId);
     Page<User> users = sqlExecutor.queryPage(builder, 1, 10);
     
     or
