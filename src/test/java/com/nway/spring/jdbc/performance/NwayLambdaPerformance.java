@@ -34,7 +34,7 @@ public class NwayLambdaPerformance implements Performance {
     @Override
     public Computer getComputerById(int id) {
 
-        SqlBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, id);
+        QueryBuilder computerSoftwareSql = SQL.query(ComputerSoftware.class).eq(ComputerSoftware::getComputerId, id);
 
         Computer computer = sqlExecutor.queryById(id, Computer.class);
 
