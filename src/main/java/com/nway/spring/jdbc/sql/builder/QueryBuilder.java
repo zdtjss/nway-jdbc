@@ -7,6 +7,7 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQueryBuilder {
@@ -60,7 +61,7 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
         return this;
     }
 
-    public <T> QueryBuilder withMVColumn(String... columnNames) {
+    public QueryBuilder withMVColumn(String... columnNames) {
         multiValColumn.addAll(Arrays.asList(columnNames));
         return this;
     }
@@ -76,6 +77,94 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
     @Override
     public List<String> getMultiValColumn() {
         return multiValColumn;
+    }
+
+    public QueryBuilder groupBy(String... column) {
+        afterWhere.append(" group by ").append(String.join(",", column));
+        return this;
+    }
+
+    @SafeVarargs
+    public final <T, R> QueryBuilder groupBy(SFunction<T, R>... columns) {
+        afterWhere.append(" group by ");
+        for (SFunction<T, R> column : columns) {
+            afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
+        }
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
+        return this;
+    }
+
+    @SafeVarargs
+    public final <T, R> QueryBuilder orderBy(SFunction<T, R>... columns) {
+        afterWhere.append(" order by ");
+        for (SFunction<T, R> column : columns) {
+            afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
+        }
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
+        return this;
+    }
+
+    public QueryBuilder orderBy(String... columns) {
+        afterWhere.append(" order by ");
+        for (String column : columns) {
+            afterWhere.append(column).append(",");
+        }
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
+        return this;
+    }
+
+    public <T, R> QueryBuilder andOrderByAsc(SFunction<T, R> column) {
+        afterWhere.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" asc");
+        return this;
+    }
+
+    public QueryBuilder andOrderByAsc(String... columns) {
+        for (String column : columns) {
+            afterWhere.append(",").append(column).append(" asc");
+        }
+        return this;
+    }
+
+    @SafeVarargs
+    public final <T, R> QueryBuilder orderByDesc(SFunction<T, R>... columns) {
+        afterWhere.append(" order by ");
+        for (SFunction<T, R> column : columns) {
+            afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc,");
+        }
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
+        return this;
+    }
+
+    public QueryBuilder orderByDesc(String... columns) {
+        afterWhere.append(" order by ");
+        for (String column : columns) {
+            afterWhere.append(column).append(" desc,");
+        }
+        afterWhere.deleteCharAt(afterWhere.length() - 1);
+        return this;
+    }
+
+    public <T, R> QueryBuilder andOrderByDesc(SFunction<T, R> column) {
+        afterWhere.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc");
+        return this;
+    }
+
+    public QueryBuilder andOrderByDesc(String... columns) {
+        for (String column : columns) {
+            afterWhere.append(",").append(column).append(" desc");
+        }
+        return this;
+    }
+
+    public QueryBuilder having(Consumer<QueryBuilder> lambdaWhereBuilder) {
+        QueryBuilder lq = new QueryBuilder(beanClass);
+        lambdaWhereBuilder.accept(lq);
+        String sql = lq.getSql();
+        if (sql.length() > 7) {
+            afterWhere.append(" having ").append(lq.getSql().substring(7));
+            param.addAll(lq.getParam());
+        }
+        return thisObj;
     }
 
     @Override
