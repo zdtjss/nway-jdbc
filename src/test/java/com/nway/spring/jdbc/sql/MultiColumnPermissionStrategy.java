@@ -9,7 +9,7 @@ public class MultiColumnPermissionStrategy implements PermissionStrategy {
 
     @Override
     public WhereCondition getSqlSegment(String column) {
-        return new WhereCondition("( " + column + " <> ? or creator_id <> ? )", new Object[]{new Date(), "bbb"});
+        return new WhereCondition("( " + column + " <> ? or keyboard_id <> ? )", new Object[]{new Date(), "bbb"});
     }
 
 }

@@ -57,7 +57,7 @@
                s.version               software_version
         FROM t_computer c
                  left JOIN
-             t_computer_user cu on c.id = cu.fk
+             t_computer_user cu on c.id = cu.foreign_key
              left join
              t_mainframe mf ON c.mainframe_id = mf.id
                  left JOIN
@@ -137,7 +137,7 @@
                s.version               software_version
         FROM t_computer c
                  left JOIN
-             t_computer_user cu on c.id = cu.fk
+             t_computer_user cu on c.id = cu.foreign_key
                  left JOIN
              t_mainframe mf ON c.mainframe_id = mf.id
                  left JOIN
