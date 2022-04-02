@@ -33,7 +33,8 @@ class SqlExecutorTest extends BaseTest {
     void update() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         String str = UUID.randomUUID().toString();
-        sqlExecutor.update(SQL.update(ExampleEntity.class).set(ExampleEntity::getString, str).eq(example::getId));
+        UpdateBuilder updateBuilder = SQL.update(ExampleEntity.class).set(ExampleEntity::getString, str).eq(example::getId);
+        sqlExecutor.update(updateBuilder);
         ExampleEntity exampleUpdated = sqlExecutor.queryById(example.getId(), ExampleEntity.class);
         Assertions.assertEquals(str, exampleUpdated.getString());
     }
@@ -120,6 +121,16 @@ class SqlExecutorTest extends BaseTest {
     void deleteById() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         int effectCount = sqlExecutor.deleteById(example.getId(), ExampleEntity.class);
+        Assertions.assertEquals(effectCount, 1);
+        boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).eq(example::getId));
+        Assertions.assertFalse(exist);
+    }
+
+    @Test
+    void deleteTest() {
+        ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
+        DeleteBuilder deleteBuilder = SQL.delete(ExampleEntity.class).eq(ExampleEntity::getId, example.getId());
+        int effectCount = sqlExecutor.delete(deleteBuilder);
         Assertions.assertEquals(effectCount, 1);
         boolean exist = sqlExecutor.exist(SQL.query(ExampleEntity.class).eq(example::getId));
         Assertions.assertFalse(exist);
