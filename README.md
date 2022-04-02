@@ -5,11 +5,15 @@
 
 性能对比（测试代码为vs-java项目，测试工具JMeter）
 
+![rsp-page.png](rsp-page.png)
+
 ![tps-page.png](tps-page.png)
-上图为分页查询性能对比，本工具TPS比mybatis-plus高出约135%，比mybatis高出约37%。
+上图为分页查询性能对比，本工具TPS比mybatis-plus高出约1倍，比mybatis高出约20%多。
+
+![rsp-list.png](rsp-list.png)
 
 ![tps-list.png](tps-list.png)
-上图为列表查询性能对比，本工具TPS比mybatis-plus高出约70%，比mybatis高出约50%。
+上图为列表查询性能对比，本工具TPS比mybatis-plus高出约60%，比mybatis高出约40%。
 
 测试数据可能因环境而异，但从多台机器不同版本jdk的测试情况看，性能明显优于同类型的MyBatis-Plus。
 
