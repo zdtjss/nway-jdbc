@@ -16,7 +16,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-public class SqlBuilder implements ISqlBuilder {
+public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
     protected StringBuilder preWhere = new StringBuilder(128);
     protected StringBuilder afterWhere = new StringBuilder(128);
@@ -31,6 +31,8 @@ public class SqlBuilder implements ISqlBuilder {
     // true 判断空字符串和全null集合
     private boolean ignoreInvalidDeep = false;
 
+    protected final X thisObj = (X) this;
+
     protected SqlBuilder(Class beanClass) {
         this.beanClass = beanClass;
     }
@@ -40,485 +42,485 @@ public class SqlBuilder implements ISqlBuilder {
         return this.beanClass;
     }
 
-    protected SqlBuilder where() {
+    protected X where() {
         if (canAppendWhere) {
             preWhere.append(" where ");
         }
         canAppendWhere = false;
-        return this;
+        return thisObj;
     }
 
     /**
      * 设置为false后，需要自己判断参数是否为空
      */
-    public SqlBuilder ignoreInvalid(boolean ignoreInvalid) {
+    public X ignoreInvalid(boolean ignoreInvalid) {
         this.ignoreInvalid = ignoreInvalid;
-        return this;
+        return thisObj;
     }
 
     /**
      * true 忽略空字符串和全null的集合作为查询条件
      */
-    public SqlBuilder ignoreInvalidDeep(boolean ignoreInvalidDeep) {
+    public X ignoreInvalidDeep(boolean ignoreInvalidDeep) {
         this.ignoreInvalid = ignoreInvalidDeep;
         this.ignoreInvalidDeep = ignoreInvalidDeep;
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder eq(SSupplier<T> val) {
+    public <T> X eq(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(val, " = ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder eq(SFunction<T, R> column, Object val) {
+    public <T, R> X eq(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " = ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder eq(String column, Object val) {
+    public X eq(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " = ?");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder ne(SSupplier<T> val) {
+    public <T> X ne(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(val, " <> ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder ne(String column, Object val) {
+    public X ne(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " <> ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder ne(SFunction<T, R> column, Object val) {
+    public <T, R> X ne(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " <> ?");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder gt(SSupplier<T> val) {
+    public <T> X gt(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(val, " > ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder gt(String column, Object val) {
+    public X gt(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " > ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder gt(SFunction<T, R> column, Object val) {
+    public <T, R> X gt(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " > ?");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder ge(SSupplier<T> val) {
+    public <T> X ge(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(val, " >= ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder ge(String column, Object val) {
+    public X ge(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " >= ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder ge(SFunction<T, R> column, Object val) {
+    public <T, R> X ge(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " >= ?");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder lt(SSupplier<T> val) {
+    public <T> X lt(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition( val, " < ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder lt(String column, Object val) {
+    public X lt(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " < ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder lt(SFunction<T, R> column, Object val) {
+    public <T, R> X lt(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " < ?");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder le(SSupplier<T> val) {
+    public <T> X le(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(val, " <= ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder le(String column, Object val) {
+    public X le(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " <= ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder le(SFunction<T, R> column, Object val) {
+    public <T, R> X le(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val, " <= ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder like(SSupplier<String> val) {
+    public X like(SSupplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, val), "%" + val.get() + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder like(String column, String val) {
+    public X like(String column, String val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, "%" + val + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder like(SFunction<T, R> column, Object val) {
+    public <T, R> X like(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder like(SFunction<T, R> column, Supplier<String> val) {
+    public <T, R> X like(SFunction<T, R> column, Supplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val.get() + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder notLike(SSupplier<String> val) {
+    public X notLike(SSupplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, val), "%" + val.get() + "%", " not like ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder notLike(String column, Object val) {
+    public X notLike(String column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, "%" + val + "%", " not like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder notLike(SFunction<T, R> column, Object val) {
+    public <T, R> X notLike(SFunction<T, R> column, Object val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val + "%", " not like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder notLike(SFunction<T, R> column, Supplier<String> val) {
+    public <T, R> X notLike(SFunction<T, R> column, Supplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val.get() + "%", " not like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder likeLeft(SSupplier<T> val) {
+    public <T> X likeLeft(SSupplier<T> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, val), "%" + val.get(), " like ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder likeLeft(String column, String val) {
+    public X likeLeft(String column, String val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, "%" + val, " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder likeLeft(SFunction<T, R> column, String val) {
+    public <T, R> X likeLeft(SFunction<T, R> column, String val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val, " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder likeLeft(SFunction<T, R> column, SSupplier<String> val) {
+    public <T, R> X likeLeft(SFunction<T, R> column, SSupplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), "%" + val.get(), " like ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder likeRight(SSupplier<String> val) {
+    public X likeRight(SSupplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, val), val.get() + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder likeRight(String column, String val) {
+    public X likeRight(String column, String val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(column, val + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder likeRight(SFunction<T, R> column, String val) {
+    public <T, R> X likeRight(SFunction<T, R> column, String val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), val + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder likeRight(SFunction<T, R> column, SSupplier<String> val) {
+    public <T, R> X likeRight(SFunction<T, R> column, SSupplier<String> val) {
         if(isInvalid(val.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         appendCondition(SqlBuilderUtils.getColumn(beanClass, column), val.get() + "%", " like ?");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder isNull(SFunction<T, R> column) {
+    public <T, R> X isNull(SFunction<T, R> column) {
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder isNull(SSupplier<T> column) {
+    public <T> X isNull(SSupplier<T> column) {
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder isNull(String column) {
+    public X isNull(String column) {
         appendAnd();
         preWhere.append(column).append(" is null");
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder isNotNull(SFunction<T, R> column) {
+    public <T, R> X isNotNull(SFunction<T, R> column) {
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder isNotNull(SSupplier<T> column) {
+    public <T> X isNotNull(SSupplier<T> column) {
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder isNotNull(String column) {
+    public X isNotNull(String column) {
         appendAnd();
         preWhere.append(column).append(" is not null");
-        return this;
+        return thisObj;
     }
 
-    public <T, X> SqlBuilder between(SSupplier<T> column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <T> X between(SSupplier<T> column, Supplier<T> leftVal, Supplier<T> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder between(SFunction<T, R> column, Object leftVal, Object rightVal) {
+    public <T, R> X between(SFunction<T, R> column, Object leftVal, Object rightVal) {
         if(isInvalid(leftVal) && isInvalid(rightVal)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
-        return this;
+        return thisObj;
     }
 
-    public <T, R, X> SqlBuilder between(SFunction<T, R> column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <T, R, O> X between(SFunction<T, R> column, Supplier<O> leftVal, Supplier<O> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder between(String column, Object leftVal, Object rightVal) {
+    public X between(String column, Object leftVal, Object rightVal) {
         if(isInvalid(leftVal) && isInvalid(rightVal)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(column).append(" between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
-        return this;
+        return thisObj;
     }
 
-    public <X> SqlBuilder between(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <T> X between(String column, Supplier<T> leftVal, Supplier<T> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(column).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
-        return this;
+        return thisObj;
     }
 
-    public <T, X> SqlBuilder notBetween(SSupplier<T> column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <T> X notBetween(SSupplier<T> column, Supplier<T> leftVal, Supplier<T> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
-        return this;
+        return thisObj;
     }
 
-    public <X> SqlBuilder notBetween(String column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <T> X notBetween(String column, Supplier<T> leftVal, Supplier<T> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(column).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder notBetween(String column, Object leftVal, Object rightVal) {
+    public X notBetween(String column, Object leftVal, Object rightVal) {
         if(isInvalid(leftVal) && isInvalid(rightVal)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(column).append(" not between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
-        return this;
+        return thisObj;
     }
 
-    public <T, R, X> SqlBuilder notBetween(SFunction<T, R> column, Supplier<X> leftVal, Supplier<X> rightVal) {
+    public <T, R, O> X notBetween(SFunction<T, R> column, Supplier<O> leftVal, Supplier<O> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder notBetween(SFunction<T, R> column, Object leftVal, Object rightVal) {
+    public <T, R> X notBetween(SFunction<T, R> column, Object leftVal, Object rightVal) {
         if(isInvalid(leftVal) && isInvalid(rightVal)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder and(Consumer<SqlBuilder> lambdaWhereBuilder) {
-        SqlBuilder lq = new SqlBuilder(beanClass);
+    public X and(Consumer<X> lambdaWhereBuilder) {
+        X lq = (X) new SqlBuilder(beanClass);
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();
         if (sql.length() > 7) {
@@ -526,11 +528,11 @@ public class SqlBuilder implements ISqlBuilder {
             preWhere.append("(").append(sql.substring(6)).append(")");
             param.addAll(lq.getParam());
         }
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder or(Consumer<SqlBuilder> lambdaWhereBuilder) {
-        SqlBuilder lq = new SqlBuilder(beanClass);
+    public X or(Consumer<X> lambdaWhereBuilder) {
+        X lq = (X) new SqlBuilder<>(beanClass);
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();
         // where 的长度
@@ -546,18 +548,18 @@ public class SqlBuilder implements ISqlBuilder {
             }
             param.addAll(lq.getParam());
         }
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder or() {
+    public <T> X or() {
         preWhere.append(" or ");
         canAppendAnd = false;
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder in(String column, Collection<?> val) {
+    public X in(String column, Collection<?> val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(column).append(" in (");
@@ -568,12 +570,12 @@ public class SqlBuilder implements ISqlBuilder {
         if (!val.isEmpty()) {
             preWhere.setCharAt(preWhere.length() - 1, ')');
         }
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder in(SFunction<T, R> column, Collection<?> val) {
+    public <T, R> X in(SFunction<T, R> column, Collection<?> val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
@@ -584,12 +586,12 @@ public class SqlBuilder implements ISqlBuilder {
         if (!val.isEmpty()) {
             preWhere.setCharAt(preWhere.length() - 1, ')');
         }
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder notIn(String column, Collection<?> val) {
+    public X notIn(String column, Collection<?> val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(column).append(" not in (");
@@ -600,12 +602,12 @@ public class SqlBuilder implements ISqlBuilder {
         if (!val.isEmpty()) {
             preWhere.setCharAt(preWhere.length() - 1, ')');
         }
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder notIn(SFunction<T, R> column, Collection<?> val) {
+    public <T, R> X notIn(SFunction<T, R> column, Collection<?> val) {
         if(isInvalid(val)) {
-            return this;
+            return thisObj;
         }
         appendAnd();
         preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
@@ -616,95 +618,95 @@ public class SqlBuilder implements ISqlBuilder {
         if (!val.isEmpty()) {
             preWhere.setCharAt(preWhere.length() - 1, ')');
         }
-        return this;
+        return thisObj;
     }
 
-    public <T> SqlBuilder groupBy(String... column) {
+    public <T> X groupBy(String... column) {
         afterWhere.append(" group by ").append(Arrays.stream(column).collect(Collectors.joining(",")));
-        return this;
+        return thisObj;
     }
 
     @SafeVarargs
-    public final <T, R> SqlBuilder groupBy(SFunction<T, R>... columns) {
+    public final <T, R> X groupBy(SFunction<T, R>... columns) {
         afterWhere.append(" group by ");
         for (SFunction<T, R> column : columns) {
             afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
         }
         afterWhere.deleteCharAt(afterWhere.length() - 1);
-        return this;
+        return thisObj;
     }
 
     @SafeVarargs
-    public final <T, R> SqlBuilder orderBy(SFunction<T, R>... columns) {
+    public final <T, R> X orderBy(SFunction<T, R>... columns) {
         afterWhere.append(" order by ");
         for (SFunction<T, R> column : columns) {
             afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(",");
         }
         afterWhere.deleteCharAt(afterWhere.length() - 1);
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder orderBy(String... columns) {
+    public X orderBy(String... columns) {
         afterWhere.append(" order by ");
         for (String column : columns) {
             afterWhere.append(column).append(",");
         }
         afterWhere.deleteCharAt(afterWhere.length() - 1);
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder andOrderByAsc(SFunction<T, R> column) {
+    public <T, R> X andOrderByAsc(SFunction<T, R> column) {
         afterWhere.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" asc");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder andOrderByAsc(String... columns) {
+    public X andOrderByAsc(String... columns) {
         for (String column : columns) {
             afterWhere.append(",").append(column).append(" asc");
         }
-        return this;
+        return thisObj;
     }
 
     @SafeVarargs
-    public final <T, R> SqlBuilder orderByDesc(SFunction<T, R>... columns) {
+    public final <T, R> X orderByDesc(SFunction<T, R>... columns) {
         afterWhere.append(" order by ");
         for (SFunction<T, R> column : columns) {
             afterWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc,");
         }
         afterWhere.deleteCharAt(afterWhere.length() - 1);
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder orderByDesc(String... columns) {
+    public X orderByDesc(String... columns) {
         afterWhere.append(" order by ");
         for (String column : columns) {
             afterWhere.append(column).append(" desc,");
         }
         afterWhere.deleteCharAt(afterWhere.length() - 1);
-        return this;
+        return thisObj;
     }
 
-    public <T, R> SqlBuilder andOrderByDesc(SFunction<T, R> column) {
+    public <T, R> X andOrderByDesc(SFunction<T, R> column) {
         afterWhere.append(",").append(SqlBuilderUtils.getColumn(beanClass, column)).append(" desc");
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder andOrderByDesc(String... columns) {
+    public X andOrderByDesc(String... columns) {
         for (String column : columns) {
             afterWhere.append(",").append(column).append(" desc");
         }
-        return this;
+        return thisObj;
     }
 
-    public SqlBuilder having(Consumer<SqlBuilder> lambdaWhereBuilder) {
-        SqlBuilder lq = new SqlBuilder(beanClass);
+    public <XX extends SqlBuilder<X>> X having(Consumer<X> lambdaWhereBuilder) {
+        X lq = (X) new SqlBuilder<>(beanClass);
         lambdaWhereBuilder.accept(lq);
         String sql = lq.getSql();
         if (sql.length() > 7) {
             afterWhere.append(" having ").append(lq.getSql().substring(7));
             param.addAll(lq.getParam());
         }
-        return this;
+        return thisObj;
     }
 
     private void appendAnd() {
@@ -723,7 +725,7 @@ public class SqlBuilder implements ISqlBuilder {
      * @param whereCondition
      * @return
      */
-    public SqlBuilder appendCondition(WhereCondition whereCondition) {
+    public X appendCondition(WhereCondition whereCondition) {
         if (whereCondition != null && whereCondition.getExpr().length() > 0) {
             this.appendWhereCondition(whereCondition.getExpr());
             if (whereCondition.getValue() instanceof Collection) {
@@ -736,13 +738,13 @@ public class SqlBuilder implements ISqlBuilder {
                 getParam().add(whereCondition.getValue());
             }
         }
-        return this;
+        return thisObj;
     }
 
-    private SqlBuilder appendWhereCondition(String whereCondition) {
+    private X appendWhereCondition(String whereCondition) {
         appendAnd();
         preWhere.append(' ').append(whereCondition).append(' ');
-        return this;
+        return thisObj;
     }
 
     private <T> void appendCondition(SSupplier<T> val, String op) {

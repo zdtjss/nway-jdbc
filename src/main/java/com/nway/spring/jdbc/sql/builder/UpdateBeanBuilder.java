@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class UpdateBeanBuilder extends SqlBuilder {
+public class UpdateBeanBuilder extends SqlBuilder<UpdateBeanBuilder> {
 
     private final List<String> sets = new ArrayList<>();
     private final List<Object> setsParam = new ArrayList<>();
@@ -58,7 +58,7 @@ public class UpdateBeanBuilder extends SqlBuilder {
         for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
             if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
                     && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
-                if(!columnList.contains(columnInfo.getColumnName())) {
+                if (!columnList.contains(columnInfo.getColumnName())) {
                     columnList.add(columnInfo.getColumnName());
                 }
             }

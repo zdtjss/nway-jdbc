@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder {
+public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQueryBuilder {
 
     private boolean ignorePower = false;
     private String distinct = "";
@@ -17,35 +17,35 @@ public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder 
     private final List<String> excludeColumns = new ArrayList<>();
     private final List<String> multiValColumn = new ArrayList<>();
 
-    public QueryBuilder(Class<T> beanClass) {
+    public QueryBuilder(Class<?> beanClass) {
         super(beanClass);
     }
 
-    public QueryBuilder<T> distinct() {
+    public QueryBuilder distinct() {
         this.distinct = " distinct ";
         return this;
     }
 
     @SafeVarargs
-    public final QueryBuilder<T> withColumn(SFunction<T, ?>... fields) {
+    public final <T> QueryBuilder withColumn(SFunction<T, ?>... fields) {
         for (SFunction<T, ?> field : fields) {
             columns.add(SqlBuilderUtils.getColumn(beanClass, field));
         }
         return this;
     }
 
-    public QueryBuilder<T> withColumn(String... columnNames) {
+    public QueryBuilder withColumn(String... columnNames) {
         columns.addAll(Arrays.asList(columnNames));
         return this;
     }
 
-    public QueryBuilder<T> excludeColumn(String... columnNames) {
+    public QueryBuilder excludeColumn(String... columnNames) {
         excludeColumns.addAll(Arrays.asList(columnNames));
         return this;
     }
 
     @SafeVarargs
-    public final QueryBuilder<T> excludeColumn(SFunction<T, ?>... fields) {
+    public final <T> QueryBuilder excludeColumn(SFunction<T, ?>... fields) {
         for (SFunction<T, ?> field : fields) {
             excludeColumns.add(SqlBuilderUtils.getColumn(beanClass, field));
         }
@@ -53,14 +53,14 @@ public class QueryBuilder<T> extends SqlBuilder implements MultiValQueryBuilder 
     }
 
     @SafeVarargs
-    public final QueryBuilder<T> withMVColumn(SFunction<T, ?>... fields) {
+    public final <T> QueryBuilder withMVColumn(SFunction<T, ?>... fields) {
         for (SFunction<T, ?> field : fields) {
             multiValColumn.add(SqlBuilderUtils.getColumn(beanClass, field));
         }
         return this;
     }
 
-    public QueryBuilder<T> withMVColumn(String... columnNames) {
+    public <T> QueryBuilder withMVColumn(String... columnNames) {
         multiValColumn.addAll(Arrays.asList(columnNames));
         return this;
     }

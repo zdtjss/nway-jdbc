@@ -8,7 +8,7 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
 import java.util.Optional;
 
-public class DeleteBuilder extends SqlBuilder {
+public class DeleteBuilder extends SqlBuilder<DeleteBuilder> {
 
     public DeleteBuilder(Class<?> beanClass) {
         super(beanClass);

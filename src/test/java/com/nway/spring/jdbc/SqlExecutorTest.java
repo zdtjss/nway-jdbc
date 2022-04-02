@@ -245,7 +245,7 @@ class SqlExecutorTest extends BaseTest {
     @Test
     void testQueryPage2() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
-        QueryBuilder<ExampleEntity> queryBuilder = SQL.query(ExampleEntity.class);
+        QueryBuilder queryBuilder = SQL.query(ExampleEntity.class);
         queryBuilder.distinct().withColumn(ExampleEntity::getId,ExampleEntity::getUtilDate, ExampleEntity::getString)
                 .eq(example::getId)
                 .orderBy(ExampleEntity::getUtilDate, ExampleEntity::getString);
@@ -444,7 +444,7 @@ class SqlExecutorTest extends BaseTest {
 
         exampleEntity.setString("strcolumn");
 
-        QueryBuilder<ExampleEntity> builder = SQL.query(ExampleEntity.class);
+        QueryBuilder builder = SQL.query(ExampleEntity.class);
 
         builder.distinct()
                 .eq(ExampleEntity::getId, 1)
@@ -502,12 +502,12 @@ class SqlExecutorTest extends BaseTest {
                 .or()
                 .eq(exampleEntity::getId)
                 .or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-                .and(e -> e.eq(ExampleEntity::getId, 1));
+                .and(e -> e.eq(ExampleEntity::getId, 1))
 //                .groupBy(ExampleEntity::getUtilDate)
 //                .having(e -> e.eq(ExampleEntity::getString, 100))
 //				.orderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
 //				.appendOrderBy("string", "p_double")
-        builder.orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
+                .orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
                 .andOrderByDesc("string", "p_double")
                 .andOrderByAsc(ExampleEntity::getString)
                 .andOrderByDesc(ExampleEntity::getPpDouble);

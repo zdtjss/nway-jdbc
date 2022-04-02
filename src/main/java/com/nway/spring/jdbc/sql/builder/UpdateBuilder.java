@@ -11,7 +11,7 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UpdateBuilder extends SqlBuilder {
+public class UpdateBuilder extends SqlBuilder<UpdateBuilder> {
 
     private final List<String> sets = new ArrayList<>();
 

@@ -270,7 +270,7 @@ public class SqlExecutor implements InitializingBean {
 
     public <T> T queryById(Serializable id, Class<T> type, String... mvColNames) {
         ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
-        ((QueryBuilder<T>) queryBuilder).withMVColumn(mvColNames);
+        ((QueryBuilder) queryBuilder).withMVColumn(mvColNames);
         T bean = queryById(id, type);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
@@ -279,7 +279,7 @@ public class SqlExecutor implements InitializingBean {
     @SafeVarargs
     public final <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
         ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
-        ((QueryBuilder<T>) queryBuilder).withMVColumn(mvFields);
+        ((QueryBuilder) queryBuilder).withMVColumn(mvFields);
         T bean = queryById(id, type);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
@@ -516,7 +516,7 @@ public class SqlExecutor implements InitializingBean {
      */
     public boolean exist(ISqlBuilder queryBuilder) {
         if (queryBuilder instanceof QueryBuilder) {
-            QueryBuilder<?> queryBuilder1 = (QueryBuilder<?>) queryBuilder;
+            QueryBuilder queryBuilder1 = (QueryBuilder) queryBuilder;
             // 当没有指定具体字段时，只查询id字段
             if (CollectionUtils.isEmpty(queryBuilder1.getColumns())) {
                 queryBuilder1.withColumn(SqlBuilderUtils.getIdName(queryBuilder1.getBeanClass()));

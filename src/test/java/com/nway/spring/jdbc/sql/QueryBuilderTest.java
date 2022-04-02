@@ -38,7 +38,7 @@ public class QueryBuilderTest {
 
     @Test
     public void orExpTest() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc").like(Computer::getKeyboardId, "aa"));
 
@@ -47,7 +47,7 @@ public class QueryBuilderTest {
 
     @Test
     public void orExpTest2() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc").like(Computer::getMainframeId, "ddd")).eq(Computer::getModel, "123");
 
@@ -56,7 +56,7 @@ public class QueryBuilderTest {
 
     @Test
     public void orExpTest3() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.eq(Computer::getId, 11).or((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
@@ -65,7 +65,7 @@ public class QueryBuilderTest {
 
     @Test
     public void orExpTest4() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc")).or().eq(Computer::getModel, "aa");
 
@@ -74,7 +74,7 @@ public class QueryBuilderTest {
 
     @Test
     public void orExpTest5() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc")).or((sql) -> sql.eq(Computer::getModel, "aa"));
 
@@ -83,14 +83,14 @@ public class QueryBuilderTest {
 
     @Test
     public void orTest() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
         queryBuilder.eq(Computer::getId, 123).or().eq(Computer::getBrand, "abc").eq(Computer::getModel, "aa");
         Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or brand = ? and model = ?"));
     }
 
     @Test
     public void andExpTest() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.and((sql) -> sql.eq(Computer::getBrand, "abc"));
 
@@ -99,7 +99,7 @@ public class QueryBuilderTest {
 
     @Test
     public void andExpTest2() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.and((sql) -> sql.eq(Computer::getBrand, "abc")).like(Computer::getKeyboardId, "dd");
 
@@ -108,7 +108,7 @@ public class QueryBuilderTest {
 
     @Test
     public void andExpTest3() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
 
         queryBuilder.eq(Computer::getId, 11).and((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
@@ -118,7 +118,7 @@ public class QueryBuilderTest {
     @Test
     public void ignoreInvalidTest() {
 
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
         queryBuilder.le(Computer::getModel, null).eq(Computer::getBrand, "").eq(Computer::getId, "abc");
 
         String sql = queryBuilder.getSql();
@@ -132,7 +132,7 @@ public class QueryBuilderTest {
     @Test
     public void ignoreInvalidDeepTest2() {
 
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
         queryBuilder.ignoreInvalidDeep(true)
                 .le(Computer::getModel, null)
                 .eq(Computer::getBrand, "")
@@ -153,7 +153,7 @@ public class QueryBuilderTest {
     @Test
     public void ignoreInvalidTest2() {
 
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
         queryBuilder.ignoreInvalid(true).le(Computer::getModel, null).eq(Computer::getBrand, "").eq(Computer::getId, "abc");
 
         String sql = queryBuilder.getSql();
@@ -166,7 +166,7 @@ public class QueryBuilderTest {
 
     @Test
     public void permissionTest() {
-        QueryBuilder<Computer> queryBuilder = SQL.query(Computer.class);
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
         String sql = queryBuilder.getSql();
         String where = sql.substring(sql.indexOf(" where "));
         List<Object> params = queryBuilder.getParam();
