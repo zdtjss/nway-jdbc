@@ -371,6 +371,42 @@ public class SqlBuilder implements ISqlBuilder {
         return this;
     }
 
+    public <T, R> SqlBuilder isNull(SFunction<T, R> column) {
+        appendAnd();
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
+        return this;
+    }
+
+    public <T> SqlBuilder isNull(SSupplier<T> column) {
+        appendAnd();
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
+        return this;
+    }
+
+    public SqlBuilder isNull(String column) {
+        appendAnd();
+        preWhere.append(column).append(" is null");
+        return this;
+    }
+
+    public <T, R> SqlBuilder isNotNull(SFunction<T, R> column) {
+        appendAnd();
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
+        return this;
+    }
+
+    public <T> SqlBuilder isNotNull(SSupplier<T> column) {
+        appendAnd();
+        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
+        return this;
+    }
+
+    public SqlBuilder isNotNull(String column) {
+        appendAnd();
+        preWhere.append(column).append(" is not null");
+        return this;
+    }
+
     public <T, X> SqlBuilder between(SSupplier<T> column, Supplier<X> leftVal, Supplier<X> rightVal) {
         if(isInvalid(leftVal.get()) && isInvalid(rightVal.get())) {
             return this;

@@ -396,19 +396,19 @@ class SqlExecutorTest extends BaseTest {
         Assertions.assertEquals(page.getPageData().size(), 1);
 
 
-        sql = "select * FROM t_nway";
+        sql = "select * from t_nway";
         page = sqlExecutor.queryPage(sql, null, 1, 3);
         Assertions.assertEquals(page.getPageData().size(), 3);
 
-        sql = "select * FROM t_nway ORDER BY pk_id";
+        sql = "select * from t_nway order by pk_id";
         page = sqlExecutor.queryPage(sql, null, 1, 3);
         Assertions.assertEquals(page.getPageData().size(), 3);
 
-        sql = "select * FROM t_nway WHERE pk_id = ? ORDER BY pk_id";
+        sql = "select * from t_nway where pk_id = ? order by pk_id";
         page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
         Assertions.assertEquals(page.getPageData().size(), 1);
 
-        sql = "select DISTINCT pk_id,p_int FROM t_nway WHERE pk_id = ? ORDER BY pk_id";
+        sql = "select DISTINCT pk_id,p_int from t_nway where pk_id = ? order by pk_id";
         page = sqlExecutor.queryPage(sql, new Object[]{first.getId()}, 1, 10);
         Assertions.assertEquals(page.getPageData().size(), 1);
 
@@ -444,8 +444,9 @@ class SqlExecutorTest extends BaseTest {
 
         exampleEntity.setString("strcolumn");
 
-        SqlBuilder builder = SQL.query(ExampleEntity.class)
+        QueryBuilder<ExampleEntity> builder = SQL.query(ExampleEntity.class);
 
+        builder.distinct()
                 .eq(ExampleEntity::getId, 1)
                 .eq(exampleEntity::getId)
                 .eq("pk_id", exampleEntity.getId())
@@ -464,6 +465,12 @@ class SqlExecutorTest extends BaseTest {
                 .le(ExampleEntity::getId, 11)
                 .le(exampleEntity::getId)
                 .le("pk_id", exampleEntity.getId())
+                .isNull(ExampleEntity::getString)
+                .isNull(exampleEntity::getString)
+                .isNull("pk_id")
+                .isNotNull(ExampleEntity::getString)
+                .isNotNull(exampleEntity::getString)
+                .isNull("pk_id")
                 .between(ExampleEntity::getString, exampleEntity::getPpLong, exampleEntity::getPpDouble)
                 .between(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
                 .between("p_double", 1, 2)
@@ -495,20 +502,22 @@ class SqlExecutorTest extends BaseTest {
                 .or()
                 .eq(exampleEntity::getId)
                 .or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-                .and(e -> e.eq(ExampleEntity::getId, 1))
-                .groupBy(ExampleEntity::getUtilDate)
-                .having(e -> e.eq(ExampleEntity::getString, 100))
+                .and(e -> e.eq(ExampleEntity::getId, 1));
+//                .groupBy(ExampleEntity::getUtilDate)
+//                .having(e -> e.eq(ExampleEntity::getString, 100))
 //				.orderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
 //				.appendOrderBy("string", "p_double")
-                .orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
+        builder.orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
                 .andOrderByDesc("string", "p_double")
                 .andOrderByAsc(ExampleEntity::getString)
                 .andOrderByDesc(ExampleEntity::getPpDouble);
 
         sqlExecutor.queryFirst(builder);
 
-        builder = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
-        sqlExecutor.queryFirst(builder);
+        SqlBuilder builder2 = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
+        sqlExecutor.queryFirst(builder2);
+
+
     }
 
     @Test
@@ -517,7 +526,7 @@ class SqlExecutorTest extends BaseTest {
 
         exampleEntity.setString("strcolumn");
 
-        SqlBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
+        QueryBuilder<ExampleEntity> builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
                 .groupBy(ExampleEntity::getString, ExampleEntity::getUtilDate)
 //				.groupBy("string", "p_double")
                 .having(e -> e.eq(exampleEntity::getString).ne(exampleEntity::getUtilDate));
