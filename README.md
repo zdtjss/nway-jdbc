@@ -15,7 +15,7 @@
 ![tps-list.png](tps-list.png)
 上图为列表查询性能对比，本工具TPS比mybatis-plus高出约60%，比mybatis高出约40%。
 
-测试数据可能因环境而异，但从多台机器不同版本jdk的测试情况看，性能明显优于同类型的MyBatis-Plus。
+&nbsp;&nbsp;&nbsp;&nbsp;测试数据可能因环境而异，但从多台机器不同版本jdk的测试情况看，性能明显优于同类型的MyBatis-Plus。
 
 &nbsp;&nbsp;&nbsp;&nbsp;本工具与mybatis定位不同，本不应对比，之所以列出，一是想说明本单表操作后复合对象，其性能不比基于mybatis的外连接查询性能差。
 关于MyBatis-Plus性能问题，我已两次向MyBatis-Plus社区提出，均未收到积极解决的态度，相反其创建者认可当前性能表现，所以，希望使用高性能的单表操作，可以考虑本工具。
@@ -70,7 +70,7 @@ Spring Boot：
     工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。null和空集合为无效值，空字符串和基本类型的默认值是有效值
     （如需要忽略空字符串和全null集合可以使用方法ignoreInvalidDeep(true)）。
     您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalid(false)，同样的调用sqlBuilder.ignoreInvalid(true)即恢复自动判断。
-    **只应在传值为空时不做为条件的情况下使用ignoreInvalid(true)，否则将数据越权。默认为false**
+    只应在传值为空时不做为条件的情况下使用ignoreInvalid(true)，否则将数据越权。默认为false
    
 单对象查询：
 	
@@ -182,7 +182,7 @@ Map对象集分页：
   <li>queryPage返回值getTotal() == 0</li>
  </ul>
 
-# 域对象不建议使用基本类型，因为新增或修改数据时通常是根据属性是否为null判断是否需要保存的
+&nbsp;&nbsp;&nbsp;&nbsp;**域对象不建议使用基本类型，因为新增或修改数据时通常是根据属性是否为null判断是否需要保存的**
 
 # 性能测试
 
