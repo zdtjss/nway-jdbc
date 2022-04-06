@@ -156,12 +156,13 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
         return this;
     }
 
-    public QueryBuilder having(Consumer<QueryBuilder> lambdaWhereBuilder) {
+    public QueryBuilder having(Consumer<QueryBuilder> whereBuilder) {
         QueryBuilder lq = new QueryBuilder(beanClass);
-        lambdaWhereBuilder.accept(lq);
-        String sql = lq.getSql();
+        whereBuilder.accept(lq);
+        StringBuilder sql = lq.getWhere();
+        // where 的长度
         if (sql.length() > 7) {
-            afterWhere.append(" having ").append(lq.getSql().substring(7));
+            afterWhere.append(" having ").append(lq.getWhere().substring(7));
             param.addAll(lq.getParam());
         }
         return thisObj;

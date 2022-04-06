@@ -1,10 +1,5 @@
 package com.nway.spring.jdbc.sql.builder;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
@@ -14,11 +9,17 @@ import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
-    protected StringBuilder preWhere = new StringBuilder(128);
+    protected StringBuilder where = new StringBuilder(128);
     protected StringBuilder afterWhere = new StringBuilder(128);
     protected List<Object> param = new ArrayList<>();
     protected Class beanClass;
@@ -44,7 +45,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
     protected X where() {
         if (canAppendWhere) {
-            preWhere.append(" where ");
+            where.append(" where ");
         }
         canAppendWhere = false;
         return thisObj;
@@ -375,37 +376,37 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
     public <T, R> X isNull(SFunction<T, R> column) {
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
         return thisObj;
     }
 
     public <T> X isNull(SSupplier<T> column) {
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is null");
         return thisObj;
     }
 
     public X isNull(String column) {
         appendAnd();
-        preWhere.append(column).append(" is null");
+        where.append(column).append(" is null");
         return thisObj;
     }
 
     public <T, R> X isNotNull(SFunction<T, R> column) {
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
         return thisObj;
     }
 
     public <T> X isNotNull(SSupplier<T> column) {
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" is not null");
         return thisObj;
     }
 
     public X isNotNull(String column) {
         appendAnd();
-        preWhere.append(column).append(" is not null");
+        where.append(column).append(" is not null");
         return thisObj;
     }
 
@@ -414,7 +415,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return thisObj;
@@ -425,7 +426,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return thisObj;
@@ -436,7 +437,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return thisObj;
@@ -447,7 +448,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(column).append(" between").append(" ? and ?");
+        where.append(column).append(" between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return thisObj;
@@ -458,7 +459,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(column).append(" between").append(" ? and ?");
+        where.append(column).append(" between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return thisObj;
@@ -469,7 +470,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return thisObj;
@@ -480,7 +481,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(column).append(" not between").append(" ? and ?");
+        where.append(column).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return thisObj;
@@ -491,7 +492,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(column).append(" not between").append(" ? and ?");
+        where.append(column).append(" not between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return thisObj;
@@ -502,7 +503,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal.get());
         param.add(rightVal.get());
         return thisObj;
@@ -513,38 +514,38 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not between").append(" ? and ?");
         param.add(leftVal);
         param.add(rightVal);
         return thisObj;
     }
 
-    public X and(Consumer<X> lambdaWhereBuilder) {
-        X lq = (X) new SqlBuilder(beanClass);
-        lambdaWhereBuilder.accept(lq);
-        String sql = lq.getSql();
+    public X and(Consumer<X> whereBuilder) {
+        X lq = createObj();
+        whereBuilder.accept(lq);
+        StringBuilder sql = lq.getWhere();
         if (sql.length() > 7) {
             appendAnd();
-            preWhere.append("(").append(sql.substring(6)).append(")");
+            where.append("(").append(sql.substring(6)).append(")");
             param.addAll(lq.getParam());
         }
         return thisObj;
     }
 
-    public X or(Consumer<X> lambdaWhereBuilder) {
-        X lq = (X) new SqlBuilder<>(beanClass);
-        lambdaWhereBuilder.accept(lq);
-        String sql = lq.getSql();
+    public X or(Consumer<X> whereBuilder) {
+        X lq = createObj();
+        whereBuilder.accept(lq);
+        StringBuilder sql = lq.getWhere();
         // where 的长度
         if (sql.length() > 7) {
             where();
             canAppendAnd = true;
             // where() 方法添加的 " where " 长度
-            if(preWhere.length() == 7) {
-                preWhere.append("(").append(sql.substring(6)).append(")");
+            if(where.length() == 7) {
+                where.append("(").append(sql.substring(6)).append(")");
             }
             else {
-                preWhere.append(" or (").append(sql.substring(6)).append(")");
+                where.append(" or (").append(sql.substring(6)).append(")");
             }
             param.addAll(lq.getParam());
         }
@@ -552,9 +553,20 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
     }
 
     public <T> X or() {
-        preWhere.append(" or ");
+        where.append(" or ");
         canAppendAnd = false;
         return thisObj;
+    }
+
+    private X createObj() {
+        X lq;
+        try {
+            Class<X> aClass = (Class<X>) thisObj.getClass();
+            lq = aClass.getDeclaredConstructor(Class.class).newInstance(beanClass);
+        } catch (Exception e) {
+            throw new SqlBuilderException(e);
+        }
+        return lq;
     }
 
     public X in(String column, Collection<?> val) {
@@ -562,13 +574,13 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(column).append(" in (");
+        where.append(column).append(" in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            preWhere.append("?,");
+            where.append("?,");
         }
         if (!val.isEmpty()) {
-            preWhere.setCharAt(preWhere.length() - 1, ')');
+            where.setCharAt(where.length() - 1, ')');
         }
         return thisObj;
     }
@@ -578,13 +590,13 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            preWhere.append("?,");
+            where.append("?,");
         }
         if (!val.isEmpty()) {
-            preWhere.setCharAt(preWhere.length() - 1, ')');
+            where.setCharAt(where.length() - 1, ')');
         }
         return thisObj;
     }
@@ -594,13 +606,13 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(column).append(" not in (");
+        where.append(column).append(" not in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            preWhere.append("?,");
+            where.append("?,");
         }
         if (!val.isEmpty()) {
-            preWhere.setCharAt(preWhere.length() - 1, ')');
+            where.setCharAt(where.length() - 1, ')');
         }
         return thisObj;
     }
@@ -610,20 +622,20 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
             return thisObj;
         }
         appendAnd();
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(" not in (");
         param.addAll(val);
         for (int i = 0; i < val.size(); i++) {
-            preWhere.append("?,");
+            where.append("?,");
         }
         if (!val.isEmpty()) {
-            preWhere.setCharAt(preWhere.length() - 1, ')');
+            where.setCharAt(where.length() - 1, ')');
         }
         return thisObj;
     }
 
     private void appendAnd() {
         if (canAppendAnd) {
-            preWhere.append(" and ");
+            where.append(" and ");
         } else {
             where();
         }
@@ -655,22 +667,22 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
     private X appendWhereCondition(String whereCondition) {
         appendAnd();
-        preWhere.append(' ').append(whereCondition).append(' ');
+        where.append(' ').append(whereCondition).append(' ');
         return thisObj;
     }
 
     private <T> void appendCondition(SSupplier<T> val, String op) {
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, val)).append(op);
+        where.append(SqlBuilderUtils.getColumn(beanClass, val)).append(op);
         param.add(val.get());
     }
 
     private <T, R> void appendCondition(SFunction<T, R> column, Object val, String op) {
-        preWhere.append(SqlBuilderUtils.getColumn(beanClass, column)).append(op);
+        where.append(SqlBuilderUtils.getColumn(beanClass, column)).append(op);
         param.add(val);
     }
 
     private void appendCondition(String column, Object val, String op) {
-        preWhere.append(column).append(op);
+        where.append(column).append(op);
         param.add(val);
     }
 
@@ -714,13 +726,13 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
         }
     }
 
-    protected StringBuilder getPreWhere() {
-        return this.preWhere;
+    protected StringBuilder getWhere() {
+        return this.where;
     }
 
     @Override
     public String getSql() {
-        String sql = this.preWhere.toString();
+        String sql = this.where.toString();
         // 不能添加where 说明已经有where存在  但是如果参数为空  有可能是因为忽略无效条件导致的
         if (!canAppendWhere && param.size() == 0) {
             sql = sql.substring(0, sql.length() - 8);

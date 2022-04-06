@@ -13,6 +13,7 @@ import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 
+import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
@@ -153,7 +154,7 @@ public class SqlBuilderUtils {
 		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName());
 	}
 
-	public static <T> SerializedLambda getSerializedLambda(SSupplier<T> lambda) {
+	public static <T extends Serializable> SerializedLambda getSerializedLambda(T lambda) {
 		Class<?> funcClass = lambda.getClass();
 		return Optional.ofNullable(SERIALIZED_LAMBDA_MAP.get(funcClass))
 				.orElseGet(() -> {
@@ -169,22 +170,6 @@ public class SqlBuilderUtils {
 				});
 	}
 
-	public static <T, R> SerializedLambda getSerializedLambda(SFunction<T, R> lambda) {
-		Class<?> funcClass = lambda.getClass();
-		return Optional.ofNullable(SERIALIZED_LAMBDA_MAP.get(funcClass))
-				.orElseGet(() -> {
-					try {
-						Method writeReplace = funcClass.getDeclaredMethod("writeReplace");
-						writeReplace.setAccessible(true);
-						SerializedLambda serializedLambda = (SerializedLambda) MethodHandles.lookup().unreflect(writeReplace).invoke(lambda);
-						SERIALIZED_LAMBDA_MAP.put(funcClass, serializedLambda);
-						return serializedLambda;
-					} catch (Throwable e) {
-						throw new SqlBuilderException(e);
-					}
-				});
-	}
-	
 	private static String getColumnName(Field field) {
 		Column column = field.getAnnotation(Column.class);
 		if(column != null && (column.name().length() > 0 || column.value().length() > 0)) {

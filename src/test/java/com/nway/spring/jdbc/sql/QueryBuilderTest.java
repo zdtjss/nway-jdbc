@@ -28,6 +28,9 @@ public class QueryBuilderTest {
         System.out.println(builder.getParam());
 
         builder = SQL.insert(Computer.class).use(new Computer());
+
+        System.out.println(builder.getSql());
+        System.out.println(builder.getParam());
     }
 
     @Test
@@ -42,7 +45,7 @@ public class QueryBuilderTest {
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc").like(Computer::getKeyboardId, "aa"));
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where ( brand = ? and keyboard_id like ?)"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ? and keyboard_id like ?)"));
     }
 
     @Test
@@ -51,7 +54,7 @@ public class QueryBuilderTest {
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc").like(Computer::getMainframeId, "ddd")).eq(Computer::getModel, "123");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where ( brand = ? and mainframe_id like ?) and model = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ? and mainframe_id like ?) and model = ?"));
     }
 
     @Test
@@ -60,7 +63,7 @@ public class QueryBuilderTest {
 
         queryBuilder.eq(Computer::getId, 11).or((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or ( brand = ?) and model = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where id = ? or ( brand = ?) and model = ?"));
     }
 
     @Test
@@ -69,7 +72,7 @@ public class QueryBuilderTest {
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc")).or().eq(Computer::getModel, "aa");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where ( brand = ?) or model = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ?) or model = ?"));
     }
 
     @Test
@@ -78,14 +81,14 @@ public class QueryBuilderTest {
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc")).or((sql) -> sql.eq(Computer::getModel, "aa"));
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where ( brand = ?) or ( model = ?)"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ?) or ( model = ?)"));
     }
 
     @Test
     public void orTest() {
         QueryBuilder queryBuilder = SQL.query(Computer.class);
         queryBuilder.eq(Computer::getId, 123).or().eq(Computer::getBrand, "abc").eq(Computer::getModel, "aa");
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? or brand = ? and model = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where id = ? or brand = ? and model = ?"));
     }
 
     @Test
@@ -94,7 +97,7 @@ public class QueryBuilderTest {
 
         queryBuilder.and((sql) -> sql.eq(Computer::getBrand, "abc"));
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where  brand = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ?)"));
     }
 
     @Test
@@ -103,7 +106,7 @@ public class QueryBuilderTest {
 
         queryBuilder.and((sql) -> sql.eq(Computer::getBrand, "abc")).like(Computer::getKeyboardId, "dd");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where ( brand = ?) and keyboard_id like ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ?) and keyboard_id like ?"));
     }
 
     @Test
@@ -112,7 +115,7 @@ public class QueryBuilderTest {
 
         queryBuilder.eq(Computer::getId, 11).and((sql) -> sql.eq(Computer::getBrand, "abc")).eq(Computer::getModel, "aa");
 
-        Assertions.assertTrue(queryBuilder.getSql().endsWith(" from t_computer where id = ? and ( brand = ?) and model = ?"));
+        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where id = ? and ( brand = ?) and model = ?"));
     }
 
     @Test
@@ -137,7 +140,7 @@ public class QueryBuilderTest {
                 .le(Computer::getModel, null)
                 .eq(Computer::getBrand, "")
                 .eq(Computer::getId, "abc")
-                .in(Computer::getKeyboardId, Arrays.asList(null, null))
+                .in(Computer::getMainframeId, Arrays.asList(null, null))
                 .in(Computer::getMouseId, Collections.singleton(""));
 
         String sql = queryBuilder.getSql();
@@ -146,7 +149,7 @@ public class QueryBuilderTest {
         Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getModel) + " "));
         Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getBrand) + " "));
         Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getId) + " "));
-        Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getKeyboardId) + " "));
+        Assertions.assertFalse(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getMainframeId) + " "));
         Assertions.assertTrue(where.contains(" " + SqlBuilderUtils.getColumn(Computer.class, Computer::getMouseId) + " "));
     }
 
@@ -171,7 +174,7 @@ public class QueryBuilderTest {
         String where = sql.substring(sql.indexOf(" where "));
         List<Object> params = queryBuilder.getParam();
 
-        Assertions.assertTrue(where.contains("( production_date = ? or creator_id = ? )"));
+        Assertions.assertTrue(where.contains("( production_date <> ? or keyboard_id <> ? )"));
         Assertions.assertEquals(2, params.size());
         Assertions.assertTrue(params.get(0).getClass().isAssignableFrom(Date.class));
         Assertions.assertTrue(params.get(1).getClass().isAssignableFrom(String.class));

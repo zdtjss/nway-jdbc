@@ -98,7 +98,7 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     void batchUpdate() {
-        Page<ExampleEntity> examplePage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
+        Page<ExampleEntity> examplePage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class).isNull(ExampleEntity::getSqlDate), 1, 2);
         List<ExampleEntity> exampleList = examplePage.getPageData().stream().map(entity -> {
             ExampleEntity example = new ExampleEntity();
             example.setId(entity.getId());
@@ -525,9 +525,8 @@ class SqlExecutorTest extends BaseTest {
 
         sqlExecutor.queryFirst(builder);
 
-        SqlBuilder builder2 = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
+        QueryBuilder builder2 = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
         sqlExecutor.queryFirst(builder2);
-
 
     }
 
@@ -537,7 +536,7 @@ class SqlExecutorTest extends BaseTest {
 
         exampleEntity.setString("strcolumn");
 
-        SqlBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
+        QueryBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
                 .groupBy(ExampleEntity::getString, ExampleEntity::getUtilDate)
 //				.groupBy("string", "p_double")
                 .having(e -> e.eq(exampleEntity::getString).ne(exampleEntity::getUtilDate));
