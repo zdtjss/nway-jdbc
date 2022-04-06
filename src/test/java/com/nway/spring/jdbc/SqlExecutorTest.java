@@ -6,6 +6,7 @@ import com.nway.spring.jdbc.sql.builder.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import javax.sql.rowset.serial.SerialBlob;
@@ -189,7 +190,7 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     void queryList() {
-        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).le(ExampleEntity::getId, 100));
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
         Assertions.assertTrue(objectList.size() > 0);
     }
 
@@ -203,7 +204,7 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     void queryListMap() {
-        Map<Integer, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class).le(ExampleEntity::getId, 100), ExampleEntity::getId);
+        Map<Integer, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class), ExampleEntity::getId);
         Assertions.assertTrue(objectMap.size() > 0);
     }
 
@@ -288,7 +289,16 @@ class SqlExecutorTest extends BaseTest {
         obj.setMv2(Arrays.asList(UUID.randomUUID().toString().substring(0, 3), "2", UUID.randomUUID().toString().substring(0, 3)));
         obj.setId(obj.getId() + 1);
         sqlExecutor.insert(obj);
-        Assertions.assertFalse(obj.getMv().isEmpty());
+
+        ExampleEntity exampleEntity = sqlExecutor.queryById(obj.getId(), ExampleEntity.class, ExampleEntity::getMv, ExampleEntity::getMv2);
+
+        for (int i = 0; i < obj.getMv().size(); i++) {
+            Assertions.assertEquals(obj.getMv().get(i), exampleEntity.getMv().get(i));
+        }
+
+        for (int i = 0; i < obj.getMv2().size(); i++) {
+            Assertions.assertEquals(obj.getMv2().get(i), exampleEntity.getMv2().get(i));
+        }
     }
 
     @Test
@@ -358,7 +368,31 @@ class SqlExecutorTest extends BaseTest {
 
     @Test
     public void queryOneTest() {
-        Assertions.assertThrows(IncorrectResultSizeDataAccessException.class, () -> sqlExecutor.queryOne(SQL.query(ExampleEntity.class)));
+        ExampleEntity max = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getId));
+        max.setId(max.getId() + 1);
+        max.setString(UUID.randomUUID().toString());
+        sqlExecutor.insert(max);
+        ExampleEntity one = sqlExecutor.queryOne(SQL.query(ExampleEntity.class).eq(max::getString));
+        Assertions.assertEquals(max.getId(), one.getId());
+    }
+
+    @Test
+    public void queryOneTest2() {
+
+        ExampleEntity max = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getId));
+        max.setId(max.getId() + 1);
+        max.setString("abc");
+
+        ExampleEntity similar = new ExampleEntity();
+        BeanCopier beanCopier = BeanCopier.create(ExampleEntity.class, ExampleEntity.class, false);
+        beanCopier.copy(max, similar, null);
+        similar.setId(max.getId() + 1);
+        similar.setString(max.getString());
+
+        sqlExecutor.batchInsert(Arrays.asList(max, similar));
+
+        Assertions.assertThrows(IncorrectResultSizeDataAccessException.class,
+                () -> sqlExecutor.queryOne(SQL.query(ExampleEntity.class).eq(max::getString)));
     }
 
     @Test

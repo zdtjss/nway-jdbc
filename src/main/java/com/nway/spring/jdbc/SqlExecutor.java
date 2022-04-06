@@ -269,8 +269,8 @@ public class SqlExecutor implements InitializingBean {
     }
 
     public <T> T queryById(Serializable id, Class<T> type, String... mvColNames) {
-        ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
-        ((QueryBuilder) queryBuilder).withMVColumn(mvColNames);
+        QueryBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
+        queryBuilder.withMVColumn(mvColNames);
         T bean = queryById(id, type);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;
@@ -278,8 +278,8 @@ public class SqlExecutor implements InitializingBean {
 
     @SafeVarargs
     public final <T> T queryById(Serializable id, Class<T> type, SFunction<T, ?>... mvFields) {
-        ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
-        ((QueryBuilder) queryBuilder).withMVColumn(mvFields);
+        QueryBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
+        queryBuilder.withMVColumn(mvFields);
         T bean = queryById(id, type);
         fillMultiValue(queryBuilder, Collections.singletonList(bean));
         return bean;

@@ -169,7 +169,7 @@ Map对象集分页：
         `fk` int DEFAULT NULL,              --固定字段，主表主键 类型可根据主表主键类型定义
         `power` varchar(255) DEFAULT NULL,  --固定字段，@Column配置的字段名（遵从默认下划线命名规则）
         `idx` int DEFAULT NULL,             --固定字段，排序用
-        PRIMARY KEY (`pk_id`)
+        PRIMARY KEY (`id`)
     );
 
 #对于JdbcTemplate.handleWarnings()，当日志级别为debug或trace时比较耗时（这是比较早的测试数据，默认可以忽略，发现性能较差时，可以考虑此问题是否存在）。
