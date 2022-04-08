@@ -7,6 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * ASM bean 使用
+ */
 public class DateUtils {
 
     public static LocalDate toLocalDate(Date date) {
