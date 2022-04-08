@@ -1,27 +1,7 @@
-**简单易用、高性能**
+**简单、易用、易扩展、性能不输给mybatis、明显高于mybatis-plus**
 
 &nbsp;&nbsp;&nbsp;&nbsp;支持新增、修改时自动填充数据，支持单字段多值时自动保存、查询（如多选字典项），支持数据权限的管控、逻辑删除等。
 使用时只需要给主类SqlExecutor配置好数据源，不需要继承某个类，也不需要实现哪个接口，工具类式使用。
-
-性能对比（测试代码为vs-java项目，测试工具JMeter）
-
-![rsp-page.png](rsp-page.png)
-
-![tps-page.png](tps-page.png)
-上图为分页查询性能对比，本工具TPS比mybatis-plus高出约1倍，比mybatis高出约20%多。
-
-![rsp-list.png](rsp-list.png)
-
-![tps-list.png](tps-list.png)
-上图为列表查询性能对比，本工具TPS比mybatis-plus高出约60%，比mybatis高出约40%。
-
-&nbsp;&nbsp;&nbsp;&nbsp;测试数据可能因环境而异，但从多台机器不同版本jdk的测试情况看，性能明显优于同类型的MyBatis-Plus。
-
-&nbsp;&nbsp;&nbsp;&nbsp;本工具与mybatis定位不同，本不应对比，之所以列出，一是想说明本单表操作后复合对象，其性能不比基于mybatis的外连接查询性能差。
-关于MyBatis-Plus性能问题，我已两次向MyBatis-Plus社区提出，均未收到积极解决的态度，相反其创建者认可当前性能表现，所以，希望使用高性能的单表操作，可以考虑本工具。
-
-&nbsp;&nbsp;&nbsp;&nbsp;本项目专注于单表操作，对于多表的情况可以考虑使用视图，也可用使用MyBatis等其他擅长多表操作的工具。
-对于有嵌套对象的情况，根据测试数据，使用本工具进行多次单表查询后复合对象，性能优于直接使用外连接由MyBatis自动组合嵌套对象的方式。
 
 # 基本使用方法
 
@@ -65,7 +45,8 @@ Spring Boot：
 
 上述代码可直接写成：
 
-    sqlBuilder.ignoreInvalid(true).like(User::getName, user.getName()); 
+    sqlBuilder.ignoreInvalid(true)
+        .like(User::getName, user.getName()); 
 
     工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件。null和空集合为无效值，空字符串和基本类型的默认值是有效值
     （如需要忽略空字符串和全null集合可以使用方法ignoreInvalidDeep(true)）。
@@ -190,3 +171,23 @@ Map对象集分页：
 
     OrderPerformanceTest 单线程顺序执行时的性能测试类
     ConcurrentPerformanceTest   多线程并发模式下的性能测试类
+
+性能对比（测试代码为vs-java项目，测试工具JMeter）
+
+![rsp-page.png](rsp-page.png)
+
+![tps-page.png](tps-page.png)
+上图为分页查询性能对比，本工具TPS比mybatis-plus高出约1倍，比mybatis高出约20%多。
+
+![rsp-list.png](rsp-list.png)
+
+![tps-list.png](tps-list.png)
+上图为列表查询性能对比，本工具TPS比mybatis-plus高出约60%，比mybatis高出约40%。
+
+&nbsp;&nbsp;&nbsp;&nbsp;测试数据可能因环境而异，但从多台机器不同版本jdk的测试情况看，性能明显优于同类型的MyBatis-Plus。
+
+&nbsp;&nbsp;&nbsp;&nbsp;本工具与mybatis定位不同，本不应对比，之所以列出，一是想说明本单表操作后复合对象，其性能不比基于mybatis的外连接查询性能差。
+关于MyBatis-Plus性能问题，我已两次向MyBatis-Plus社区提出，均未收到积极解决的态度，相反其创建者认可当前性能表现，所以，希望使用高性能的单表操作，可以考虑本工具。
+
+&nbsp;&nbsp;&nbsp;&nbsp;本项目专注于单表操作，对于多表的情况可以考虑使用视图，也可用使用MyBatis等其他擅长多表操作的工具。
+对于有嵌套对象的情况，根据测试数据，使用本工具进行多次单表查询后复合对象，性能优于直接使用外连接由MyBatis自动组合嵌套对象的方式。
