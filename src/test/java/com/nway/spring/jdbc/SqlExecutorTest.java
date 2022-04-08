@@ -208,8 +208,6 @@ class SqlExecutorTest {
     @Test
     void insert() {
         ExampleEntity exampleEntity = new ExampleEntity();
-        exampleEntity.setId(Double.valueOf(Math.random() * Integer.MAX_VALUE).intValue());
-        exampleEntity.setString(UUID.randomUUID().toString());
         int effectCount = sqlExecutor.insert(exampleEntity);
         Assertions.assertEquals(effectCount, 1);
         ExampleEntity exampleDb = sqlExecutor.queryById(exampleEntity.getId(), ExampleEntity.class);

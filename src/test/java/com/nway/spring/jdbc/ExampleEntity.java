@@ -3,6 +3,8 @@ package com.nway.spring.jdbc;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.LogicFieldStrategy;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
+import com.nway.spring.jdbc.sql.fill.NumberIdStrategy;
+import com.nway.spring.jdbc.sql.fill.StringIdStrategy;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -31,7 +33,7 @@ public class ExampleEntity {
 	private short ppShort;
 	@com.nway.spring.jdbc.annotation.Column(name = "p_int")
 	private int ppInt;
-	@com.nway.spring.jdbc.annotation.Column(name = "p_long")
+	@com.nway.spring.jdbc.annotation.Column(name = "p_long", fillStrategy = NumberIdStrategy.class)
 	private long ppLong;
 	@com.nway.spring.jdbc.annotation.Column(name = "p_float")
 	private float ppFloat;
@@ -48,13 +50,13 @@ public class ExampleEntity {
 	private Short wwShort;
 	@com.nway.spring.jdbc.annotation.Column(name = "w_int", fillStrategy = TestFillStrategy.class)
 	private Integer wwInt;
-	@com.nway.spring.jdbc.annotation.Column(name = "w_long")
+	@com.nway.spring.jdbc.annotation.Column(name = "w_long", fillStrategy = NumberIdStrategy.class)
 	private Long wwLong;
 	@com.nway.spring.jdbc.annotation.Column(name = "w_float")
 	private Float wwFloat;
 	@com.nway.spring.jdbc.annotation.Column(name = "w_double")
 	private Double wwDouble;
-
+	@com.nway.spring.jdbc.annotation.Column(fillStrategy = StringIdStrategy.class)
 	private String string;
 //	@com.nway.spring.jdbc.annotation.Column(permissionStrategy = TestPermissionStrategy.class)
 	private Date utilDate;
