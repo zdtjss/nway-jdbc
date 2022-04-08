@@ -1,29 +1,30 @@
 package com.nway.spring.jdbc.performance;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
-
+import com.nway.spring.jdbc.performance.entity.Computer;
+import com.nway.spring.jdbc.performance.entity.Monitor;
+import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import com.nway.spring.jdbc.BaseTest;
-import com.nway.spring.jdbc.performance.entity.Computer;
-import com.nway.spring.jdbc.performance.entity.Monitor;
-import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 /**
  * 单线程顺序执行时的性能测试
  */
+@Disabled
 @Service
-public class OrderPerformanceTest extends BaseTest {
+@SpringJUnitConfig(locations = {"/spring.xml"})
+public class OrderPerformanceTest {
 
     @Autowired
     @Qualifier("nwayPerformance")
@@ -83,7 +84,7 @@ public class OrderPerformanceTest extends BaseTest {
 
             springJdbcPerformance.getMonitorById(monitor.getId());
 
-//			myBatisPerformance.getMonitorById(monitor.getId());
+			myBatisPerformance.getMonitorById(monitor.getId());
 
             myBatisPlusPerformance.getMonitorById(monitor.getId());
 
@@ -125,25 +126,23 @@ public class OrderPerformanceTest extends BaseTest {
     @Test
     public void testGetComputer() {
 
-        final int id = 11;
+        final int id = nwayLambdaPerformance.listComputer().get(0).getId();
 
         for (int i = 0; i < 10; i++) {
 
-            nwayPerformance.getComputerById(id);
+            nwayLambdaPerformance.getComputerById(id);
 
-//			hibernatePerformance.getComputerById(id);
+			hibernatePerformance.getComputerById(id);
 
-//			jpaPerformance.getComputerById(id);
+			jpaPerformance.getComputerById(id);
 
-//			springDataJpaPerformance.getComputerById(id);
+			springDataJpaPerformance.getComputerById(id);
 
-//			springJdbcPerformance.getComputerById(id);
+			springJdbcPerformance.getComputerById(id);
 
             myBatisPerformance.getComputerById(id);
 
             myBatisGePerformance.getComputerById(id);
-
-            // System.out.println(computer.getSoftware());
 
             System.out.println();
         }
@@ -170,7 +169,7 @@ public class OrderPerformanceTest extends BaseTest {
 
             springJdbcPerformance.listComputer();
 
-//			cs = myBatisPerformance.listComputer();
+			cs = myBatisPerformance.listComputer();
 
             cs = myBatisPlusPerformance.listComputer();
 
@@ -205,16 +204,16 @@ public class OrderPerformanceTest extends BaseTest {
         }
         System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
 
-//        begin = System.currentTimeMillis();
-//        for (int i = 0; i < times; i++) {
-//            myBatisPlusPerformance.listComputer();
-//        }
-//        System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
+        begin = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            myBatisPlusPerformance.listComputer();
+        }
+        System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
 
-        /*System.out.println();
+        System.out.println();
         for (int i = 0; i < 50; i++) {
             myBatisGePerformance.listComputer();
-        }*/
+        }
     }
 
     @Test
@@ -229,16 +228,16 @@ public class OrderPerformanceTest extends BaseTest {
 
         int times = 50;
         long begin = System.currentTimeMillis();
-//        for (int i = 0; i < times; i++) {
-//            myBatisPerformance.listMonitor();
-//        }
-//        System.out.println("myBatis = " + (System.currentTimeMillis() - begin));
+        for (int i = 0; i < times; i++) {
+            myBatisPerformance.listMonitor();
+        }
+        System.out.println("myBatis = " + (System.currentTimeMillis() - begin));
 
-//        begin = System.currentTimeMillis();
-//        for (int i = 0; i < times; i++) {
-//            nwayLambdaPerformance.listMonitor();
-//        }
-//        System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
+        begin = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            nwayLambdaPerformance.listMonitor();
+        }
+        System.out.println("nwayLambda = " + (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
@@ -246,12 +245,11 @@ public class OrderPerformanceTest extends BaseTest {
         }
         System.out.println("myBatisPlus = " + (System.currentTimeMillis() - begin));
 
-//        begin = System.currentTimeMillis();
-//        for (int i = 0; i < times; i++) {
-//            myBatisGePerformance.listMonitor();
-//        }
-//        System.out.println("myBatisGe = " + (System.currentTimeMillis() - begin));
-
+        begin = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            myBatisGePerformance.listMonitor();
+        }
+        System.out.println("myBatisGe = " + (System.currentTimeMillis() - begin));
     }
 
     @Test

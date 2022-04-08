@@ -1,12 +1,24 @@
 package com.nway.spring.jdbc.sql;
 
+import com.nway.spring.jdbc.ExampleEntity;
+import com.nway.spring.jdbc.SqlExecutor;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.time.Duration;
+import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -14,7 +26,40 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+@SpringJUnitConfig(classes = QueryBuilderTest.Config.class)
 public class QueryBuilderTest {
+
+    @Autowired
+    private SqlExecutor sqlExecutor;
+
+    @Configuration
+    @EnableTransactionManagement
+    static class Config {
+
+        @Autowired
+        private DataSource dataSource;
+
+        @Bean("dataSource")
+        public DataSource dataSource() {
+
+            Resource resource = new ClassPathResource("datasource.xml");
+
+            DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+
+            XmlBeanDefinitionReader xmlBeanReader = new XmlBeanDefinitionReader(beanFactory);
+
+            xmlBeanReader.loadBeanDefinitions(resource);
+
+            return beanFactory.getBean(DataSource.class);
+        }
+
+        @Bean
+        @DependsOn("dataSource")
+        public SqlExecutor sqlExecutor() {
+            return new SqlExecutor(dataSource);
+        }
+
+    }
 
     @Test
     public void getSqlTest() {
@@ -178,5 +223,183 @@ public class QueryBuilderTest {
         Assertions.assertEquals(2, params.size());
         Assertions.assertTrue(params.get(0).getClass().isAssignableFrom(Date.class));
         Assertions.assertTrue(params.get(1).getClass().isAssignableFrom(String.class));
+    }
+
+    @Test
+    public void excludeColumnTest() {
+        QueryBuilder queryBuilder = SQL.query(Computer.class).excludeColumn(Computer::getMainframeId);
+        String sql = queryBuilder.getSql();
+        String selectColumn = sql.substring(0, sql.indexOf(" from "));
+        String excludeColumn = SqlBuilderUtils.getColumn(Computer::getMainframeId);
+        Assertions.assertFalse(selectColumn.contains(excludeColumn));
+    }
+
+    @Test
+    public void withMVColumnTest() {
+
+        String mvColumn = SqlBuilderUtils.getColumn(Computer::getUserList);
+
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
+        String sql = queryBuilder.getSql();
+        String selectColumn = sql.substring(0, sql.indexOf(" from "));
+        Assertions.assertFalse(selectColumn.contains(mvColumn));
+
+        queryBuilder = SQL.query(Computer.class).withMVColumn(Computer::getUserList);
+        sql = queryBuilder.getSql();
+        selectColumn = sql.substring(0, sql.indexOf(" from "));
+        Assertions.assertFalse(selectColumn.contains(mvColumn));
+        Assertions.assertTrue(queryBuilder.getMultiValColumn().size() == 1 && queryBuilder.getMultiValColumn().contains(mvColumn));
+    }
+
+    @Test
+    public void groupByTest() {
+
+        QueryBuilder queryBuilder = SQL.query(Computer.class).groupBy(Computer::getBrand);
+        String sql = queryBuilder.getSql();
+        int groupByIdx = sql.indexOf(" group by ");
+        Assertions.assertTrue(groupByIdx > 0);
+
+        String groupExp = sql.substring(groupByIdx);
+        String groupColumn = SqlBuilderUtils.getColumn(Computer::getBrand);
+
+        Assertions.assertTrue(groupExp.contains(groupColumn));
+    }
+
+    @Test
+    public void havingTest() {
+        QueryBuilder queryBuilder = SQL.query(Computer.class).having(builder -> builder.eq(Computer::getBrand, "0").ne(Computer::getMainframeId, "b"));
+        String sql = queryBuilder.getSql();
+        int havingByIdx = sql.indexOf(" having ");
+        Assertions.assertTrue(havingByIdx > 0);
+
+        String havingExp = sql.substring(havingByIdx);
+
+        Assertions.assertEquals(havingExp, " having brand = ? and mainframe_id <> ?");
+    }
+
+    @Test
+    public void orderByTest() {
+
+        QueryBuilder queryBuilder = SQL.query(Computer.class).orderBy(Computer::getBrand);
+        String sql = queryBuilder.getSql();
+        int orderByIdx = sql.indexOf(" order by ");
+        Assertions.assertTrue(orderByIdx > 0);
+
+        String orderExp = sql.substring(orderByIdx);
+        String orderColumn = SqlBuilderUtils.getColumn(Computer::getBrand);
+
+        Assertions.assertTrue(orderExp.contains(orderColumn));
+    }
+
+    @Test
+    public void orderByTest2() {
+
+        QueryBuilder queryBuilder = SQL.query(Computer.class).orderBy(Computer::getBrand).andOrderByAsc(Computer::getModel);
+        String sql = queryBuilder.getSql();
+        int orderByIdx = sql.indexOf(" order by ");
+        Assertions.assertTrue(orderByIdx > 0);
+
+        String orderExp = sql.substring(orderByIdx);
+
+        Assertions.assertEquals(orderExp, " order by brand,model asc");
+    }
+
+
+    @Test
+    public void sqlTest() {
+
+        ExampleEntity exampleEntity = new ExampleEntity();
+
+        exampleEntity.setString("strcolumn");
+
+        QueryBuilder builder = SQL.query(ExampleEntity.class);
+
+        builder.distinct()
+                .eq(ExampleEntity::getId, 1)
+                .eq(exampleEntity::getId)
+                .eq("pk_id", exampleEntity.getId())
+                .ne(ExampleEntity::getString, "ne")
+                .ne(exampleEntity::getString)
+                .ne("string", "str")
+                .ge(ExampleEntity::getId, 11)
+                .ge(exampleEntity::getId)
+                .ge("pk_id", exampleEntity.getId())
+                .gt(ExampleEntity::getId, 11)
+                .gt(exampleEntity::getId)
+                .gt("pk_id", exampleEntity.getId())
+                .lt(ExampleEntity::getId, 11)
+                .lt(exampleEntity::getId)
+                .lt("pk_id", exampleEntity.getId())
+                .le(ExampleEntity::getId, 11)
+                .le(exampleEntity::getId)
+                .le("pk_id", exampleEntity.getId())
+                .isNull(ExampleEntity::getString)
+                .isNull(exampleEntity::getString)
+                .isNull("pk_id")
+                .isNotNull(ExampleEntity::getString)
+                .isNotNull(exampleEntity::getString)
+                .isNull("pk_id")
+                .between(ExampleEntity::getString, exampleEntity::getPpLong, exampleEntity::getPpDouble)
+                .between(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
+                .between("p_double", 1, 2)
+                .between("p_double", exampleEntity::getPpDouble, exampleEntity::getPpDouble)
+                .notBetween(ExampleEntity::getPpDouble, exampleEntity::getPpLong, exampleEntity::getPpLong)
+                .notBetween(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
+                .notBetween("p_double", 1, 2)
+                .notBetween("p_double", exampleEntity::getPpDouble, exampleEntity::getPpDouble)
+                .like(exampleEntity::getString)
+                .like("string", exampleEntity.getString())
+                .like(ExampleEntity::getString, exampleEntity::getString)
+                .like(ExampleEntity::getString, exampleEntity.getString())
+                .notLike(exampleEntity::getString)
+                .notLike("string", exampleEntity.getString())
+                .notLike(ExampleEntity::getString, exampleEntity::getString)
+                .notLike(ExampleEntity::getString, exampleEntity.getString())
+                .likeLeft(exampleEntity::getString)
+                .likeLeft("string", exampleEntity.getString())
+                .likeLeft(ExampleEntity::getString, exampleEntity::getString)
+                .likeLeft(ExampleEntity::getString, exampleEntity.getString())
+                .likeRight(exampleEntity::getString)
+                .likeRight("string", exampleEntity.getString())
+                .likeRight(ExampleEntity::getString, exampleEntity::getString)
+                .likeRight(ExampleEntity::getString, exampleEntity.getString())
+                .in(ExampleEntity::getString, Collections.singletonList("aa"))
+                .in("string", Collections.singletonList("aa"))
+                .notIn(ExampleEntity::getString, Collections.singletonList("aa"))
+                .notIn("string", Collections.singletonList("aa"))
+                .or()
+                .eq(exampleEntity::getId)
+                .or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
+                .and(e -> e.eq(ExampleEntity::getId, 1))
+//                .groupBy(ExampleEntity::getUtilDate)
+//                .having(e -> e.eq(ExampleEntity::getString, 100))
+//				.orderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
+//				.appendOrderBy("string", "p_double")
+                .orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
+                .andOrderByDesc("string", "p_double")
+                .andOrderByAsc(ExampleEntity::getString)
+                .andOrderByDesc(ExampleEntity::getPpDouble);
+
+        ExampleEntity first = sqlExecutor.queryFirst(builder);
+        Assertions.assertNull(first);
+
+        QueryBuilder builder2 = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
+        first = sqlExecutor.queryFirst(builder2);
+        Assertions.assertNotNull(first);
+    }
+
+    @Test
+    void groupSqlTest() {
+        ExampleEntity exampleEntity = new ExampleEntity();
+
+        exampleEntity.setString("strcolumn");
+
+        QueryBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
+                .isNull(ExampleEntity::getId)
+                .groupBy(ExampleEntity::getString, ExampleEntity::getUtilDate)
+//				.groupBy("string", "p_double")
+                .having(e -> e.eq(exampleEntity::getString).isNotNull(exampleEntity::getUtilDate));
+        ExampleEntity first = sqlExecutor.queryFirst(builder);
+        Assertions.assertNull(first);
     }
 }

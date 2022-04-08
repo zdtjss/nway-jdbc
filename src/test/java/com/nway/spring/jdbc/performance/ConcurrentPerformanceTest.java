@@ -1,6 +1,5 @@
 package com.nway.spring.jdbc.performance;
 
-import com.nway.spring.jdbc.BaseTest;
 import com.nway.spring.jdbc.performance.dal.po.ComputerPoEntity;
 import com.nway.spring.jdbc.performance.dal.po.MonitorPoEntity;
 import com.nway.spring.jdbc.performance.entity.Computer;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +25,8 @@ import java.util.stream.IntStream;
  */
 @Slf4j
 @Service
-public class ConcurrentPerformanceTest extends BaseTest {
+@SpringJUnitConfig(locations = {"/spring.xml"})
+public class ConcurrentPerformanceTest {
 
     @Autowired
     @Qualifier("nwayPerformance")

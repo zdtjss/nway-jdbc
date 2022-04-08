@@ -229,6 +229,11 @@ public class Computer {
 		this.keyboardId = keyboardId;
 	}
 
+	@Transient
+	public List<String> getUserList() {
+		return userList;
+	}
+
 	public void setUserList(List<String> userList) {
 		this.userList = userList;
 	}

@@ -6,9 +6,24 @@ import com.nway.spring.jdbc.sql.builder.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import java.math.BigDecimal;
@@ -25,10 +40,47 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class SqlExecutorTest extends BaseTest {
+@Rollback
+@Transactional
+@SpringJUnitConfig(classes = SqlExecutorTest.Config.class)
+class SqlExecutorTest {
 
     @Autowired
     private SqlExecutor sqlExecutor;
+
+    @Configuration
+    @EnableTransactionManagement
+    static class Config {
+
+        @Autowired
+        private DataSource dataSource;
+
+        @Bean("dataSource")
+        public DataSource dataSource() {
+
+            Resource resource = new ClassPathResource("datasource.xml");
+
+            DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+
+            XmlBeanDefinitionReader xmlBeanReader = new XmlBeanDefinitionReader(beanFactory);
+
+            xmlBeanReader.loadBeanDefinitions(resource);
+
+            return beanFactory.getBean(DataSource.class);
+        }
+
+        @Bean
+        public PlatformTransactionManager txManager() {
+            return new DataSourceTransactionManager(dataSource);
+        }
+
+        @Bean
+        @DependsOn("dataSource")
+        public SqlExecutor sqlExecutor() {
+            return new SqlExecutor(dataSource);
+        }
+
+    }
 
     @Test
     void update() {
@@ -49,7 +101,9 @@ class SqlExecutorTest extends BaseTest {
         exampleEntity.setId(example.getId());
         exampleEntity.setString(UUID.randomUUID().toString());
 
-        sqlExecutor.updateById(exampleEntity);
+        int effect = sqlExecutor.updateById(exampleEntity);
+
+        Assertions.assertEquals(effect, 1);
 
         ExampleEntity exampleUpdated = sqlExecutor.queryById(example.getId(), ExampleEntity.class);
 
@@ -65,7 +119,9 @@ class SqlExecutorTest extends BaseTest {
         exampleEntity.setId(example.getId());
         exampleEntity.setString(UUID.randomUUID().toString());
 
-        sqlExecutor.updateById(exampleEntity, ExampleEntity::getString);
+        int effect = sqlExecutor.updateById(exampleEntity, ExampleEntity::getString);
+
+        Assertions.assertEquals(effect, 1);
 
         ExampleEntity exampleUpdated = sqlExecutor.queryById(example.getId(), ExampleEntity.class);
 
@@ -77,7 +133,8 @@ class SqlExecutorTest extends BaseTest {
         Page<ExampleEntity> examplePage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
         String str = UUID.randomUUID().toString();
         examplePage.getPageData().forEach(e -> e.setString(str));
-        sqlExecutor.batchUpdateById(examplePage.getPageData());
+        int effect = sqlExecutor.batchUpdateById(examplePage.getPageData());
+        Assertions.assertEquals(examplePage.getPageData().size(), effect);
         ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
         Assertions.assertEquals(str, exampleUpdated.getString());
     }
@@ -92,7 +149,8 @@ class SqlExecutorTest extends BaseTest {
             example.setPpInt((int) (Math.random() * 1000));
             return example;
         }).collect(Collectors.toList());
-        sqlExecutor.batchUpdateById(exampleList, ExampleEntity::getPpInt, ExampleEntity::getString);
+        int effect = sqlExecutor.batchUpdateById(exampleList, ExampleEntity::getPpInt, ExampleEntity::getString);
+        Assertions.assertEquals(effect, exampleList.size());
         ExampleEntity exampleUpdated = sqlExecutor.queryById(examplePage.getPageData().get(0).getId(), ExampleEntity.class);
         Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
     }
@@ -113,7 +171,8 @@ class SqlExecutorTest extends BaseTest {
                 .addCondition(ExampleEntity::getId, SqlOperator.EQ)
                 .addCondition(ExampleEntity::getSqlDate, SqlOperator.IS_NULL)
                 .use(exampleList);
-        sqlExecutor.batchUpdate(updateBuilder);
+        int effect = sqlExecutor.batchUpdate(updateBuilder);
+        Assertions.assertEquals(effect, exampleList.size());
         ExampleEntity exampleUpdated = sqlExecutor.queryById(exampleList.get(0).getId(), ExampleEntity.class);
         Assertions.assertEquals(exampleList.get(0).getString(), exampleUpdated.getString());
     }
@@ -258,7 +317,7 @@ class SqlExecutorTest extends BaseTest {
     void testQueryPage2() {
         ExampleEntity example = sqlExecutor.queryFirst(SQL.query(ExampleEntity.class));
         QueryBuilder queryBuilder = SQL.query(ExampleEntity.class);
-        queryBuilder.distinct().withColumn(ExampleEntity::getId,ExampleEntity::getUtilDate, ExampleEntity::getString)
+        queryBuilder.distinct().withColumn(ExampleEntity::getId, ExampleEntity::getUtilDate, ExampleEntity::getString)
                 .eq(example::getId)
                 .orderBy(ExampleEntity::getUtilDate, ExampleEntity::getString);
         Page<ExampleEntity> mapPage = sqlExecutor.queryPage(queryBuilder, 1, 1);
@@ -480,101 +539,6 @@ class SqlExecutorTest extends BaseTest {
 
     private void arg(Object... abc) {
         System.out.println(Arrays.deepToString(abc));
-    }
-
-    @Test
-    public void sqlTest() {
-
-        ExampleEntity exampleEntity = new ExampleEntity();
-
-        exampleEntity.setString("strcolumn");
-
-        QueryBuilder builder = SQL.query(ExampleEntity.class);
-
-        builder.distinct()
-                .eq(ExampleEntity::getId, 1)
-                .eq(exampleEntity::getId)
-                .eq("pk_id", exampleEntity.getId())
-                .ne(ExampleEntity::getString, "ne")
-                .ne(exampleEntity::getString)
-                .ne("string", "str")
-                .ge(ExampleEntity::getId, 11)
-                .ge(exampleEntity::getId)
-                .ge("pk_id", exampleEntity.getId())
-                .gt(ExampleEntity::getId, 11)
-                .gt(exampleEntity::getId)
-                .gt("pk_id", exampleEntity.getId())
-                .lt(ExampleEntity::getId, 11)
-                .lt(exampleEntity::getId)
-                .lt("pk_id", exampleEntity.getId())
-                .le(ExampleEntity::getId, 11)
-                .le(exampleEntity::getId)
-                .le("pk_id", exampleEntity.getId())
-                .isNull(ExampleEntity::getString)
-                .isNull(exampleEntity::getString)
-                .isNull("pk_id")
-                .isNotNull(ExampleEntity::getString)
-                .isNotNull(exampleEntity::getString)
-                .isNull("pk_id")
-                .between(ExampleEntity::getString, exampleEntity::getPpLong, exampleEntity::getPpDouble)
-                .between(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
-                .between("p_double", 1, 2)
-                .between("p_double", exampleEntity::getPpDouble, exampleEntity::getPpDouble)
-                .notBetween(ExampleEntity::getPpDouble, exampleEntity::getPpLong, exampleEntity::getPpLong)
-                .notBetween(ExampleEntity::getPpDouble, exampleEntity.getPpDouble(), exampleEntity.getPpDouble())
-                .notBetween("p_double", 1, 2)
-                .notBetween("p_double", exampleEntity::getPpDouble, exampleEntity::getPpDouble)
-                .like(exampleEntity::getString)
-                .like("string", exampleEntity.getString())
-                .like(ExampleEntity::getString, exampleEntity::getString)
-                .like(ExampleEntity::getString, exampleEntity.getString())
-                .notLike(exampleEntity::getString)
-                .notLike("string", exampleEntity.getString())
-                .notLike(ExampleEntity::getString, exampleEntity::getString)
-                .notLike(ExampleEntity::getString, exampleEntity.getString())
-                .likeLeft(exampleEntity::getString)
-                .likeLeft("string", exampleEntity.getString())
-                .likeLeft(ExampleEntity::getString, exampleEntity::getString)
-                .likeLeft(ExampleEntity::getString, exampleEntity.getString())
-                .likeRight(exampleEntity::getString)
-                .likeRight("string", exampleEntity.getString())
-                .likeRight(ExampleEntity::getString, exampleEntity::getString)
-                .likeRight(ExampleEntity::getString, exampleEntity.getString())
-                .in(ExampleEntity::getString, Collections.singletonList("aa"))
-                .in("string", Collections.singletonList("aa"))
-                .notIn(ExampleEntity::getString, Collections.singletonList("aa"))
-                .notIn("string", Collections.singletonList("aa"))
-                .or()
-                .eq(exampleEntity::getId)
-                .or(e -> e.eq(exampleEntity::getId).ne(exampleEntity::getId))
-                .and(e -> e.eq(ExampleEntity::getId, 1))
-//                .groupBy(ExampleEntity::getUtilDate)
-//                .having(e -> e.eq(ExampleEntity::getString, 100))
-//				.orderBy(ExampleEntity::getString, ExampleEntity::getPpDouble)
-//				.appendOrderBy("string", "p_double")
-                .orderByDesc(ExampleEntity::getString, ExampleEntity::getPpDouble)
-                .andOrderByDesc("string", "p_double")
-                .andOrderByAsc(ExampleEntity::getString)
-                .andOrderByDesc(ExampleEntity::getPpDouble);
-
-        sqlExecutor.queryFirst(builder);
-
-        QueryBuilder builder2 = SQL.query(ExampleEntity.class).orderByDesc(ExampleEntity::getUtilDate);
-        sqlExecutor.queryFirst(builder2);
-
-    }
-
-    @Test
-    void groupSqlTest() {
-        ExampleEntity exampleEntity = new ExampleEntity();
-
-        exampleEntity.setString("strcolumn");
-
-        QueryBuilder builder = SQL.query(ExampleEntity.class).withColumn(ExampleEntity::getString, ExampleEntity::getUtilDate)
-                .groupBy(ExampleEntity::getString, ExampleEntity::getUtilDate)
-//				.groupBy("string", "p_double")
-                .having(e -> e.eq(exampleEntity::getString).ne(exampleEntity::getUtilDate));
-        sqlExecutor.queryFirst(builder);
     }
 
     @Test
