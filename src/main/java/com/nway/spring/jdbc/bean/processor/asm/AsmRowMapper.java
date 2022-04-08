@@ -212,7 +212,7 @@ public class AsmRowMapper<T> implements org.springframework.jdbc.core.RowMapper<
             methodVisitor.visitLabel(label6);
             methodVisitor.visitLocalVariable("this", "L" + className + ";", null, label0, label6, 0);
             methodVisitor.visitLocalVariable("rs", "Ljava/sql/ResultSet;", null, label0, label6, 1);
-            methodVisitor.visitLocalVariable("monitor", "L" + beanClassName + ";", null, labelFirst, label6, 2);
+            methodVisitor.visitLocalVariable("bean", "L" + beanClassName + ";", null, labelFirst, label6, 2);
             methodVisitor.visitMaxs(4, 3);
             methodVisitor.visitEnd();
         }
