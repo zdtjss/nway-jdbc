@@ -255,7 +255,7 @@ public class OrderPerformanceTest {
     @Test
     public void initDB() throws InterruptedException {
 
-        int times = 100000;
+        int times = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(16);
         Collection<Callable<Void>> initDataTask = new ArrayList<>(times);
 

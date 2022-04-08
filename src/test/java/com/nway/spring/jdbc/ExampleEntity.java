@@ -317,12 +317,12 @@ public class ExampleEntity {
 		this.bigDecimal = bigDecimal;
 	}
 
-	public void setDelFlag(int delFlag) {
+	public void setDelFlag(Integer delFlag) {
 		this.delFlag = delFlag;
 	}
 
 	@Column(name = "del_flag")
-	public int getDelFlag() {
+	public Integer getDelFlag() {
 		return delFlag;
 	}
 

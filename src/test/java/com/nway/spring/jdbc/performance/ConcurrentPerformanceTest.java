@@ -6,6 +6,7 @@ import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.performance.entity.Monitor;
 import com.nway.spring.jdbc.performance.repositories.SpringDataJpaPerformance;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 /**
  * 多线程并发模式下的性能测试
  */
+@Disabled
 @Slf4j
 @Service
 @SpringJUnitConfig(locations = {"/spring.xml"})
