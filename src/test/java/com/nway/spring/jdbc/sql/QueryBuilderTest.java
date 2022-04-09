@@ -223,6 +223,15 @@ public class QueryBuilderTest {
         Assertions.assertEquals(2, params.size());
         Assertions.assertTrue(params.get(0).getClass().isAssignableFrom(Date.class));
         Assertions.assertTrue(params.get(1).getClass().isAssignableFrom(String.class));
+
+        queryBuilder = SQL.query(Computer.class);
+        queryBuilder.ignorePermission();
+        sql = queryBuilder.getSql();
+        params = queryBuilder.getParam();
+
+        Assertions.assertEquals(-1, sql.indexOf(" where "));
+        Assertions.assertEquals(0, params.size());
+
     }
 
     @Test
@@ -267,7 +276,8 @@ public class QueryBuilderTest {
 
     @Test
     public void havingTest() {
-        QueryBuilder queryBuilder = SQL.query(Computer.class).having(builder -> builder.eq(Computer::getBrand, "0").ne(Computer::getMainframeId, "b"));
+        QueryBuilder queryBuilder = SQL.query(Computer.class)
+                .having(builder -> builder.eq(Computer::getBrand, "0").ne(Computer::getMainframeId, "b"));
         String sql = queryBuilder.getSql();
         int havingByIdx = sql.indexOf(" having ");
         Assertions.assertTrue(havingByIdx > 0);

@@ -66,10 +66,6 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
         return this;
     }
 
-    public void ignorePermission() {
-        this.ignorePower = true;
-    }
-
     public List<String> getColumns() {
         return columns;
     }
@@ -166,6 +162,10 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
             param.addAll(lq.getParam());
         }
         return thisObj;
+    }
+
+    public void ignorePermission() {
+        this.ignorePower = true;
     }
 
     @Override
