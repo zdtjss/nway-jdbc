@@ -10,7 +10,7 @@ maven
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.6.0</version>
+		<version>1.6.1</version>
 	</dependency>
 
 基于xml配置的bean：

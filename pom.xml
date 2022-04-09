@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.zdtjss</groupId>
     <artifactId>nway-jdbc</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
     <packaging>jar</packaging>
     <name>nway-jdbc</name>
     <description>简单易用的单表操作工具</description>
@@ -14,7 +14,6 @@
     <properties>
         <project.build.sourceEncoding>utf8</project.build.sourceEncoding>
         <spring.version>5.3.13</spring.version>
-        <skip.test>true</skip.test>
     </properties>
     <licenses>
         <license>
@@ -137,6 +136,11 @@
                         <version>1.3.8</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M6</version>
             </plugin>
         </plugins>
     </build>
