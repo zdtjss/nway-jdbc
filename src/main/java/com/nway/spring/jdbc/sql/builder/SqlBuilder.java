@@ -734,7 +734,7 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
     public String getSql() {
         String sql = this.where.toString();
         // 不能添加where 说明已经有where存在  但是如果参数为空  有可能是因为忽略无效条件导致的
-        if (!canAppendWhere && param.size() == 0) {
+        if (!canAppendWhere && param.size() == 0 && !sql.trim().endsWith(" null")) {
             sql = sql.substring(0, sql.length() - 8);
         }
         return sql + afterWhere.toString();
