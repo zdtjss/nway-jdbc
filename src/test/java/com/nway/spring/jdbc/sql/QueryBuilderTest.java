@@ -2,9 +2,13 @@ package com.nway.spring.jdbc.sql;
 
 import com.nway.spring.jdbc.ExampleEntity;
 import com.nway.spring.jdbc.SqlExecutor;
+import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.annotation.Table;
+import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import lombok.Data;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -411,5 +415,24 @@ public class QueryBuilderTest {
                 .having(e -> e.eq(exampleEntity::getString).isNotNull(exampleEntity::getUtilDate));
         ExampleEntity first = sqlExecutor.queryFirst(builder);
         Assertions.assertNull(first);
+    }
+
+    @Test
+    public void noneParamQuery() {
+
+        QueryBuilder queryBuilder = SQL.query(Pure.class)
+                .isNull(Pure::getId)
+                .isNotNull(Pure::getString);
+
+        List<Pure> list = sqlExecutor.queryList(queryBuilder);
+        Assertions.assertEquals(list.size(), 0);
+    }
+
+    @Data
+    @Table("t_nway")
+    public static class Pure {
+        @Column(name = "pk_id", type = ColumnType.ID)
+        private Integer id;
+        private String string;
     }
 }
