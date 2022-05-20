@@ -189,16 +189,14 @@ public class SqlBuilderUtils {
 	 * @return
 	 */
 	public static Object getColumnValue(ColumnInfo columnInfo, Object obj, SqlType sqlType) {
+		Object objVal;
 		try {
-			Object objVal = columnInfo.getReadMethod().get(obj);
-			if (objVal != null) {
-				return objVal;
-			}
+			objVal = columnInfo.getReadMethod().get(obj);
 		} catch (IllegalAccessException e) {
 			throw new SqlBuilderException(e);
 		}
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
-			Object value = columnInfo.getFillStrategy().getValue(sqlType);
+			Object value = columnInfo.getFillStrategy().getValue(sqlType, objVal);
 			try {
 				columnInfo.getReadMethod().set(obj, value);
 			} catch (IllegalAccessException e) {

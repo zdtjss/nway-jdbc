@@ -16,11 +16,11 @@
  */
 package com.nway.spring.jdbc.bean;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import com.nway.spring.jdbc.bean.processor.BeanProcessor;
 import org.springframework.jdbc.core.ResultSetExtractor;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * <code>ResultSetHandler</code> implementation that converts the first <code>ResultSet</code> row
@@ -34,7 +34,7 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      * The Class of beans produced by this handler.
      */
     private final Class<T> type;
-    
+
     private final BeanProcessor beanProcessor;
 
     public BeanHandler(Class<T> type, BeanProcessor beanProcessor) {
@@ -52,9 +52,9 @@ public class BeanHandler<T> implements ResultSetExtractor<T> {
      *
      * @throws SQLException if a database access error occurs
      */
-	@Override
-	public T extractData(ResultSet rs) throws SQLException {
-		return rs.next() ? beanProcessor.toBean(rs, type) : null;
-	}
+    @Override
+    public T extractData(ResultSet rs) throws SQLException {
+        return rs.next() ? PostSelect.post(beanProcessor.toBean(rs, type), type) : null;
+    }
 
 }

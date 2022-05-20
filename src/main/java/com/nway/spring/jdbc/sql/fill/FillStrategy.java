@@ -12,5 +12,5 @@ public interface FillStrategy {
 	 * @param sqlType
 	 * @return
 	 */
-	Object getValue(SqlType sqlType);
+	Object getValue(SqlType sqlType, Object val);
 }

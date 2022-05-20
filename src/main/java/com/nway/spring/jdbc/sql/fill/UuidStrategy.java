@@ -1,8 +1,8 @@
 package com.nway.spring.jdbc.sql.fill;
 
-import java.util.UUID;
-
 import com.nway.spring.jdbc.sql.SqlType;
+
+import java.util.UUID;
 
 public class UuidStrategy implements FillStrategy {
 
@@ -12,7 +12,7 @@ public class UuidStrategy implements FillStrategy {
     }
 
     @Override
-    public Object getValue(SqlType sqlType) {
+    public Object getValue(SqlType sqlType, Object val) {
 
         return UUID.randomUUID().toString().replace("-", "");
     }

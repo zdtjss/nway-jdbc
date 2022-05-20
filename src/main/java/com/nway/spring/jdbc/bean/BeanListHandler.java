@@ -13,12 +13,12 @@
  */
 package com.nway.spring.jdbc.bean;
 
+import com.nway.spring.jdbc.bean.processor.BeanProcessor;
+import org.springframework.jdbc.core.ResultSetExtractor;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import com.nway.spring.jdbc.bean.processor.BeanProcessor;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 /**
  *
@@ -30,7 +30,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 public final class BeanListHandler<T> implements ResultSetExtractor<List<T>> {
 
     private final Class<T> type;
-    
+
     /**
      * 考虑本类可能在不同 ClassLoader中使用，这里不应该是静态的 *
      */
@@ -41,10 +41,10 @@ public final class BeanListHandler<T> implements ResultSetExtractor<List<T>> {
         this.beanProcessor = beanProcessor;
     }
 
-	@Override
-	public List<T> extractData(ResultSet rs) throws SQLException {
+    @Override
+    public List<T> extractData(ResultSet rs) throws SQLException {
 
-		return beanProcessor.toBeanList(rs, type);
-	}
+        return PostSelect.post(beanProcessor.toBeanList(rs, type), type);
+    }
 
 }

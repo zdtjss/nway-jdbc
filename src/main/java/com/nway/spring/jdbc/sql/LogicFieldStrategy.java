@@ -15,7 +15,7 @@ public class LogicFieldStrategy implements FillStrategy, PermissionStrategy {
     }
 
     @Override
-    public Object getValue(SqlType sqlType) {
+    public Object getValue(SqlType sqlType, Object val) {
         return SqlType.INSERT == sqlType ? 0 : 1;
     }
 
