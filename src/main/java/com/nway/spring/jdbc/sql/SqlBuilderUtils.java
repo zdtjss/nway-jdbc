@@ -196,15 +196,14 @@ public class SqlBuilderUtils {
 			throw new SqlBuilderException(e);
 		}
 		if (columnInfo.getFillStrategy().isSupport(sqlType)) {
-			Object value = columnInfo.getFillStrategy().getValue(sqlType, objVal);
+			objVal = columnInfo.getFillStrategy().getValue(sqlType, objVal);
 			try {
-				columnInfo.getReadMethod().set(obj, value);
+				columnInfo.getReadMethod().set(obj, objVal);
 			} catch (IllegalAccessException e) {
 				throw new SqlBuilderException(e);
 			}
-			return value;
 		}
-		return null;
+		return objVal;
 	}
 	
 	public static String getTableNameFromCache(Class<?> entityClass) {

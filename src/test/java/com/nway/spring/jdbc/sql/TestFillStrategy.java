@@ -10,7 +10,8 @@ public class TestFillStrategy implements FillStrategy {
     }
 
     @Override
-    public Object getValue(SqlType sqlType) {
+    public Object getValue(SqlType sqlType, Object val) {
+
         return (int) (Math.random() * 10000);
     }
 

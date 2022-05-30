@@ -4,6 +4,8 @@ import com.nway.spring.jdbc.sql.SqlType;
 
 public interface FillStrategy {
 
+	Object DEFALUT_NONE = new Object();
+
 	boolean isSupport(SqlType sqlType);
 
 	/**

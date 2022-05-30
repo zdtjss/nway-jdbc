@@ -1,5 +1,6 @@
 package com.nway.spring.jdbc;
 
+import com.alibaba.fastjson.JSON;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.*;
@@ -8,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ClassPathResource;
@@ -440,9 +439,7 @@ class SqlExecutorTest {
         max.setId(max.getId() + 1);
         max.setString("abc");
 
-        ExampleEntity similar = new ExampleEntity();
-        BeanCopier beanCopier = BeanCopier.create(ExampleEntity.class, ExampleEntity.class, false);
-        beanCopier.copy(max, similar, null);
+        ExampleEntity similar = JSON.parseObject(JSON.toJSONString(max), ExampleEntity.class);
         similar.setId(max.getId() + 1);
         similar.setString(max.getString());
 

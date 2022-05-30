@@ -2,6 +2,7 @@ package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
@@ -54,7 +55,7 @@ public class UpdateBuilder extends SqlBuilder<UpdateBuilder> {
         for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
             if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
                     && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
-                Object value = columnInfo.getFillStrategy().getValue(SqlType.UPDATE);
+                Object value = columnInfo.getFillStrategy().getValue(SqlType.UPDATE, FillStrategy.DEFALUT_NONE);
                 sets.add(columnInfo.getColumnName() + " = ?");
                 param.add(value);
             }

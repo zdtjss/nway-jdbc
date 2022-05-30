@@ -3,6 +3,7 @@ package com.nway.spring.jdbc.sql.builder;
 import com.nway.spring.jdbc.sql.LogicFieldStrategy;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
+import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
@@ -22,7 +23,7 @@ public class DeleteBuilder extends SqlBuilder<DeleteBuilder> {
             StringBuilder sql = new StringBuilder(128);
             sql.append("update ")
                     .append(SqlBuilderUtils.getTableNameFromCache(beanClass))
-                    .append(" set ").append(columnInfo.getColumnName()).append(" = ").append(columnInfo.getFillStrategy().getValue(SqlType.DELETE))
+                    .append(" set ").append(columnInfo.getColumnName()).append(" = ").append(columnInfo.getFillStrategy().getValue(SqlType.DELETE, FillStrategy.DEFALUT_NONE))
                     .append(super.getSql());
             return sql.toString();
         }

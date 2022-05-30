@@ -12,8 +12,10 @@ public class StringIdStrategy implements FillStrategy {
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
-
-        return IdWorker.getIdStr();
+        if (val == DEFALUT_NONE || val == null || "".equals(val)) {
+            return IdWorker.getIdStr();
+        }
+        return val;
     }
 
 }

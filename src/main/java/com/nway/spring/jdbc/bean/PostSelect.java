@@ -9,13 +9,15 @@ import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class PostSelect<T> {
+class PostSelect {
 
     public static <T> List<T> post(List<T> objs, Class<T> type) {
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(type);
         List<ColumnInfo> columns = entityInfo.getColumnMap().values()
                 .stream().filter(col -> col.getFillStrategy().isSupport(SqlType.SELECT)).collect(Collectors.toList());
-        objs.forEach(obj -> post(obj, columns));
+        for (T obj : objs) {
+            post(obj, columns);
+        }
         return objs;
     }
 

@@ -13,8 +13,10 @@ public class UuidStrategy implements FillStrategy {
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
-
-        return UUID.randomUUID().toString().replace("-", "");
+        if (val == DEFALUT_NONE || val == null || "".equals(val)) {
+            return UUID.randomUUID().toString().replace("-", "");
+        }
+        return val;
     }
 
 }
