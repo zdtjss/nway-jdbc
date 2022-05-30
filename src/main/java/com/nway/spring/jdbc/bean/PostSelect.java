@@ -1,6 +1,6 @@
 package com.nway.spring.jdbc.bean;
 
-import com.nway.spring.jdbc.NwayException;
+import com.nway.spring.jdbc.NwayJdbcException;
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
@@ -36,7 +36,7 @@ class PostSelect {
                     column.getReadMethod().set(obj, newVal);
                 }
             } catch (IllegalAccessException e) {
-                throw new NwayException(e);
+                throw new NwayJdbcException(e);
             }
         }
         return obj;
