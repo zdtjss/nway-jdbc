@@ -407,9 +407,9 @@ class SqlExecutorTest {
 
     @Test
     void mvListTest3() {
-        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv2 limit 10", String.class);
-        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).withMVColumn(ExampleEntity::getMv2, ExampleEntity::getMv3).in(ExampleEntity::getId, fks));
-        boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv2() != null && !obj.getMv3().isEmpty());
+        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct foreign_key from t_nway_mvc limit 10", String.class);
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).withMVColumn(ExampleEntity::getMv3).in(ExampleEntity::getId, fks));
+        boolean anyMatch = objectList.stream().noneMatch(obj -> obj.getMv3().isEmpty());
         Assertions.assertTrue(anyMatch);
     }
 

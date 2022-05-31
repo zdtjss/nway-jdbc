@@ -88,8 +88,8 @@ public class ExampleEntity {
 	@MultiColumn(table = "t_nway_mv2")
 	private List<String> mv2;
 
-	@com.nway.spring.jdbc.annotation.Column(name = "mv2", type = ColumnType.MULTI_VALUE)
-	@MultiColumn(table = "t_nway_mv2")
+	@com.nway.spring.jdbc.annotation.Column(name = "mv3", type = ColumnType.MULTI_VALUE)
+	@MultiColumn(table = "t_nway_mvc", key = "pk_id", fk = "foreign_key", idx = "seq")
 	private List<String> mv3;
 
 	@Transient
