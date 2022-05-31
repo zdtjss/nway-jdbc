@@ -26,6 +26,7 @@ import com.nway.spring.jdbc.sql.builder.*;
 import com.nway.spring.jdbc.sql.fill.incrementer.IdWorker;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
+import com.nway.spring.jdbc.sql.meta.MultiValueColumnInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -759,12 +760,12 @@ public class SqlExecutor implements InitializingBean {
             return;
         }
         Class<T> type = queryBuilder.getBeanClass();
-        List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
+        List<MultiValueColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
         if(CollectionUtils.isEmpty(multiValColumn)) {
             multiValColumn = multiValueList.stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
         }
         if (!multiValueList.isEmpty()) {
-            for (ColumnInfo columnInfo : multiValueList) {
+            for (MultiValueColumnInfo columnInfo : multiValueList) {
                 String columnName = columnInfo.getColumnName();
                 if(!multiValColumn.contains(columnName)) {
                     continue;
@@ -776,13 +777,12 @@ public class SqlExecutor implements InitializingBean {
                 }
 
                 StringBuilder subSql = new StringBuilder(64)
-                        .append("select fk,")
-                        .append(columnName)
+                        .append("select ").append(columnInfo.getFk()).append(",").append(columnName)
                         .append(" from ")
-                        .append(SqlBuilderUtils.getTableNameFromCache(type)).append('_').append(columnName)
-                        .append(" where fk in (");
+                        .append(columnInfo.getTable())
+                        .append(" where ").append(columnInfo.getFk()).append(" in (");
                 String placeholder = IntStream.range(0, beanList.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                subSql.append(placeholder).append(") order by idx");
+                subSql.append(placeholder).append(") order by ").append(columnInfo.getIdx());
                 Object[] idValueArr = rows.keySet().toArray(new Object[0]);
                 if (isDebugEnabled) {
                     logger.debug("sql = " + subSql);
@@ -791,7 +791,7 @@ public class SqlExecutor implements InitializingBean {
                 List<Map<String, Object>> subVal = jdbcTemplate.queryForList(subSql.toString(), idValueArr);
                 Map<Object, List<Object>> group = new HashMap<>(idValueArr.length);
                 for (Map<String, Object> map : subVal) {
-                    Object foreignKey = map.get("fk");
+                    Object foreignKey = map.get(columnInfo.getFk());
                     List<Object> row = group.computeIfAbsent(foreignKey, k -> new ArrayList<>());
                     row.add(map.get(columnName));
                 }
@@ -814,10 +814,10 @@ public class SqlExecutor implements InitializingBean {
      * @param <T>
      */
     protected <T> void saveMultiValue(Class<?> type, List<T> beanList, boolean nedDel) {
-        List<ColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
+        List<MultiValueColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
         if (!multiValueList.isEmpty()) {
             Map<Integer, Object> idValMap = new HashMap<>(beanList.size());
-            for (ColumnInfo columnInfo : multiValueList) {
+            for (MultiValueColumnInfo columnInfo : multiValueList) {
                 String columnName = columnInfo.getColumnName();
                 Map<Object, List<Object>> data = new HashMap<>();
                 for (T bean : beanList) {
@@ -835,13 +835,12 @@ public class SqlExecutor implements InitializingBean {
                 if (data.isEmpty()) {
                     continue;
                 }
-                String tableName = SqlBuilderUtils.getTableNameFromCache(type) + "_" + columnName;
 
                 if(nedDel) {
                     StringBuilder delSql = new StringBuilder(64)
                             .append("delete from ")
-                            .append(tableName)
-                            .append(" where fk in (");
+                            .append(columnInfo.getTable())
+                            .append(" where ").append(columnInfo.getFk()).append(" in (");
                     String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
                     delSql.append(placeholder).append(")");
                     Object[] idValueArr = idValMap.values().toArray(new Object[0]);
@@ -853,9 +852,9 @@ public class SqlExecutor implements InitializingBean {
                 }
 
                 StringBuilder insertSql = new StringBuilder(64)
-                        .append("insert into ")
-                        .append(tableName)
-                        .append("(id, fk,").append(columnName).append(",idx) values (?,?,?,?)");
+                        .append("insert into ").append(columnInfo.getTable())
+                        .append(" (").append(columnInfo.getKey()).append(",").append(columnInfo.getFk())
+                        .append(",").append(columnName).append(",").append(columnInfo.getIdx()).append(") values (?,?,?,?)");
 
                 for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
                     Collection<Object> entryValue = entry.getValue();

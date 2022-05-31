@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.sql;
 
 import com.nway.spring.jdbc.annotation.Column;
+import com.nway.spring.jdbc.annotation.MultiColumn;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.builder.SqlBuilderException;
@@ -9,6 +10,7 @@ import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import com.nway.spring.jdbc.sql.meta.MultiValueColumnInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
@@ -58,7 +60,28 @@ public class SqlBuilderUtils {
 						entityInfo.setId(columnInfo);
 					}
 					else if(ColumnType.MULTI_VALUE.equals(column.type())) {
-						entityInfo.getMultiValue().add(columnInfo);
+
+						MultiColumn multiColumn = field.getAnnotation(MultiColumn.class);
+						MultiValueColumnInfo multiValueColumnInfo = new MultiValueColumnInfo();
+
+						multiValueColumnInfo.setColumnName(columnInfo.getColumnName());
+						multiValueColumnInfo.setReadMethod(columnInfo.getReadMethod());
+						multiValueColumnInfo.setFillStrategy(columnInfo.getFillStrategy());
+						multiValueColumnInfo.setPermissionStrategy(columnInfo.getPermissionStrategy());
+						String defaultTableName = entityInfo.getTableName() + "_" + columnInfo.getColumnName();
+						if (multiColumn != null) {
+							multiValueColumnInfo.setTable(multiColumn.table().length() == 0 ? defaultTableName : multiColumn.table());
+							multiValueColumnInfo.setKey(multiColumn.key());
+							multiValueColumnInfo.setFk(multiColumn.fk());
+							multiValueColumnInfo.setIdx(multiColumn.idx());
+						}
+						else {
+							multiValueColumnInfo.setTable(defaultTableName);
+							multiValueColumnInfo.setKey("id");
+							multiValueColumnInfo.setFk("fk");
+							multiValueColumnInfo.setIdx("idx");
+						}
+						entityInfo.getMultiValue().add(multiValueColumnInfo);
 					}
 				}
 				else {

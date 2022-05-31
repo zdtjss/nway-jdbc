@@ -36,6 +36,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -226,7 +227,7 @@ class SqlExecutorTest {
     @Test
     void batchInsert() {
         ExampleEntity exampleEntity = new ExampleEntity();
-        exampleEntity.setId(Double.valueOf(Math.random() * Integer.MAX_VALUE).intValue());
+        exampleEntity.setId(Double.valueOf(Math.random() * Integer.MAX_VALUE).longValue());
         exampleEntity.setString(UUID.randomUUID().toString());
         int effectCount = sqlExecutor.batchInsert(Collections.singletonList(exampleEntity));
         Assertions.assertEquals(effectCount, 1);
@@ -260,7 +261,7 @@ class SqlExecutorTest {
 
     @Test
     void queryListMap() {
-        Map<Integer, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class), ExampleEntity::getId);
+        Map<Long, ExampleEntity> objectMap = sqlExecutor.queryListMap(SQL.query(ExampleEntity.class), ExampleEntity::getId);
         Assertions.assertTrue(objectMap.size() > 0);
     }
 
@@ -274,7 +275,7 @@ class SqlExecutorTest {
     @Test
     void testQueryListMap() {
         Page<ExampleEntity> objectPage = sqlExecutor.queryPage(SQL.query(ExampleEntity.class), 1, 2);
-        Map<Integer, ExampleEntity> exampleEntityMap = sqlExecutor.queryListMap(objectPage.getPageData().stream().map(ExampleEntity::getId).collect(Collectors.toList()), ExampleEntity.class, ExampleEntity::getId);
+        Map<Long, ExampleEntity> exampleEntityMap = sqlExecutor.queryListMap(objectPage.getPageData().stream().map(ExampleEntity::getId).collect(Collectors.toList()), ExampleEntity.class, ExampleEntity::getId);
         Assertions.assertEquals(objectPage.getPageData().size(), exampleEntityMap.size());
     }
 
@@ -406,6 +407,14 @@ class SqlExecutorTest {
 
     @Test
     void mvListTest3() {
+        List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv2 limit 10", String.class);
+        List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).withMVColumn(ExampleEntity::getMv2, ExampleEntity::getMv3).in(ExampleEntity::getId, fks));
+        boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv2() != null && !obj.getMv3().isEmpty());
+        Assertions.assertTrue(anyMatch);
+    }
+
+    @Test
+    void mvListTest4() {
         List<String> fks = sqlExecutor.getJdbcTemplate().queryForList("select distinct fk from t_nway_mv limit 10", String.class);
         List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class).in(ExampleEntity::getId, fks));
         boolean anyMatch = objectList.stream().anyMatch(obj -> obj.getMv() == null || obj.getMv().isEmpty());
@@ -543,8 +552,9 @@ class SqlExecutorTest {
         sqlBuilder.ignoreInvalid(true);
         sqlBuilder.set(ExampleEntity::getString, null)
                 .set(ExampleEntity::getId, 0);
-        Assertions.assertFalse(sqlBuilder.getSql().contains(" string = "));
-        Assertions.assertTrue(sqlBuilder.getSql().contains(" pk_id = "));
+        String sql = sqlBuilder.getSql();
+        Assertions.assertFalse(sql.contains(" string = "));
+        Assertions.assertTrue(sql.contains(" pk_id = ") || sql.contains(",pk_id = "));
     }
 
     @Test
@@ -559,7 +569,7 @@ class SqlExecutorTest {
         Assertions.assertEquals(first.getPpLong() + 1, example.getPpLong());
     }
 
-    private final AtomicInteger atomicInteger = new AtomicInteger(5041731);
+    private final AtomicLong atomicInteger = new AtomicLong(5041731);
 
     @Test
     public void initData() throws InterruptedException {

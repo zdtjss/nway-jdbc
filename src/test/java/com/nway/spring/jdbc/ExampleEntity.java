@@ -1,5 +1,6 @@
 package com.nway.spring.jdbc;
 
+import com.nway.spring.jdbc.annotation.MultiColumn;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.LogicFieldStrategy;
 import com.nway.spring.jdbc.sql.TestFillStrategy;
@@ -23,8 +24,8 @@ import java.util.List;
 @com.nway.spring.jdbc.annotation.Table(name = "t_nway")
 public class ExampleEntity {
 
-	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID, fillStrategy = TestFillStrategy.class)
-	private Integer id;
+	@com.nway.spring.jdbc.annotation.Column(name = "pk_id", type = ColumnType.ID, fillStrategy = NumberIdStrategy.class)
+	private Long id;
 	@com.nway.spring.jdbc.annotation.Column(name = "p_boolean")
 	private boolean ppBoolean;
 	@com.nway.spring.jdbc.annotation.Column(name = "p_byte")
@@ -84,7 +85,12 @@ public class ExampleEntity {
 	private List<String> mv;
 
 	@com.nway.spring.jdbc.annotation.Column(name = "mv2", type = ColumnType.MULTI_VALUE)
+	@MultiColumn(table = "t_nway_mv2")
 	private List<String> mv2;
+
+	@com.nway.spring.jdbc.annotation.Column(name = "mv2", type = ColumnType.MULTI_VALUE)
+	@MultiColumn(table = "t_nway_mv2")
+	private List<String> mv3;
 
 	@Transient
 	@com.nway.spring.jdbc.annotation.Column(type = ColumnType.IGNORE)
@@ -93,11 +99,11 @@ public class ExampleEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "pk_id")
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -344,6 +350,14 @@ public class ExampleEntity {
 
 	public void setMv2(List<String> mv2) {
 		this.mv2 = mv2;
+	}
+
+	public List<String> getMv3() {
+		return mv3;
+	}
+
+	public void setMv3(List<String> mv3) {
+		this.mv3 = mv3;
 	}
 
 	@Transient

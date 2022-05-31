@@ -9,7 +9,7 @@ public final class EntityInfo {
 
     private ColumnInfo id;
 
-    private List<ColumnInfo> multiValue;
+    private List<MultiValueColumnInfo> multiValue;
 
     private List<String> columnList;
 
@@ -31,11 +31,11 @@ public final class EntityInfo {
         this.id = id;
     }
 
-    public List<ColumnInfo> getMultiValue() {
+    public List<MultiValueColumnInfo> getMultiValue() {
         return multiValue;
     }
 
-    public void setMultiValue(List<ColumnInfo> multiValue) {
+    public void setMultiValue(List<MultiValueColumnInfo> multiValue) {
         this.multiValue = multiValue;
     }
 

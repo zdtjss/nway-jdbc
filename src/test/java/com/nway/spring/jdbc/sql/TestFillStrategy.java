@@ -11,16 +11,19 @@ public class TestFillStrategy implements FillStrategy {
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
+        if (val == DEFALUT_NONE) {
+            return null;
+        }
         Object v;
         switch (sqlType) {
             case INSERT:
                 v = (int) (Math.random() * 10000);
                 break;
             case UPDATE:
-                v = Integer.parseInt(val.toString()) + 1;
+                v = val == null ? null : Integer.parseInt(val.toString()) + 1;
                 break;
             case SELECT:
-                v = Integer.parseInt(val.toString()) + 10;
+                v = val == null ? null : Integer.parseInt(val.toString()) + 10;
                 break;
             default:
                 v = null;
