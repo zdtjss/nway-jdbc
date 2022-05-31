@@ -12,7 +12,7 @@ public class StringIdStrategy implements FillStrategy {
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
-        if (val == DEFALUT_NONE || val == null || "".equals(val)) {
+        if (val == DEFAULT_NONE || val == null || "".equals(val)) {
             return IdWorker.getIdStr();
         }
         return val;

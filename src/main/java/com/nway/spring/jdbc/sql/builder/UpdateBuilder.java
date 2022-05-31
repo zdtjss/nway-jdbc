@@ -55,7 +55,7 @@ public class UpdateBuilder extends SqlBuilder<UpdateBuilder> {
         for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
             if (!NoneFillStrategy.class.equals(columnInfo.getFillStrategy().getClass())
                     && columnInfo.getFillStrategy().isSupport(SqlType.UPDATE)) {
-                Object value = columnInfo.getFillStrategy().getValue(SqlType.UPDATE, FillStrategy.DEFALUT_NONE);
+                Object value = columnInfo.getFillStrategy().getValue(SqlType.UPDATE, FillStrategy.DEFAULT_NONE);
                 sets.add(columnInfo.getColumnName() + " = ?");
                 param.add(value);
             }

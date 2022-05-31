@@ -23,7 +23,7 @@ public class DeleteBuilder extends SqlBuilder<DeleteBuilder> {
             StringBuilder sql = new StringBuilder(128);
             sql.append("update ")
                     .append(SqlBuilderUtils.getTableNameFromCache(beanClass))
-                    .append(" set ").append(columnInfo.getColumnName()).append(" = ").append(columnInfo.getFillStrategy().getValue(SqlType.DELETE, FillStrategy.DEFALUT_NONE))
+                    .append(" set ").append(columnInfo.getColumnName()).append(" = ").append(columnInfo.getFillStrategy().getValue(SqlType.DELETE, FillStrategy.DEFAULT_NONE))
                     .append(super.getSql());
             return sql.toString();
         }

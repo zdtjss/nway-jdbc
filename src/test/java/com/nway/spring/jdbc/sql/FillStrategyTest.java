@@ -85,7 +85,7 @@ public class FillStrategyTest {
         value = stringIdStrategy.getValue(SqlType.INSERT, "");
         Assertions.assertNotNull(value);
 
-        value = stringIdStrategy.getValue(SqlType.INSERT, FillStrategy.DEFALUT_NONE);
+        value = stringIdStrategy.getValue(SqlType.INSERT, FillStrategy.DEFAULT_NONE);
         Assertions.assertNotNull(value);
 
         value = stringIdStrategy.getValue(SqlType.INSERT, "abc");

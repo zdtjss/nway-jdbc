@@ -11,7 +11,7 @@ public class TestFillStrategy implements FillStrategy {
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
-        if (val == DEFALUT_NONE) {
+        if (val == DEFAULT_NONE) {
             return null;
         }
         Object v;
