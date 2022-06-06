@@ -10,7 +10,7 @@ maven
 	<dependency>
 		<groupId>com.github.zdtjss</groupId>
 		<artifactId>nway-jdbc</artifactId>
-		<version>1.6.1</version>
+		<version>1.6.2</version>
 	</dependency>
 
 基于xml配置的bean：
@@ -154,6 +154,8 @@ Map对象集分页：
         `idx` int DEFAULT NULL,             --固定字段，排序用
         PRIMARY KEY (`id`)
     );
+
+    使用注解@MultiColumn可以自定义字段名
 
 #对于JdbcTemplate.handleWarnings()，当日志级别为debug或trace时比较耗时（这是比较早的测试数据，默认可以忽略，发现性能较差时，可以考虑此问题是否存在）。
 
