@@ -6,6 +6,7 @@ import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.fill.StringIdStrategy;
+import com.nway.spring.jdbc.sql.fill.UuidStrategy;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -109,6 +110,12 @@ public class FillStrategyTest {
 
         FillStrategyPojo strategyPojo2 = sqlExecutor.queryById(pojo.getId(), FillStrategyPojo.class);
         Assertions.assertEquals(strategyPojo2.getWwInt(), pojo.getWwInt() + 10);
+
+        FillStrategyPojo first = sqlExecutor.queryFirst(SQL.query(FillStrategyPojo.class));
+
+        sqlExecutor.deleteById(first.getId(), FillStrategyPojo.class);
+        FillStrategyPojo strategyPojo3 = sqlExecutor.queryById(first.getId(), FillStrategyPojo.class);
+        Assertions.assertNull(strategyPojo3);
     }
 
 
@@ -123,6 +130,13 @@ public class FillStrategyTest {
         private Integer wwInt;
 
         @Column(fillStrategy = LogicFieldStrategy.class, permissionStrategy = LogicFieldStrategy.class)
-        private Integer delFlag;
+        private Boolean delFlag;
+    }
+
+    @Test
+    public void uuidTest() {
+        UuidStrategy uuidStrategy = new UuidStrategy();
+        String value = (String) uuidStrategy.getValue(SqlType.INSERT, FillStrategy.DEFAULT_NONE);
+        Assertions.assertFalse(value.contains("-"));
     }
 }
