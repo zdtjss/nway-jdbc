@@ -11,16 +11,19 @@ public class LogicFieldStrategy implements FillStrategy, PermissionStrategy {
 
     @Override
     public boolean isSupport(SqlType sqlType) {
-        return SqlType.INSERT == sqlType || SqlType.DELETE == sqlType;
+        return true;
     }
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
-        return SqlType.INSERT == sqlType ? 0 : 1;
+        if (val == DEFAULT_NONE || val == null) {
+            return SqlType.DELETE == sqlType;
+        }
+        return val;
     }
 
     @Override
     public WhereCondition getSqlSegment(String column) {
-        return new WhereCondition(column + " = ? ", 0);
+        return new WhereCondition(column + " = ? ", false);
     }
 }

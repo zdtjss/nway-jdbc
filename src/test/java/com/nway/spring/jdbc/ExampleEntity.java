@@ -79,7 +79,7 @@ public class ExampleEntity {
 	private BigDecimal bigDecimal;
 
 	@com.nway.spring.jdbc.annotation.Column(fillStrategy = LogicFieldStrategy.class, permissionStrategy = LogicFieldStrategy.class)
-	private Integer delFlag;
+	private Boolean delFlag;
 
 	@com.nway.spring.jdbc.annotation.Column(name = "mv", type = ColumnType.MULTI_VALUE)
 	private List<String> mv;
@@ -325,12 +325,12 @@ public class ExampleEntity {
 		this.bigDecimal = bigDecimal;
 	}
 
-	public void setDelFlag(Integer delFlag) {
+	public void setDelFlag(Boolean delFlag) {
 		this.delFlag = delFlag;
 	}
 
 	@Column(name = "del_flag")
-	public Integer getDelFlag() {
+	public Boolean getDelFlag() {
 		return delFlag;
 	}
 
