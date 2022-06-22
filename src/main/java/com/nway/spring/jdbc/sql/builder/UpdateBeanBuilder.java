@@ -45,6 +45,9 @@ public class UpdateBeanBuilder extends SqlBuilder<UpdateBeanBuilder> {
         Map<String, ColumnInfo> columnMap = entityInfo.getColumnMap().values().stream().collect(Collectors.toMap(ColumnInfo::getColumnName, Function.identity()));
         for (String column : columnList) {
             ColumnInfo columnInfo = columnMap.get(column);
+            if (entityInfo.getId() == columnInfo) {
+                continue;
+            }
             Object value = SqlBuilderUtils.getColumnValue(columnInfo, obj, SqlType.UPDATE);
             if (value != null) {
                 sets.add(columnInfo.getColumnName() + " = ?");
