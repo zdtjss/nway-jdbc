@@ -8,6 +8,7 @@ import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -86,6 +87,23 @@ public class QueryBuilderTest {
     public void duration() {
         LocalDate begin = LocalDate.of(2020, 10, 11);
         System.out.println(ChronoUnit.DAYS.between(begin, LocalDate.now()));
+    }
+
+    @Test
+    public void customColumn() {
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
+        queryBuilder.withColumn("max(id)");
+        Assertions.assertTrue(queryBuilder.getSql().contains("select max(id) from t_computer where "));
+    }
+
+    @Test
+    public void customCondition() {
+        QueryBuilder queryBuilder = SQL.query(Computer.class);
+        WhereCondition condition = new WhereCondition();
+        condition.setExpr(SqlBuilderUtils.getColumn(Computer::getProductionDate) + " >= now()");
+        condition.setValue(Collections.emptyList());
+        queryBuilder.appendCondition(condition);
+        Assertions.assertTrue(queryBuilder.getSql().contains(" production_date >= now() "));
     }
 
     @Test
