@@ -164,7 +164,7 @@ public class SqlExecutor implements InitializingBean {
         }
         saveMultiValue(beanClass, objs, true);
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        return (int) Arrays.stream(effect).filter(c -> c > 0).count();
+        return Arrays.stream(effect).filter(c -> c > 0).sum();
     }
 
     /**
@@ -184,7 +184,7 @@ public class SqlExecutor implements InitializingBean {
             saveMultiValue(sqlBuilder.getBeanClass(), ((BatchUpdateBuilder) sqlBuilder).getData(), true);
         }
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        return (int) Arrays.stream(effect).filter(c -> c > 0).count();
+        return Arrays.stream(effect).filter(c -> c > 0).sum();
     }
 
     /**
