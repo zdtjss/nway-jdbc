@@ -376,7 +376,7 @@ public class SqlExecutor implements InitializingBean {
         return dataList.stream().collect(Collectors.toMap(key, Function.identity()));
     }
 
-    public <T> List<T> queryList(List<? extends Serializable> ids, Class<T> type) {
+    public <T> List<T> queryList(Collection<? extends Serializable> ids, Class<T> type) {
         ISqlBuilder queryBuilder = SQL.query(type).in(SqlBuilderUtils.getIdName(type), ids);
         return queryList(queryBuilder);
     }
@@ -391,7 +391,7 @@ public class SqlExecutor implements InitializingBean {
      * @param <R>
      * @return
      */
-    public <T, R> Map<R, T> queryListMap(List<? extends Serializable> ids, Class<T> type, Function<T, R> key) {
+    public <T, R> Map<R, T> queryListMap(Collection<? extends Serializable> ids, Class<T> type, Function<T, R> key) {
         List<T> dataList = queryList(ids, type);
         return dataList.stream().collect(Collectors.toMap(key, Function.identity()));
     }
