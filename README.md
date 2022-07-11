@@ -112,7 +112,7 @@ Map对象集分页：
 	使用办法：
 		查询对象对应属性加入注解 @Column(fillStrategy = TestFillStrategy.class, permissionStrategy = TestPermissionStrategy.class) 
 
-    LogicFieldStrategy：基于fillStrategy、permissionStrategy实现的软删除。这两个属性有很大的想象空间。
+    LogicFieldStrategy：基于fillStrategy、permissionStrategy实现的软删除。这两个属性有很大的想象空间。LogicFieldIntStrategy是int标记类型的实现。
 
 # 关于深度自定义
 
