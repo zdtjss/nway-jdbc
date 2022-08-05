@@ -7,11 +7,12 @@ import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.WhereCondition;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,25 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
                 throw new SqlBuilderException("更新失败，批量更新时存在主键为空的数据。");
             }
             ((List) this.param.get(i)).add(idVal);
+        }
+
+        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
+            if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
+                continue;
+            }
+            WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(SqlType.UPDATE, columnInfo);
+            if (whereCondition != null && whereCondition.getExpr().length() > 0) {
+                sql.append(' ').append(whereCondition.getExpr()).append(' ');
+                for (int i = 0; i < this.param.size(); i++) {
+                    if (whereCondition.getValue() instanceof Collection) {
+                        ((List) this.param.get(i)).addAll((Collection) whereCondition.getValue());
+                    } else if (ObjectUtils.isArray(whereCondition.getValue())) {
+                        ((List) this.param.get(i)).addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
+                    } else {
+                        ((List) this.param.get(i)).add(whereCondition.getValue());
+                    }
+                }
+            }
         }
         return sql.toString();
     }

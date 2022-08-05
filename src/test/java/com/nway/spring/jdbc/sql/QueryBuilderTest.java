@@ -8,6 +8,7 @@ import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.performance.entity.Computer;
 import com.nway.spring.jdbc.sql.builder.ISqlBuilder;
 import com.nway.spring.jdbc.sql.builder.QueryBuilder;
+import com.nway.spring.jdbc.sql.builder.UpdateBuilder;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
@@ -253,6 +254,28 @@ public class QueryBuilderTest {
 
         Assertions.assertEquals(-1, sql.indexOf(" where "));
         Assertions.assertEquals(0, params.size());
+
+    }
+
+    @Test
+    public void permissionUpdateTest() {
+        UpdateBuilder queryBuilder = SQL.update(Computer.class).set(Computer::getBrand, "aa");
+        String sql = queryBuilder.getSql();
+        String where = sql.substring(sql.indexOf(" where "));
+        List<Object> params = queryBuilder.getParam();
+
+        Assertions.assertTrue(where.contains("( production_date <> ? or keyboard_id <> ? )"));
+        Assertions.assertEquals(3, params.size());
+        Assertions.assertTrue(params.get(1).getClass().isAssignableFrom(Date.class));
+        Assertions.assertTrue(params.get(2).getClass().isAssignableFrom(String.class));
+
+        queryBuilder = SQL.update(Computer.class).set(Computer::getBrand, "aa");
+        queryBuilder.ignorePermission();
+        sql = queryBuilder.getSql();
+        params = queryBuilder.getParam();
+
+        Assertions.assertEquals(-1, sql.indexOf(" where "));
+        Assertions.assertEquals(1, params.size());
 
     }
 

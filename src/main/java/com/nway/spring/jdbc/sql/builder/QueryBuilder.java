@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
@@ -12,7 +13,6 @@ import java.util.stream.Collectors;
 
 public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQueryBuilder {
 
-    private boolean ignorePower = false;
     private String distinct = "";
     private final List<String> columns = new ArrayList<>();
     private final List<String> excludeColumns = new ArrayList<>();
@@ -20,6 +20,11 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
 
     public QueryBuilder(Class<?> beanClass) {
         super(beanClass);
+    }
+
+    @Override
+    protected SqlType getSqlType() {
+        return SqlType.SELECT;
     }
 
     public QueryBuilder distinct() {
@@ -164,15 +169,8 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
         return thisObj;
     }
 
-    public void ignorePermission() {
-        this.ignorePower = true;
-    }
-
     @Override
     public String getSql() {
-        if (!this.ignorePower) {
-            initPermission();
-        }
         return getSelectStmt() + super.getSql();
     }
 

@@ -26,6 +26,11 @@ public class UpdateBeanBuilder extends SqlBuilder<UpdateBeanBuilder> {
         this.obj = obj;
     }
 
+    @Override
+    protected SqlType getSqlType() {
+        return SqlType.UPDATE;
+    }
+
     @SafeVarargs
     public final <T, R> UpdateBeanBuilder columns(SFunction<T, R>... columns) {
         for (SFunction<T, R> column : columns) {

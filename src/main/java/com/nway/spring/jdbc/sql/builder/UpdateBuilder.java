@@ -16,6 +16,11 @@ public class UpdateBuilder extends SqlBuilder<UpdateBuilder> {
 
     private final List<String> sets = new ArrayList<>();
 
+    @Override
+    protected SqlType getSqlType() {
+        return SqlType.UPDATE;
+    }
+
     public UpdateBuilder(Class<?> beanClass) {
         super(beanClass);
         initFilled();

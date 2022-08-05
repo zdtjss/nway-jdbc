@@ -8,7 +8,7 @@ import java.util.Date;
 public class MultiColumnPermissionStrategy implements PermissionStrategy {
 
     @Override
-    public WhereCondition getSqlSegment(String column) {
+    public WhereCondition getSqlSegment(SqlType sqlType, String column) {
         return new WhereCondition("( " + column + " <> ? or keyboard_id <> ? )", new Object[]{new Date(), "bbb"});
     }
 

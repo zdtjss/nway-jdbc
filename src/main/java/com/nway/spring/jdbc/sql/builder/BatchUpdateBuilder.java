@@ -6,8 +6,13 @@ import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.WhereCondition;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -79,6 +84,26 @@ public class BatchUpdateBuilder implements ISqlBuilder {
             if (!(SqlOperator.IS_NULL.getOperator().equals(condExp.operator)
                     || SqlOperator.IS_NOT_NULL.getOperator().equals(condExp.operator))) {
                 sql.append(' ').append('?');
+            }
+        }
+
+        EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
+        for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
+            if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
+                continue;
+            }
+            WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(SqlType.UPDATE, columnInfo);
+            if (whereCondition != null && whereCondition.getExpr().length() > 0) {
+                sql.append(' ').append(whereCondition.getExpr()).append(' ');
+                for (int i = 0; i < this.param.size(); i++) {
+                    if (whereCondition.getValue() instanceof Collection) {
+                        this.param.addAll((Collection) whereCondition.getValue());
+                    } else if (ObjectUtils.isArray(whereCondition.getValue())) {
+                        this.param.addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
+                    } else {
+                        this.param.add(whereCondition.getValue());
+                    }
+                }
             }
         }
         return sql.toString();

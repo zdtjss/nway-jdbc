@@ -16,6 +16,11 @@ public class DeleteBuilder extends SqlBuilder<DeleteBuilder> {
     }
 
     @Override
+    protected SqlType getSqlType() {
+        return SqlType.DELETE;
+    }
+
+    @Override
     public String getSql() {
         Optional<ColumnInfo> logicDelField = getLogicDelField();
         if (logicDelField.isPresent()) {

@@ -170,11 +170,11 @@ public class SqlBuilderUtils {
 		}
 	}
 
-	public static WhereCondition getWhereCondition(ColumnInfo columnInfo) {
+	public static WhereCondition getWhereCondition(SqlType sqlType, ColumnInfo columnInfo) {
 		if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
 			return null;
 		}
-		return columnInfo.getPermissionStrategy().getSqlSegment(columnInfo.getColumnName());
+		return columnInfo.getPermissionStrategy().getSqlSegment(sqlType, columnInfo.getColumnName());
 	}
 
 	public static <T extends Serializable> SerializedLambda getSerializedLambda(T lambda) {

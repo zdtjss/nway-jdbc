@@ -1,6 +1,7 @@
 package com.nway.spring.jdbc.sql.builder;
 
 import com.nway.spring.jdbc.sql.SqlBuilderUtils;
+import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
 import com.nway.spring.jdbc.sql.meta.ColumnInfo;
@@ -17,26 +18,39 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
+public abstract class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
     protected StringBuilder where = new StringBuilder(128);
     protected StringBuilder afterWhere = new StringBuilder(128);
     protected List<Object> param = new ArrayList<>();
     protected Class beanClass;
 
-    // 查询条件一定是以where()方法开始，where后的第一个条件不要and
+    /**
+     * 查询条件一定是以where()方法开始，where后的第一个条件不要and
+     */
     private boolean canAppendAnd = false;
     private boolean canAppendWhere = true;
-    // false 表示不糊了无效值，即要在代码中使用if判断是否作为查询条件
+    /**
+     * false 表示不糊了无效值，即要在代码中使用if判断是否作为查询条件
+     */
     private boolean ignoreInvalid = false;
-    // true 判断空字符串和全null集合
+    /**
+     * true 判断空字符串和全null集合
+     */
     private boolean ignoreInvalidDeep = false;
+
+    /**
+     * 是否忽略权限
+     */
+    protected boolean ignorePower = false;
 
     protected final X thisObj = (X) this;
 
     protected SqlBuilder(Class beanClass) {
         this.beanClass = beanClass;
     }
+
+    protected abstract SqlType getSqlType();
 
     @Override
     public <T> Class<T> getBeanClass() {
@@ -716,13 +730,17 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
         return val == null;
     }
 
+    public void ignorePermission() {
+        this.ignorePower = true;
+    }
+
     protected void initPermission() {
         EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
         for (ColumnInfo columnInfo : entityInfo.getColumnMap().values()) {
             if (columnInfo.getPermissionStrategy().getClass() == NonePermissionStrategy.class) {
                 continue;
             }
-            appendCondition(SqlBuilderUtils.getWhereCondition(columnInfo));
+            appendCondition(SqlBuilderUtils.getWhereCondition(getSqlType(), columnInfo));
         }
     }
 
@@ -732,6 +750,9 @@ public class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder {
 
     @Override
     public String getSql() {
+        if (!this.ignorePower) {
+            initPermission();
+        }
         String sql = this.where.toString();
         // 以where结尾  有可能是因为忽略无效条件导致的
         if (sql.endsWith(" where ")) {

@@ -23,7 +23,7 @@ public class LogicFieldStrategy implements FillStrategy, PermissionStrategy {
     }
 
     @Override
-    public WhereCondition getSqlSegment(String column) {
+    public WhereCondition getSqlSegment(SqlType sqlType, String column) {
         return new WhereCondition(column + " = ? ", false);
     }
 }

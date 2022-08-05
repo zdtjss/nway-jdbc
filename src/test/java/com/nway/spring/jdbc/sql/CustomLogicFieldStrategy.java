@@ -18,7 +18,7 @@ public class CustomLogicFieldStrategy extends LogicFieldStrategy {
     }
 
     @Override
-    public WhereCondition getSqlSegment(String column) {
+    public WhereCondition getSqlSegment(SqlType sqlType, String column) {
         return new WhereCondition(column + " = ? ", 0);
     }
 }
