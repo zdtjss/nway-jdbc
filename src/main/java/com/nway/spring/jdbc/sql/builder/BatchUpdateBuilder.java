@@ -94,14 +94,14 @@ public class BatchUpdateBuilder implements ISqlBuilder {
             }
             WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(SqlType.UPDATE, columnInfo);
             if (whereCondition != null && whereCondition.getExpr().length() > 0) {
-                sql.append(' ').append(whereCondition.getExpr()).append(' ');
-                for (int i = 0; i < this.param.size(); i++) {
+                sql.append(whereCondList.isEmpty() ? " " : " and ").append(whereCondition.getExpr()).append(' ');
+                for (int i = 0; i < this.data.size(); i++) {
                     if (whereCondition.getValue() instanceof Collection) {
-                        this.param.addAll((Collection) whereCondition.getValue());
+                        ((List<Object>) this.param.get(i)).addAll((Collection) whereCondition.getValue());
                     } else if (ObjectUtils.isArray(whereCondition.getValue())) {
-                        this.param.addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
+                        ((List<Object>) this.param.get(i)).addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
                     } else {
-                        this.param.add(whereCondition.getValue());
+                        ((List<Object>) this.param.get(i)).add(whereCondition.getValue());
                     }
                 }
             }

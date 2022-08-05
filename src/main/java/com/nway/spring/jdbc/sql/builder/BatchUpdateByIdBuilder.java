@@ -110,7 +110,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
             }
             WhereCondition whereCondition = SqlBuilderUtils.getWhereCondition(SqlType.UPDATE, columnInfo);
             if (whereCondition != null && whereCondition.getExpr().length() > 0) {
-                sql.append(' ').append(whereCondition.getExpr()).append(' ');
+                sql.append(" and ").append(whereCondition.getExpr()).append(' ');
                 for (int i = 0; i < this.param.size(); i++) {
                     if (whereCondition.getValue() instanceof Collection) {
                         ((List) this.param.get(i)).addAll((Collection) whereCondition.getValue());
