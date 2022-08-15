@@ -113,7 +113,10 @@ public class QueryBuilderTest {
 
         queryBuilder.or((sql) -> sql.eq(Computer::getBrand, "abc").like(Computer::getKeyboardId, "aa"));
 
-        Assertions.assertTrue(queryBuilder.getSql().contains(" from t_computer where ( brand = ? and keyboard_id like ?)"));
+        String sql = queryBuilder.getSql();
+        Assertions.assertTrue(sql.contains(" from t_computer where ( brand = ? and keyboard_id like ?)"));
+
+        Assertions.assertEquals(countQuestionMark(sql), queryBuilder.getParam().size());
     }
 
     @Test
@@ -475,5 +478,18 @@ public class QueryBuilderTest {
         @Column(name = "pk_id", type = ColumnType.ID)
         private Integer id;
         private String string;
+    }
+
+    private int countQuestionMark(String str) {
+
+        int count = 0;
+        int length = str.length();
+
+        for (int i = 0; i < length; i++) {
+            if (str.charAt(i) == '?') {
+                count++;
+            }
+        }
+        return count;
     }
 }

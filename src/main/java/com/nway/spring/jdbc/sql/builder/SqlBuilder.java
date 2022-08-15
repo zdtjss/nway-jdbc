@@ -667,13 +667,13 @@ public abstract class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder
         if (whereCondition != null && whereCondition.getExpr().length() > 0) {
             this.appendWhereCondition(whereCondition.getExpr());
             if (whereCondition.getValue() instanceof Collection) {
-                getParam().addAll((Collection) whereCondition.getValue());
+                this.param.addAll((Collection) whereCondition.getValue());
             }
             else if (ObjectUtils.isArray(whereCondition.getValue())) {
-                getParam().addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
+                this.param.addAll(CollectionUtils.arrayToList(whereCondition.getValue()));
             }
             else {
-                getParam().add(whereCondition.getValue());
+                this.param.add(whereCondition.getValue());
             }
         }
         return thisObj;
