@@ -809,66 +809,73 @@ public class SqlExecutor implements InitializingBean {
     /**
      * 认为每次保存都是全量的
      *
+     * null 代表不修改，empty 代表清空
+     *
      * @param type
      * @param beanList
      * @param <T>
      */
     protected <T> void saveMultiValue(Class<?> type, List<T> beanList, boolean nedDel) {
         List<MultiValueColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
-        if (!multiValueList.isEmpty()) {
-            Map<Integer, Object> idValMap = new HashMap<>(beanList.size());
-            for (MultiValueColumnInfo columnInfo : multiValueList) {
-                String columnName = columnInfo.getColumnName();
-                Map<Object, List<Object>> data = new HashMap<>();
-                for (T bean : beanList) {
-                    Object value = SqlBuilderUtils.getColumnValue(columnInfo, bean, SqlType.INSERT);
-                    if (value == null || ((List) value).isEmpty()) {
-                        continue;
-                    }
-                    Object fk = Optional.ofNullable(idValMap.get(bean.hashCode())).orElseGet(() -> {
-                        Object idValue = SqlBuilderUtils.getIdValue(type, bean);
-                        idValMap.put(bean.hashCode(), idValue);
-                        return idValue;
-                    });
-                    data.put(fk, (List) value);
-                }
-                if (data.isEmpty()) {
+        if (multiValueList.isEmpty()) {
+            return;
+        }
+        Map<Integer, Object> idValMap = new HashMap<>(beanList.size());
+        for (MultiValueColumnInfo columnInfo : multiValueList) {
+            String columnName = columnInfo.getColumnName();
+            Map<Object, List<Object>> data = new HashMap<>();
+            for (T bean : beanList) {
+                Object value = SqlBuilderUtils.getColumnValue(columnInfo, bean, SqlType.INSERT);
+                if (value == null) {
                     continue;
                 }
+                Object fk = Optional.ofNullable(idValMap.get(bean.hashCode())).orElseGet(() -> {
+                    Object idValue = SqlBuilderUtils.getIdValue(type, bean);
+                    idValMap.put(bean.hashCode(), idValue);
+                    return idValue;
+                });
+                data.put(fk, (List) value);
+            }
+            if (data.isEmpty()) {
+                continue;
+            }
 
-                if(nedDel) {
-                    StringBuilder delSql = new StringBuilder(64)
-                            .append("delete from ")
-                            .append(columnInfo.getTable())
-                            .append(" where ").append(columnInfo.getFk()).append(" in (");
-                    String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                    delSql.append(placeholder).append(")");
-                    Object[] idValueArr = idValMap.values().toArray(new Object[0]);
-                    if (isDebugEnabled) {
-                        logger.debug("sql = " + delSql);
-                        logger.debug("params = " + objToStr(idValueArr));
-                    }
-                    jdbcTemplate.update(delSql.toString(), idValueArr);
+            if (nedDel) {
+                StringBuilder delSql = new StringBuilder(64)
+                        .append("delete from ")
+                        .append(columnInfo.getTable())
+                        .append(" where ").append(columnInfo.getFk()).append(" in (");
+                String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
+                delSql.append(placeholder).append(")");
+                Object[] idValueArr = idValMap.values().toArray(new Object[0]);
+                if (isDebugEnabled) {
+                    logger.debug("sql = " + delSql);
+                    logger.debug("params = " + objToStr(idValueArr));
                 }
+                jdbcTemplate.update(delSql.toString(), idValueArr);
+            }
 
-                StringBuilder insertSql = new StringBuilder(64)
-                        .append("insert into ").append(columnInfo.getTable())
-                        .append(" (").append(columnInfo.getKey()).append(",").append(columnInfo.getFk())
-                        .append(",").append(columnName).append(",").append(columnInfo.getIdx()).append(") values (?,?,?,?)");
+            StringBuilder insertSql = new StringBuilder(64)
+                    .append("insert into ").append(columnInfo.getTable())
+                    .append(" (").append(columnInfo.getKey()).append(",").append(columnInfo.getFk())
+                    .append(",").append(columnName).append(",").append(columnInfo.getIdx()).append(") values (?,?,?,?)");
 
-                for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
-                    Collection<Object> entryValue = entry.getValue();
-                    List<Object[]> rows = new ArrayList<>(entryValue.size());
-                    int idx = 0;
-                    for (Object bizVal : entryValue) {
-                        rows.add(new Object[]{IdWorker.getId(), entry.getKey(), bizVal, ++idx});
-                    }
-                    if (isDebugEnabled) {
-                        logger.debug("sql = " + insertSql);
-                        logger.debug("params = " + objToStr(rows));
-                    }
-                    jdbcTemplate.batchUpdate(insertSql.toString(), rows);
+            for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
+                Collection<Object> entryValue = entry.getValue();
+                // 空集合不操作  意思是empty集合是被删除的字段
+                if (entryValue.isEmpty()) {
+                    continue;
                 }
+                List<Object[]> rows = new ArrayList<>(entryValue.size());
+                int idx = 0;
+                for (Object bizVal : entryValue) {
+                    rows.add(new Object[]{IdWorker.getId(), entry.getKey(), bizVal, ++idx});
+                }
+                if (isDebugEnabled) {
+                    logger.debug("sql = " + insertSql);
+                    logger.debug("params = " + objToStr(rows));
+                }
+                jdbcTemplate.batchUpdate(insertSql.toString(), rows);
             }
         }
     }
