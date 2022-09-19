@@ -95,7 +95,11 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
-        return jdbcTemplate.update(sql, params);
+        int count = jdbcTemplate.update(sql, params);
+        if (isDebugEnabled) {
+            logger.debug("count = " + count);
+        }
+        return count;
     }
 
     public int updateById(Object obj) {
@@ -124,6 +128,9 @@ public class SqlExecutor implements InitializingBean {
         sqlBuilder.eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
         int count = update(sqlBuilder);
         saveMultiValue(beanClass, Collections.singletonList(obj), true);
+        if (isDebugEnabled) {
+            logger.debug("count = " + count);
+        }
         return count;
     }
 
@@ -164,7 +171,11 @@ public class SqlExecutor implements InitializingBean {
         }
         saveMultiValue(beanClass, objs, true);
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        return Arrays.stream(effect).filter(c -> c > 0).sum();
+        int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
+        if (isDebugEnabled) {
+            logger.debug("count = " + sum);
+        }
+        return sum;
     }
 
     /**
@@ -184,7 +195,11 @@ public class SqlExecutor implements InitializingBean {
             saveMultiValue(sqlBuilder.getBeanClass(), ((BatchUpdateBuilder) sqlBuilder).getData(), true);
         }
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        return Arrays.stream(effect).filter(c -> c > 0).sum();
+        int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
+        if (isDebugEnabled) {
+            logger.debug("count = " + sum);
+        }
+        return sum;
     }
 
     /**
