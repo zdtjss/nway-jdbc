@@ -95,18 +95,22 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
-        int count = jdbcTemplate.update(sql, params);
-        if (isDebugEnabled) {
-            logger.debug("count = " + count);
-        }
-        return count;
+        return jdbcTemplate.update(sql, params);
     }
 
+    /**
+     * 注意：多值字段遵循null忽略、empty清空的策略
+     *
+     * @param obj
+     * @return
+     */
     public int updateById(Object obj) {
         return updateById(obj, new String[0]);
     }
 
     /**
+     * 注意：多值字段遵循null忽略、empty清空的策略
+     *
      * @param obj bean
      * @return
      */
@@ -119,6 +123,9 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
+     *
+     * 注意：多值字段遵循null忽略、empty清空的策略
+     *
      * @param obj bean
      * @return
      */
@@ -127,15 +134,12 @@ public class SqlExecutor implements InitializingBean {
         UpdateBeanBuilder sqlBuilder = new UpdateBeanBuilder(obj).columns(columns);
         sqlBuilder.eq(SqlBuilderUtils.getIdName(beanClass), SqlBuilderUtils.getIdValue(beanClass, obj));
         int count = update(sqlBuilder);
-        saveMultiValue(beanClass, Collections.singletonList(obj), true);
-        if (isDebugEnabled) {
-            logger.debug("count = " + count);
-        }
+        saveMultiValue(beanClass, Collections.singletonList(obj), columns, true);
         return count;
     }
 
     /**
-     * 注意：此方法将更新所有字段
+     * 注意：此方法将更新所有字段，多值字段遵循null忽略、empty清空的策略
      *
      * @param objs
      * @param <T>
@@ -145,6 +149,15 @@ public class SqlExecutor implements InitializingBean {
         return batchUpdateById(objs, new String[0]);
     }
 
+    /**
+     * 注意：多值字段遵循null忽略、empty清空的策略
+     *
+     * @param objs
+     * @param columns
+     * @param <T>
+     * @param <R>
+     * @return
+     */
     @SafeVarargs
     public final <T, R> int batchUpdateById(List<?> objs, SFunction<T, R>... columns) {
         Class<?> beanClass = objs.get(0).getClass();
@@ -154,6 +167,9 @@ public class SqlExecutor implements InitializingBean {
     }
 
     /**
+     *
+     * 注意：多值字段遵循null忽略、empty清空的策略
+     *
      * @param objs beans
      * @return
      */
@@ -169,16 +185,13 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params.toArray()));
         }
-        saveMultiValue(beanClass, objs, true);
+        saveMultiValue(beanClass, objs, columns, true);
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
-        if (isDebugEnabled) {
-            logger.debug("count = " + sum);
-        }
-        return sum;
+        return Arrays.stream(effect).filter(c -> c > 0).sum();
     }
 
     /**
+     * 注意：多值字段遵循null忽略、empty清空的策略。
      * 请谨慎使用本方法，因为where条件约束的数据可能是一个范围，此范围可能包含非预期数据。
      *
      * @param sqlBuilder
@@ -192,14 +205,10 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params.toArray()));
         }
         if (sqlBuilder instanceof BatchUpdateBuilder) {
-            saveMultiValue(sqlBuilder.getBeanClass(), ((BatchUpdateBuilder) sqlBuilder).getData(), true);
+            saveMultiValue(sqlBuilder.getBeanClass(), ((BatchUpdateBuilder) sqlBuilder).getData(), null, true);
         }
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
-        if (isDebugEnabled) {
-            logger.debug("count = " + sum);
-        }
-        return sum;
+        return Arrays.stream(effect).filter(c -> c > 0).sum();
     }
 
     /**
@@ -230,7 +239,7 @@ public class SqlExecutor implements InitializingBean {
     public int insert(Object obj) {
         Class<?> beanClass = obj.getClass();
         int count = update(SQL.insert(beanClass).use(obj));
-        saveMultiValue(beanClass, Collections.singletonList(obj), false);
+        saveMultiValue(beanClass, Collections.singletonList(obj), null, false);
         return count;
     }
 
@@ -269,7 +278,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params));
         }
         int[] count = jdbcTemplate.batchUpdate(sql, params);
-        saveMultiValue(sqlBuilder.getBeanClass(), objs, false);
+        saveMultiValue(sqlBuilder.getBeanClass(), objs, null,false);
         return count.length;
     }
 
@@ -824,66 +833,78 @@ public class SqlExecutor implements InitializingBean {
     /**
      * 认为每次保存都是全量的
      *
+     * null 代表不修改，empty 代表清空
+     *
      * @param type
      * @param beanList
      * @param <T>
      */
-    protected <T> void saveMultiValue(Class<?> type, List<T> beanList, boolean nedDel) {
+    protected <T> void saveMultiValue(Class<?> type, List<T> beanList, String[] expectColumns, boolean nedDel) {
         List<MultiValueColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
-        if (!multiValueList.isEmpty()) {
-            Map<Integer, Object> idValMap = new HashMap<>(beanList.size());
-            for (MultiValueColumnInfo columnInfo : multiValueList) {
-                String columnName = columnInfo.getColumnName();
-                Map<Object, List<Object>> data = new HashMap<>();
-                for (T bean : beanList) {
-                    Object value = SqlBuilderUtils.getColumnValue(columnInfo, bean, SqlType.INSERT);
-                    if (value == null || ((List) value).isEmpty()) {
-                        continue;
-                    }
-                    Object fk = Optional.ofNullable(idValMap.get(bean.hashCode())).orElseGet(() -> {
-                        Object idValue = SqlBuilderUtils.getIdValue(type, bean);
-                        idValMap.put(bean.hashCode(), idValue);
-                        return idValue;
-                    });
-                    data.put(fk, (List) value);
-                }
-                if (data.isEmpty()) {
+        if (multiValueList.isEmpty()) {
+            return;
+        }
+        List<String> columns = Arrays.asList(Optional.ofNullable(expectColumns).orElse(new String[0]));
+        Map<Integer, Object> idValMap = new HashMap<>(beanList.size());
+        for (MultiValueColumnInfo columnInfo : multiValueList) {
+            String columnName = columnInfo.getColumnName();
+            // !columns.isEmpty() 是指有指定需要更新的字段名  !columns.contains(columnName) 多值字段不包含在指定更新的列内
+            if (!columns.isEmpty() && !columns.contains(columnName)) {
+                continue;
+            }
+            Map<Object, List<Object>> data = new HashMap<>();
+            for (T bean : beanList) {
+                Object value = SqlBuilderUtils.getColumnValue(columnInfo, bean, SqlType.INSERT);
+                if (value == null) {
                     continue;
                 }
+                Object fk = Optional.ofNullable(idValMap.get(bean.hashCode())).orElseGet(() -> {
+                    Object idValue = SqlBuilderUtils.getIdValue(type, bean);
+                    idValMap.put(bean.hashCode(), idValue);
+                    return idValue;
+                });
+                data.put(fk, (List) value);
+            }
+            if (data.isEmpty()) {
+                continue;
+            }
 
-                if(nedDel) {
-                    StringBuilder delSql = new StringBuilder(64)
-                            .append("delete from ")
-                            .append(columnInfo.getTable())
-                            .append(" where ").append(columnInfo.getFk()).append(" in (");
-                    String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                    delSql.append(placeholder).append(")");
-                    Object[] idValueArr = idValMap.values().toArray(new Object[0]);
-                    if (isDebugEnabled) {
-                        logger.debug("sql = " + delSql);
-                        logger.debug("params = " + objToStr(idValueArr));
-                    }
-                    jdbcTemplate.update(delSql.toString(), idValueArr);
+            if (nedDel) {
+                StringBuilder delSql = new StringBuilder(64)
+                        .append("delete from ")
+                        .append(columnInfo.getTable())
+                        .append(" where ").append(columnInfo.getFk()).append(" in (");
+                String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
+                delSql.append(placeholder).append(")");
+                Object[] idValueArr = idValMap.values().toArray(new Object[0]);
+                if (isDebugEnabled) {
+                    logger.debug("sql = " + delSql);
+                    logger.debug("params = " + objToStr(idValueArr));
                 }
+                jdbcTemplate.update(delSql.toString(), idValueArr);
+            }
 
-                StringBuilder insertSql = new StringBuilder(64)
-                        .append("insert into ").append(columnInfo.getTable())
-                        .append(" (").append(columnInfo.getKey()).append(",").append(columnInfo.getFk())
-                        .append(",").append(columnName).append(",").append(columnInfo.getIdx()).append(") values (?,?,?,?)");
+            StringBuilder insertSql = new StringBuilder(64)
+                    .append("insert into ").append(columnInfo.getTable())
+                    .append(" (").append(columnInfo.getKey()).append(",").append(columnInfo.getFk())
+                    .append(",").append(columnName).append(",").append(columnInfo.getIdx()).append(") values (?,?,?,?)");
 
-                for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
-                    Collection<Object> entryValue = entry.getValue();
-                    List<Object[]> rows = new ArrayList<>(entryValue.size());
-                    int idx = 0;
-                    for (Object bizVal : entryValue) {
-                        rows.add(new Object[]{IdWorker.getId(), entry.getKey(), bizVal, ++idx});
-                    }
-                    if (isDebugEnabled) {
-                        logger.debug("sql = " + insertSql);
-                        logger.debug("params = " + objToStr(rows));
-                    }
-                    jdbcTemplate.batchUpdate(insertSql.toString(), rows);
+            for (Map.Entry<Object, List<Object>> entry : data.entrySet()) {
+                Collection<Object> entryValue = entry.getValue();
+                // 空集合不操作  意思是empty集合是被删除的字段
+                if (entryValue.isEmpty()) {
+                    continue;
                 }
+                List<Object[]> rows = new ArrayList<>(entryValue.size());
+                int idx = 0;
+                for (Object bizVal : entryValue) {
+                    rows.add(new Object[]{IdWorker.getId(), entry.getKey(), bizVal, ++idx});
+                }
+                if (isDebugEnabled) {
+                    logger.debug("sql = " + insertSql);
+                    logger.debug("params = " + objToStr(rows));
+                }
+                jdbcTemplate.batchUpdate(insertSql.toString(), rows);
             }
         }
     }
