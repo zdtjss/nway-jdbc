@@ -39,7 +39,7 @@ Spring Boot：
 
 查询条件自动判空，省去不必要的判断代码，如：
 
-    if(StringUtils.isBlank(user.getName)) {
+    if(StringUtils.isNotBlank(user.getName)) {
         sqlBuilder.like(User::getName, user.getName());
     }
 
@@ -48,11 +48,11 @@ Spring Boot：
     sqlBuilder.ignoreInvalidDeep(true)
         .like(User::getName, user.getName()); 
 
-    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件，null、空集合、空字符串为无效值。基本类型的默认值是有效值
+    工具内部会判断user.getName()的传值是否有效，只有有效时才会作为查询条件，null、空集合、空字符串均为无效值。基本类型的默认值是有效值
     （如果只需要忽略null或集合可以使用方法ignoreInvalid(true)）。
     您当然可以忽略自动判断。只需调用sqlBuilder.ignoreInvalidDeep(false)，同样的调用sqlBuilder.ignoreInvalidDeep(true)即恢复自动判断。
     只应在传值为空时不做为条件的情况下使用ignoreInvalidDeep(true)，否则将数据越权，默认为false。
-    注意，and(Consumer<X> whereBuilder)或or(Consumer<X> whereBuilder)中也需要此特性，要明确指定，
+    注意，and(Consumer<X> whereBuilder)或or(Consumer<X> whereBuilder)中使用此特性时，要明确指定，
     如：and((sql) -> sql.ignoreInvalidDeep(true).like(User::getName, user.getName()))
    
 单对象查询：
