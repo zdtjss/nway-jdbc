@@ -35,7 +35,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -208,6 +207,7 @@ class SqlExecutorTest {
     @Test
     void insert() {
         ExampleEntity exampleEntity = new ExampleEntity();
+        exampleEntity.setMv(Collections.singletonList("aab"));
         int effectCount = sqlExecutor.insert(exampleEntity);
         Assertions.assertEquals(effectCount, 1);
         ExampleEntity exampleDb = sqlExecutor.queryById(exampleEntity.getId(), ExampleEntity.class);
@@ -248,6 +248,14 @@ class SqlExecutorTest {
     @Test
     void queryList() {
         List<ExampleEntity> objectList = sqlExecutor.queryList(SQL.query(ExampleEntity.class));
+        Assertions.assertTrue(objectList.size() > 0);
+    }
+
+    @Test
+    void queryList2() {
+        QueryBuilder queryBuilder = SQL.query(ExampleEntity.class)
+                .mvIn(ExampleEntity::getMv, Collections.singletonList("aab"));
+        List<ExampleEntity> objectList = sqlExecutor.queryList(queryBuilder);
         Assertions.assertTrue(objectList.size() > 0);
     }
 

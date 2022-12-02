@@ -4,11 +4,11 @@ import com.nway.spring.jdbc.sql.SqlBuilderUtils;
 import com.nway.spring.jdbc.sql.SqlType;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
+import com.nway.spring.jdbc.sql.meta.MultiValueColumnInfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQueryBuilder {
@@ -17,6 +17,7 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
     private final List<String> columns = new ArrayList<>();
     private final List<String> excludeColumns = new ArrayList<>();
     private final List<String> multiValColumn = new ArrayList<>();
+    private final Map<String, Collection<?>> selectMultiParamMap = new LinkedHashMap<>();
 
     public QueryBuilder(Class<?> beanClass) {
         super(beanClass);
@@ -68,6 +69,12 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
 
     public QueryBuilder withMVColumn(String... columnNames) {
         multiValColumn.addAll(Arrays.asList(columnNames));
+        return this;
+    }
+
+    public <T> QueryBuilder mvIn(SFunction<T, ?> field, Collection<?> params) {
+        String column = SqlBuilderUtils.getColumn(beanClass, field);
+        selectMultiParamMap.put(column, params);
         return this;
     }
 
@@ -177,12 +184,34 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
     private String getSelectStmt() {
         StringBuilder sql = new StringBuilder(64);
         if (getColumns().size() > 0) {
-            sql.append("select ").append(this.distinct).append(String.join(",", getColumns())).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+            sql.append("select ") .append(this.distinct).append(String.join(",", getColumns()))
+                    .append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         } else {
             EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-            String columnList = entityInfo.getColumnList().stream().filter(column -> !excludeColumns.contains(column)).collect(Collectors.joining(","));
-            sql.append("select ").append(this.distinct).append(columnList).append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+            List<String> columnList = entityInfo.getColumnList();
+            String columnStr = columnList.stream()
+                    .filter(column -> !excludeColumns.contains(column))
+                    .collect(Collectors.joining(","));
+            sql.append("select ").append(this.distinct).append(columnStr)
+                    .append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
         }
+
+        if (!selectMultiParamMap.isEmpty()) {
+            List<MultiValueColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(getBeanClass()).getMultiValue();
+            Map<String, MultiValueColumnInfo> mvColMap = multiValueList.stream().collect(Collectors.toMap(MultiValueColumnInfo::getColumnName, Function.identity()));
+
+            int current = 0;
+            for (Map.Entry<String, Collection<?>> entry : selectMultiParamMap.entrySet()) {
+                int next = current + 1;
+                String curAlias = "t" + current;
+                String nextAlias = "t" + next;
+                MultiValueColumnInfo multiValueColumnInfo = mvColMap.get(entry.getKey());
+                sql.append(" ").append(curAlias).append(" left join ")
+                        .append(multiValueColumnInfo.getTable()).append(" ").append(nextAlias).append(" on ").append(curAlias).append('.').append(SqlBuilderUtils.getIdName(getBeanClass())).append(" = ").append(nextAlias).append('.').append(multiValueColumnInfo.getFk());
+                super.in(nextAlias + "." + entry.getKey(), entry.getValue());
+            }
+        }
+
         return sql.toString();
     }
 
