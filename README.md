@@ -141,7 +141,7 @@ Map对象集分页：
       	 @Column("user_name")
 	  	 private String name;
 	  	 private int status;
-         @Column(type = ColumnType.MULTI_VALUE, name = "power")
+         @Column(name = "power", sub = @MultiColumn(XXX))
          private List<String> powerList;
       }
 
