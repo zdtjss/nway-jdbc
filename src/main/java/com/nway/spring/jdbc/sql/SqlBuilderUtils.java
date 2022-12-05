@@ -58,12 +58,13 @@ public class SqlBuilderUtils {
 					columnInfo.setPermissionStrategy(column.permissionStrategy().getConstructor().newInstance());
 					if (ColumnType.ID.equals(column.type())) {
 						entityInfo.setId(columnInfo);
-					}
-					else if(ColumnType.MULTI_VALUE.equals(column.type())) {
+					} // 两种配置方式
+					else if(!Column.class.getDeclaredMethod("sub").getDefaultValue().equals(column.sub()) || ColumnType.MULTI_VALUE.equals(column.type())) {
 
 						MultiColumn multiColumn = field.getAnnotation(MultiColumn.class);
-						MultiValueColumnInfo multiValueColumnInfo = new MultiValueColumnInfo();
+						multiColumn = multiColumn == null ? column.sub() : multiColumn;
 
+						MultiValueColumnInfo multiValueColumnInfo = new MultiValueColumnInfo();
 						multiValueColumnInfo.setColumnName(columnInfo.getColumnName());
 						multiValueColumnInfo.setReadMethod(columnInfo.getReadMethod());
 						multiValueColumnInfo.setFillStrategy(columnInfo.getFillStrategy());
@@ -74,12 +75,6 @@ public class SqlBuilderUtils {
 							multiValueColumnInfo.setKey(multiColumn.key());
 							multiValueColumnInfo.setFk(multiColumn.fk());
 							multiValueColumnInfo.setIdx(multiColumn.idx());
-						}
-						else {
-							multiValueColumnInfo.setTable(defaultTableName);
-							multiValueColumnInfo.setKey("id");
-							multiValueColumnInfo.setFk("fk");
-							multiValueColumnInfo.setIdx("idx");
 						}
 						entityInfo.getMultiValue().add(multiValueColumnInfo);
 					}

@@ -24,6 +24,12 @@ public class SqlBuilderUtilsTest {
     @Test
     public void multiTest() {
 
+        MultiValueColumnInfo mv2 = SqlBuilderUtils.getEntityInfo(ExampleEntity.class)
+                .getMultiValue()
+                .stream().filter(entity -> entity.getColumnName().equals("mv2")).findFirst().get();
+
+        Assertions.assertEquals(mv2.getKey(), "pk_id_mv2");
+
         MultiValueColumnInfo mv3 = SqlBuilderUtils.getEntityInfo(ExampleEntity.class)
                 .getMultiValue()
                 .stream().filter(entity -> entity.getColumnName().equals("mv3")).findFirst().get();

@@ -254,7 +254,7 @@ class SqlExecutorTest {
     @Test
     void queryList2() {
         QueryBuilder queryBuilder = SQL.query(ExampleEntity.class)
-                .mvIn(ExampleEntity::getMv, Collections.singletonList("aab"));
+                .mvIn(ExampleEntity::getMv, Collections.singletonList("65d"));
         List<ExampleEntity> objectList = sqlExecutor.queryList(queryBuilder);
         Assertions.assertTrue(objectList.size() > 0);
     }
