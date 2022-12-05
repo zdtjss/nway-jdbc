@@ -16,7 +16,7 @@ public class LogicFieldStrategy implements FillStrategy, PermissionStrategy {
 
     @Override
     public Object getValue(SqlType sqlType, Object val) {
-        if (val == DEFAULT_NONE || val == null) {
+        if (SqlType.SELECT != sqlType && (val == DEFAULT_NONE || val == null)) {
             return SqlType.DELETE == sqlType;
         }
         return val;
