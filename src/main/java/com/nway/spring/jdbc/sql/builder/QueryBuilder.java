@@ -73,8 +73,10 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
     }
 
     public <T> QueryBuilder mvIn(SFunction<T, ?> field, Collection<?> params) {
-        String column = SqlBuilderUtils.getColumn(beanClass, field);
-        selectMultiParamMap.put(column, params);
+        if (!isInvalid(params)) {
+            String column = SqlBuilderUtils.getColumn(beanClass, field);
+            selectMultiParamMap.put(column, params);
+        }
         return this;
     }
 
