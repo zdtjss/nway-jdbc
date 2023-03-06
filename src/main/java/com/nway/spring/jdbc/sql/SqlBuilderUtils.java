@@ -59,7 +59,7 @@ public class SqlBuilderUtils {
 					if (ColumnType.ID.equals(column.type())) {
 						entityInfo.setId(columnInfo);
 					} // 两种配置方式
-					else if(!Column.class.getDeclaredMethod("sub").getDefaultValue().equals(column.sub()) || ColumnType.MULTI_VALUE.equals(column.type())) {
+					else if (isMultiVal(column)) {
 
 						MultiColumn multiColumn = field.getAnnotation(MultiColumn.class);
 						multiColumn = multiColumn == null ? column.sub() : multiColumn;
@@ -85,7 +85,7 @@ public class SqlBuilderUtils {
 				}
 				columnMap.put(field.getName(), columnInfo);
 				// 多值字段在子表查
-				if(column == null || !ColumnType.MULTI_VALUE.equals(column.type())) {
+				if(column == null || !isMultiVal(column)) {
 					entityInfo.getColumnList().add(columnInfo.getColumnName());
 				}
 			}
@@ -93,6 +93,10 @@ public class SqlBuilderUtils {
 		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
+	}
+
+	private static boolean isMultiVal(Column column) throws NoSuchMethodException {
+		return ColumnType.MULTI_VALUE.equals(column.type()) || !Column.class.getDeclaredMethod("sub").getDefaultValue().equals(column.sub());
 	}
 
 	public static EntityInfo getEntityInfo(Class<?> claszz) {
