@@ -805,9 +805,9 @@ public class SqlExecutor implements InitializingBean {
                         .append(" from ")
                         .append(columnInfo.getTable())
                         .append(" where ").append(columnInfo.getFk()).append(" in (");
-                String placeholder = IntStream.range(0, beanList.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                subSql.append(placeholder).append(") order by ").append(columnInfo.getIdx());
                 Object[] idValueArr = rows.keySet().toArray(new Object[0]);
+                String placeholder = IntStream.range(0, idValueArr.length).mapToObj(a -> "?").collect(Collectors.joining(","));
+                subSql.append(placeholder).append(") order by ").append(columnInfo.getIdx());
                 if (isDebugEnabled) {
                     logger.debug("sql = " + subSql);
                     logger.debug("params = " + objToStr(idValueArr));
