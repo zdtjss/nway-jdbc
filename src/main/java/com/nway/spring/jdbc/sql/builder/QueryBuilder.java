@@ -187,7 +187,7 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
         StringBuilder sql = new StringBuilder(64);
         if (getColumns().size() > 0) {
             sql.append("select ") .append(this.distinct).append(String.join(",", getColumns()))
-                    .append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+                    .append(" from ").append(getTableName());
         } else {
             EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
             List<String> columnList = entityInfo.getColumnList();
@@ -195,7 +195,7 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
                     .filter(column -> !excludeColumns.contains(column))
                     .collect(Collectors.joining(","));
             sql.append("select ").append(this.distinct).append(columnStr)
-                    .append(" from ").append(SqlBuilderUtils.getTableNameFromCache(beanClass));
+                    .append(" from ").append(getTableName());
         }
 
         if (!selectMultiParamMap.isEmpty()) {

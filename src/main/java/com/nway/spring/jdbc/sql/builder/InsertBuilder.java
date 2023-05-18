@@ -18,6 +18,7 @@ public class InsertBuilder implements ISqlBuilder {
     private final StringBuilder sql = new StringBuilder();
     private final List<Object> param = new ArrayList<>();
     private final Class beanClass;
+    private String tableName;
 
     public InsertBuilder(Class<?> beanClass) {
         this.beanClass = beanClass;
@@ -41,7 +42,7 @@ public class InsertBuilder implements ISqlBuilder {
     @Override
     public String getSql() {
         sql.append("insert into ")
-                .append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" (")
+                .append(getTableName()).append(" (")
                 .append(String.join(",", columns))
                 .append(") values (")
                 .append(columns.stream().map(e -> "?").collect(Collectors.joining(",")))
@@ -57,6 +58,15 @@ public class InsertBuilder implements ISqlBuilder {
     @Override
     public List<Object> getParam() {
         return this.param;
+    }
+
+    public String getTableName() {
+        return tableName == null ? SqlBuilderUtils.getTableNameFromCache(beanClass) : tableName;
+    }
+
+    @Override
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public Object getKeyValue() {

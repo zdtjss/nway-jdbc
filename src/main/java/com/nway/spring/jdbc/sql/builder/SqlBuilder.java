@@ -24,6 +24,7 @@ public abstract class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder
     protected StringBuilder afterWhere = new StringBuilder(128);
     protected List<Object> param = new ArrayList<>();
     protected Class beanClass;
+    private String tableName;
 
     /**
      * 查询条件一定是以where()方法开始，where后的第一个条件不要and
@@ -55,6 +56,15 @@ public abstract class SqlBuilder<X extends SqlBuilder<X>> implements ISqlBuilder
     @Override
     public <T> Class<T> getBeanClass() {
         return this.beanClass;
+    }
+
+    public String getTableName() {
+        return tableName == null ? SqlBuilderUtils.getTableNameFromCache(beanClass) : tableName;
+    }
+
+    @Override
+    public void setTableName(String tableName) {
+       this.tableName = tableName;
     }
 
     protected X where() {

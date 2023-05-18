@@ -22,6 +22,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
     protected List<Object> param = new ArrayList<>();
     private List<String> columnNameList = new ArrayList<>();
     protected Class beanClass;
+    private String tableName;
 
     public BatchUpdateByIdBuilder(Class<?> beanClass) {
         this.beanClass = beanClass;
@@ -82,7 +83,7 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ");
+        sql.append("update ").append(getTableName()).append(" set ");
         int initLength = sql.length();
 
         List<String> columnList = getColumnNameList(SqlBuilderUtils.getEntityInfo(beanClass));
@@ -133,6 +134,15 @@ public class BatchUpdateByIdBuilder implements ISqlBuilder {
     @Override
     public List<Object> getParam() {
         return param.stream().map(e -> ((List<Object>) e).toArray()).collect(Collectors.toList());
+    }
+
+    public String getTableName() {
+        return tableName == null ? SqlBuilderUtils.getTableNameFromCache(beanClass) : tableName;
+    }
+
+    @Override
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     private List<String> getColumnNameList(EntityInfo entityInfo) {

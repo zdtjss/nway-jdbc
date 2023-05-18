@@ -9,4 +9,6 @@ public interface ISqlBuilder {
 	String getSql();
 	
 	List<Object> getParam();
+
+	void setTableName(String tableName);
 }

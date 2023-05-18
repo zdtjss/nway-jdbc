@@ -17,6 +17,7 @@ public class BatchInsertBuilder implements ISqlBuilder {
     private final StringBuilder sql = new StringBuilder();
     private final List<Object> param = new ArrayList<>();
     private final Class beanClass;
+    private String tableName;
 
     public BatchInsertBuilder(Class<?> beanClass) {
         this.beanClass = beanClass;
@@ -44,7 +45,7 @@ public class BatchInsertBuilder implements ISqlBuilder {
     @Override
     public String getSql() {
         sql.append("insert into ")
-                .append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" (")
+                .append(getTableName()).append(" (")
                 .append(String.join(",", columnList))
                 .append(") values (")
                 .append(columnList.stream().map(e -> "?").collect(Collectors.joining(",")))
@@ -60,5 +61,14 @@ public class BatchInsertBuilder implements ISqlBuilder {
     @Override
     public List<Object> getParam() {
         return this.param.stream().map(e -> ((List) e).toArray()).collect(Collectors.toList());
+    }
+
+    public String getTableName() {
+        return tableName == null ? SqlBuilderUtils.getTableNameFromCache(beanClass) : tableName;
+    }
+
+    @Override
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

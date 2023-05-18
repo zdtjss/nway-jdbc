@@ -52,7 +52,7 @@ public class UpdateBuilder extends SqlBuilder<UpdateBuilder> {
 
     @Override
     public String getSql() {
-        return "update " + SqlBuilderUtils.getTableNameFromCache(beanClass) + " set " + String.join(",", sets) + super.getSql();
+        return "update " + getTableName() + " set " + String.join(",", sets) + super.getSql();
     }
 
     private void initFilled() {

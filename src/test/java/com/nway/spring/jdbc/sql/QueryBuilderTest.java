@@ -21,10 +21,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -470,6 +472,20 @@ public class QueryBuilderTest {
 
         List<Pure> list = sqlExecutor.queryList(queryBuilder);
         Assertions.assertEquals(list.size(), 0);
+    }
+
+    @Test
+    public void changeTable() {
+        QueryBuilder queryBuilder = SQL.query(Pure.class)
+                .isNull(Pure::getId)
+                .isNotNull(Pure::getString);
+        queryBuilder.setTableName(queryBuilder.getTableName()+ "_abc");
+
+        try {
+            sqlExecutor.queryList(queryBuilder);
+        } catch (BadSqlGrammarException e) {
+            Assertions.assertTrue(e.getMessage().contains("t_nway_abc' doesn't exist"));
+        }
     }
 
     @Data

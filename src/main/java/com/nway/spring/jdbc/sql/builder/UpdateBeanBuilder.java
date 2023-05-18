@@ -78,7 +78,7 @@ public class UpdateBeanBuilder extends SqlBuilder<UpdateBeanBuilder> {
     public String getSql() {
         init();
         StringBuilder sql = new StringBuilder();
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ")
+        sql.append("update ").append(getTableName()).append(" set ")
                 .append(String.join(",", sets)).append(super.getSql());
         return sql.toString();
     }

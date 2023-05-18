@@ -25,6 +25,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
 
     private Class beanClass;
     protected List<?> data;
+    private String tableName;
     private final List<Object> param = new ArrayList<>();
     protected final List<String> columnNameList = new ArrayList<>();
     protected final List<CondExp> whereCondList = new ArrayList<>();
@@ -64,7 +65,7 @@ public class BatchUpdateBuilder implements ISqlBuilder {
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("update ").append(SqlBuilderUtils.getTableNameFromCache(beanClass)).append(" set ");
+        sql.append("update ").append(getTableName()).append(" set ");
         int initLength = sql.length();
 
         List<String> columnList = getColumnNameList(SqlBuilderUtils.getEntityInfo(beanClass));
@@ -117,6 +118,15 @@ public class BatchUpdateBuilder implements ISqlBuilder {
     @Override
     public List<Object> getParam() {
         return param.stream().map(e -> ((List<Object>) e).toArray()).collect(Collectors.toList());
+    }
+
+    public String getTableName() {
+        return tableName == null ? SqlBuilderUtils.getTableNameFromCache(beanClass) : tableName;
+    }
+
+    @Override
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public List<?> getData() {
