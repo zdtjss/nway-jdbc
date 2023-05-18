@@ -10,7 +10,7 @@ public enum SqlOperator {
     IS_NULL("is null"),
     IS_NOT_NULL("is not null");
 
-    private String operator;
+    private final String operator;
 
     SqlOperator(String operator) {
         this.operator = operator;
