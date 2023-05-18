@@ -32,7 +32,7 @@ public class DeleteBuilder extends SqlBuilder<DeleteBuilder> {
                     .append(super.getSql());
             return sql.toString();
         }
-        return "delete from " + SqlBuilderUtils.getTableNameFromCache(beanClass) + " " + super.getSql();
+        return "delete from " + getTableName()+ " " + super.getSql();
     }
 
     private Optional<ColumnInfo> getLogicDelField() {
