@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.nway.spring.jdbc.pagination.Page;
 import com.nway.spring.jdbc.sql.SQL;
 import com.nway.spring.jdbc.sql.builder.*;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -46,6 +49,8 @@ class SqlExecutorTest {
 
     @Autowired
     private SqlExecutor sqlExecutor;
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Configuration
     @EnableTransactionManagement
@@ -79,6 +84,18 @@ class SqlExecutorTest {
             return new SqlExecutor(dataSource);
         }
 
+        @Bean
+        @DependsOn("dataSource")
+        public SessionFactory sessionFactoryBean() throws IOException {
+            LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+            sessionFactoryBean.setDataSource(dataSource);
+            sessionFactoryBean.setPackagesToScan("com.nway.spring.jdbc");
+            java.util.Properties properties = new java.util.Properties();
+            properties.put("hibernate.hbm2ddl.auto", "create");
+            sessionFactoryBean.setHibernateProperties(properties);
+            sessionFactoryBean.afterPropertiesSet();
+            return sessionFactoryBean.getObject();
+        }
     }
 
     @Test
@@ -632,7 +649,7 @@ class SqlExecutorTest {
             exampleEntityList.add(example);
 
         }
-
+        sessionFactory.openSession().save(exampleEntityList.get(0));
         long begin = System.currentTimeMillis();
         sqlExecutor.batchInsert(exampleEntityList);
         System.out.println("batchInsert = " + (System.currentTimeMillis() - begin));

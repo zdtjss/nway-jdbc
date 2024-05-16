@@ -351,6 +351,7 @@ public class ExampleEntity {
 		this.mv2 = mv2;
 	}
 
+	@Transient
 	public List<String> getMv3() {
 		return mv3;
 	}
