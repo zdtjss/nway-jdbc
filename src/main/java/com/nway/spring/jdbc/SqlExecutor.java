@@ -95,7 +95,11 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
-        return jdbcTemplate.update(sql, params);
+        int update = jdbcTemplate.update(sql, params);
+        if (isDebugEnabled) {
+            logger.debug("update = " + update);
+        }
+        return update;
     }
 
     /**
@@ -174,7 +178,7 @@ public class SqlExecutor implements InitializingBean {
      * @return
      */
     public int batchUpdateById(List<?> objs, String... columns) {
-        if (objs == null || objs.size() == 0) {
+        if (objs == null || objs.isEmpty()) {
             return 0;
         }
         Class<?> beanClass = objs.get(0).getClass();
@@ -186,8 +190,12 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params.toArray()));
         }
         saveMultiValue(beanClass, objs, columns, true);
-        int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        return Arrays.stream(effect).filter(c -> c > 0).sum();
+        int[] effect = jdbcTemplate.batchUpdate(sql, params, params.isEmpty() ? new int[0] : getSqlType((Object[]) params.get(0)));
+        int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
+        if (isDebugEnabled) {
+            logger.debug("rows: " + sum);
+        }
+        return sum;
     }
 
     /**
@@ -207,8 +215,12 @@ public class SqlExecutor implements InitializingBean {
         if (sqlBuilder instanceof BatchUpdateBuilder) {
             saveMultiValue(sqlBuilder.getBeanClass(), ((BatchUpdateBuilder) sqlBuilder).getData(), null, true);
         }
-        int[] effect = jdbcTemplate.batchUpdate(sql, params, params.size() == 0 ? new int[0] : getSqlType((Object[]) params.get(0)));
-        return Arrays.stream(effect).filter(c -> c > 0).sum();
+        int[] effect = jdbcTemplate.batchUpdate(sql, params, params.isEmpty() ? new int[0] : getSqlType((Object[]) params.get(0)));
+        int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
+        if (isDebugEnabled) {
+            logger.debug("rows: " + sum);
+        }
+        return sum;
     }
 
     /**
@@ -267,7 +279,7 @@ public class SqlExecutor implements InitializingBean {
     }*/
 
     public int batchInsert(List<?> objs) {
-        if (objs == null || objs.size() == 0) {
+        if (objs == null || objs.isEmpty()) {
             return 0;
         }
         BatchInsertBuilder sqlBuilder = new BatchInsertBuilder(objs.get(0).getClass()).use(objs);
@@ -278,7 +290,7 @@ public class SqlExecutor implements InitializingBean {
             logger.debug("params = " + objToStr(params));
         }
         int[] count = jdbcTemplate.batchUpdate(sql, params);
-        saveMultiValue(sqlBuilder.getBeanClass(), objs, null,false);
+        saveMultiValue(sqlBuilder.getBeanClass(), objs, null, false);
         return count.length;
     }
 
@@ -353,7 +365,7 @@ public class SqlExecutor implements InitializingBean {
      * 与{@link #queryFirst(ISqlBuilder)}的区别是，当查询到多条数据此方法将抛出异常
      *
      * @return
-     * @throws DataAccessException 数据访问异常
+     * @throws DataAccessException                    数据访问异常
      * @throws IncorrectResultSizeDataAccessException 查询到多条数据时
      */
     public <T> T queryOne(ISqlBuilder sqlBuilder) throws DataAccessException {
@@ -611,7 +623,7 @@ public class SqlExecutor implements InitializingBean {
             if (i + 2 < sqlChars.length && sqlChars[i] == 'y' && sqlChars[i - 1] == 'b' && sqlChars[i + 1] == ' ' && sqlChars[i - 2] == ' ') {
                 // 如果匹配到 by  则继续匹配 order
                 for (int n = 0; n < orderChar.length; n++) {
-                    if (sqlChars[i - n - 3] != orderChar[n] ) {
+                    if (sqlChars[i - n - 3] != orderChar[n]) {
                         break;
                     }
                     if (n == orderChar.length - 1 && (sqlChars[i - n - 4] == ' ' || sqlChars[i - n - 4] == '\n')) {
@@ -752,9 +764,9 @@ public class SqlExecutor implements InitializingBean {
      */
     private int firstFromIndex(StringBuilder sql) {
         int fromIndex = sql.indexOf(" from ");
-		if (fromIndex == -1) {
-			fromIndex = sql.indexOf(" FROM ");
-		}
+        if (fromIndex == -1) {
+            fromIndex = sql.indexOf(" FROM ");
+        }
         return fromIndex;
     }
 
@@ -766,18 +778,18 @@ public class SqlExecutor implements InitializingBean {
      */
     private int lastFromIndex(StringBuilder sql) {
         int fromIndex = sql.lastIndexOf(" from ");
-		if (fromIndex == -1) {
-			fromIndex = sql.lastIndexOf(" FROM ");
-		}
+        if (fromIndex == -1) {
+            fromIndex = sql.lastIndexOf(" FROM ");
+        }
         return fromIndex;
     }
 
     private <T> void fillMultiValue(ISqlBuilder queryBuilder, List<T> beanList) {
-        if(beanList == null || beanList.isEmpty() || (beanList.size() == 1 && beanList.get(0) == null)) {
+        if (beanList == null || beanList.isEmpty() || (beanList.size() == 1 && beanList.get(0) == null)) {
             return;
         }
         List<String> multiValColumn = null;
-        if(queryBuilder instanceof MultiValQueryBuilder) {
+        if (queryBuilder instanceof MultiValQueryBuilder) {
             multiValColumn = ((MultiValQueryBuilder) queryBuilder).getMultiValColumn();
         }
         if (CollectionUtils.isEmpty(multiValColumn)) {
@@ -785,13 +797,13 @@ public class SqlExecutor implements InitializingBean {
         }
         Class<T> type = queryBuilder.getBeanClass();
         List<MultiValueColumnInfo> multiValueList = SqlBuilderUtils.getEntityInfo(type).getMultiValue();
-        if(CollectionUtils.isEmpty(multiValColumn)) {
+        if (CollectionUtils.isEmpty(multiValColumn)) {
             multiValColumn = multiValueList.stream().map(ColumnInfo::getColumnName).collect(Collectors.toList());
         }
         if (!multiValueList.isEmpty()) {
             for (MultiValueColumnInfo columnInfo : multiValueList) {
                 String columnName = columnInfo.getColumnName();
-                if(!multiValColumn.contains(columnName)) {
+                if (!multiValColumn.contains(columnName)) {
                     continue;
                 }
 
@@ -832,7 +844,7 @@ public class SqlExecutor implements InitializingBean {
 
     /**
      * 认为每次保存都是全量的
-     *
+     * <p>
      * null 代表不修改，empty 代表清空
      *
      * @param type
