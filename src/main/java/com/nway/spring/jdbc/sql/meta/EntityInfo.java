@@ -15,6 +15,13 @@ public final class EntityInfo {
 
     private Map<String, ColumnInfo> columnMap;
 
+    private List<ColumnInfo> selectFillColumns;
+
+    /**
+     * Pre-built comma-joined string of all column names, avoiding repeated String.join/Stream operations.
+     */
+    private String allColumnStr;
+
     public String getTableName() {
         return tableName;
     }
@@ -53,5 +60,21 @@ public final class EntityInfo {
 
     public void setColumnMap(Map<String, ColumnInfo> columnMap) {
         this.columnMap = columnMap;
+    }
+
+    public List<ColumnInfo> getSelectFillColumns() {
+        return selectFillColumns;
+    }
+
+    public void setSelectFillColumns(List<ColumnInfo> selectFillColumns) {
+        this.selectFillColumns = selectFillColumns;
+    }
+
+    public String getAllColumnStr() {
+        return allColumnStr;
+    }
+
+    public void setAllColumnStr(String allColumnStr) {
+        this.allColumnStr = allColumnStr;
     }
 }

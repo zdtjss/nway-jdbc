@@ -27,7 +27,7 @@ public final class OraclePaginationSupport implements PaginationSupport {
 
 		String pageSql = "SELECT * FROM ( SELECT TMP.*, ROWNUM RN FROM ( " + sql + " ) TMP WHERE ROWNUM <= ? ) WHERE RN > ?";
 
-		return new PageDialect(pageSql, offset, pageSize);
+		return new PageDialect(pageSql, offset + pageSize, offset);
 	}
 	
 }

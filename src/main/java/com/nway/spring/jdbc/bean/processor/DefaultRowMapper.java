@@ -6,7 +6,6 @@ import com.nway.spring.jdbc.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -14,14 +13,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -71,67 +70,52 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
     /**
      * The class we are mapping to.
      */
-    @Nullable
-    private Class<T> mappedClass;
+    private final Class<T> mappedClass;
 
     /**
-     * Map of the fields we provide mapping for.
+     * Map of the fields we provide mapping for. Key is column name (underscore format).
      */
-    @Nullable
-    private Map<String, Field> mappedFields;
+    private final Map<String, Field> mappedFields;
 
     /**
-     * Set of bean properties we provide mapping for.
+     * Column index mapping for this mapper instance. Immutable after construction.
      */
-    @Nullable
-    private Set<String> mappedProperties;
-
-    private Map<String, Integer> columnIndexMap;
+    private final Map<String, Integer> columnIndexMap;
 
     /**
-     * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated
-     * properties in the target bean.
+     * Cached no-arg constructor for the mapped class, resolved once at construction time.
+     */
+    private final Constructor<T> mappedConstructor;
+
+    /**
+     * Create a new {@code DefaultRowMapper} with column index mapping.
+     * This instance is immutable and thread-safe after construction.
      *
-     * @param mappedClass the class that each row should be mapped to
+     * @param mappedClass    the class that each row should be mapped to
+     * @param columnIndexMap the mapping from column name to ResultSet column index
      */
-    public DefaultRowMapper(Class<T> mappedClass) {
-        initialize(mappedClass);
-    }
-
-    public DefaultRowMapper<T> setColumnIndexMap(Map<String, Integer> columnIndexMap) {
-        this.columnIndexMap = columnIndexMap;
-        return this;
-    }
-
-    /**
-     * Set the class that each row should be mapped to.
-     */
-    public void setMappedClass(Class<T> mappedClass) {
-        if (this.mappedClass == null) {
-            initialize(mappedClass);
-        } else {
-            if (this.mappedClass != mappedClass) {
-                throw new InvalidDataAccessApiUsageException("The mapped class can not be reassigned to map to " +
-                        mappedClass + " since it is already providing mapping for " + this.mappedClass);
-            }
+    public DefaultRowMapper(Class<T> mappedClass, Map<String, Integer> columnIndexMap) {
+        this.mappedClass = mappedClass;
+        this.columnIndexMap = Collections.unmodifiableMap(new HashMap<>(columnIndexMap));
+        this.mappedFields = buildMappedFields(mappedClass);
+        try {
+            this.mappedConstructor = mappedClass.getConstructor();
+            this.mappedConstructor.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new SqlBuilderException("No default constructor found for " + mappedClass.getName(), e);
         }
     }
 
     /**
-     * Initialize the mapping meta-data for the given class.
-     *
-     * @param mappedClass the mapped class
+     * Build the field mapping metadata for the given class.
      */
-    protected void initialize(Class<T> mappedClass) {
-        this.mappedClass = mappedClass;
-        this.mappedFields = new HashMap<>();
-        this.mappedProperties = new HashSet<>();
-
+    private Map<String, Field> buildMappedFields(Class<T> mappedClass) {
+        Map<String, Field> fields = new HashMap<>();
         for (Field field : ReflectionUtils.getAllFields(mappedClass)) {
             field.setAccessible(true);
-            this.mappedFields.put(annotationName(field), field);
-            this.mappedProperties.add(field.getName());
+            fields.put(annotationName(field), field);
         }
+        return Collections.unmodifiableMap(fields);
     }
 
     /**
@@ -183,7 +167,7 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
 
         for (Map.Entry<String, Integer> entry : columnIndexMap.entrySet()) {
             String column = entry.getKey();
-            Field pd = (this.mappedFields != null ? this.mappedFields.get(column) : null);
+            Field pd = this.mappedFields.get(column);
             if (pd != null) {
                 try {
                     Class<?> pdType = pd.getType();
@@ -230,8 +214,8 @@ public class DefaultRowMapper<T> implements RowMapper<T> {
 
     protected T getBeanInstance() {
         try {
-            return mappedClass.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            return mappedConstructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new SqlBuilderException(e);
         }
     }

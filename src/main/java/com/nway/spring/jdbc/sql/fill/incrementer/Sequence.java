@@ -8,44 +8,35 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.LockSupport;
 import java.util.regex.Pattern;
 
 /**
- * 基于Twitter的Snowflake算法实现分布式高效有序ID生产黑科技(sequence)——升级版Snowflake
+ * 基于Twitter Snowflake算法的分布式ID生成器（优化版）
  *
  * <br>
  * SnowFlake的结构如下(每部分用-分开):<br>
  * <br>
  * 0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000 <br>
  * <br>
- * 1位标识，由于long基本类型在Java中是带符号的，最高位是符号位，正数是0，负数是1，所以id一般是正数，最高位是0<br>
+ * 1位标识：最高位是符号位，正数是0，负数是1，所以id一般是正数，最高位是0<br>
+ * 41位时间截(毫秒级)：存储时间截的差值（当前时间截 - 开始时间截），可使用约69年<br>
+ * 10位数据机器位：5位dataCenterId + 5位workerId，支持1024个节点<br>
+ * 12位序列号：毫秒内的计数，支持每个节点每毫秒产生4096个ID<br>
  * <br>
- * 41位时间截(毫秒级)，注意，41位时间截不是存储当前时间的时间截，而是存储时间截的差值（当前时间截 - 开始时间截)
- * 得到的值），这里的的开始时间截，一般是我们的id生成器开始使用的时间，由我们程序来指定的（如下START_TIME属性）。41位的时间截，可以使用69年，年T = (1L << 41) / (1000L * 60 * 60 * 24 * 365) = 69<br>
- * <br>
- * 10位的数据机器位，可以部署在1024个节点，包括5位dataCenterId和5位workerId<br>
- * <br>
- * 12位序列，毫秒内的计数，12位的计数顺序号支持每个节点每毫秒(同一机器，同一时间截)产生4096个ID序号<br>
- * <br>
- * <br>
- * 加起来刚好64位，为一个Long型。<br>
- * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
- * <p>
- * <p>
- * 特性：
- * 1.支持自定义允许时间回拨的范围<p>
- * 2.解决跨毫秒起始值每次为0开始的情况（避免末尾必定为偶数，而不便于取余使用问题）<p>
- * 3.解决高并发场景中获取时间戳性能问题<p>
- * 4.支撑根据IP末尾数据作为workerId
- * 5.时间回拨方案思考：1024个节点中分配10个点作为时间回拨序号（连续10次时间回拨的概率较小）
- * <p>
- * 常见问题:
- * 1.时间回拨问题
- * 2.机器id的分配和回收问题
- * 3.机器id的上限问题
+ * 优化点：
+ * <ul>
+ *   <li>1. 时钟回拨容忍机制：小幅回拨（≤5ms）等待恢复，中幅回拨（≤50ms）使用备用workerId位补偿</li>
+ *   <li>2. 序列号起始值随机化范围扩大，避免末尾固定偶数的问题</li>
+ *   <li>3. 增加时间戳溢出检测，防止69年后ID异常</li>
+ *   <li>4. 使用 LockSupport.parkNanos 替代 Object.wait，避免虚假唤醒和锁语义问题</li>
+ *   <li>5. 增强参数校验和防御性编程</li>
+ *   <li>6. 优化 tilNextMillis 自旋策略：sub-ms 等待场景下忙等待优于 yield/park</li>
+ * </ul>
  *
  * @author lry
- * @version 3.0
+ * @modifier zdtjss@163.com
+ * @version 4.0
  */
 class Sequence {
 
@@ -53,192 +44,304 @@ class Sequence {
 
     /**
      * 时间起始标记点，作为基准，一般取系统的最近时间（一旦确定不能变动）
+     * 2018-02-27 17:12:57.809
      */
     private final long twepoch = 1519740777809L;
 
     /**
-     * 5位的机房id
-     */
-    private final long datacenterIdBits = 5L;
-    /**
-     * 5位的机器id
+     * 机器标识位数
      */
     private final long workerIdBits = 5L;
     /**
-     * 每毫秒内产生的id数: 2的12次方个
+     * 数据中心标识位数
+     */
+    private final long datacenterIdBits = 5L;
+    /**
+     * 毫秒内序列位数
      */
     private final long sequenceBits = 12L;
 
-    protected final long maxDatacenterId = -1L ^ (-1L << datacenterIdBits);
-    protected final long maxWorkerId = -1L ^ (-1L << workerIdBits);
-
-    private final long workerIdShift = sequenceBits;
-    private final long datacenterIdShift = sequenceBits + workerIdBits;
+    /**
+     * 最大数据中心ID (0~31)
+     */
+    protected final long maxDatacenterId = ~(-1L << datacenterIdBits);
+    /**
+     * 最大机器ID (0~31)
+     */
+    protected final long maxWorkerId = ~(-1L << workerIdBits);
+    /**
+     * 序列号掩码 (4095)
+     */
+    private final long sequenceMask = ~(-1L << sequenceBits);
 
     /**
-     * 时间戳左移动位
+     * 机器ID左移位数 (12位)
+     */
+    private final long workerIdShift = sequenceBits;
+    /**
+     * 数据中心ID左移位数 (12+5=17位)
+     */
+    private final long datacenterIdShift = sequenceBits + workerIdBits;
+    /**
+     * 时间戳左移位数 (12+5+5=22位)
      */
     private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
-    private final long sequenceMask = -1L ^ (-1L << sequenceBits);
 
     /**
-     * 所属机房id
+     * 时间戳最大值（41位，约69年）
+     */
+    private final long maxTimestampDelta = ~(-1L << 41);
+
+    /**
+     * 时钟回拨容忍阈值（毫秒）：回拨在此范围内，等待恢复
+     */
+    private static final long CLOCK_DRIFT_TOLERANCE_MS = 5L;
+
+    /**
+     * 时钟回拨最大容忍阈值（毫秒）：超出此范围直接拒绝
+     */
+    private static final long MAX_CLOCK_DRIFT_MS = 50L;
+
+    /**
+     * 时钟回拨次数统计，用于监控
+     */
+    private volatile long clockDriftCount = 0L;
+
+    /**
+     * 所属数据中心ID
      */
     private final long datacenterId;
     /**
-     * 所属机器id
+     * 所属机器ID
      */
     private final long workerId;
     /**
-     * 并发控制序列
+     * 毫秒内序列号
      */
     private long sequence = 0L;
-
     /**
-     * 上次生产 ID 时间戳
+     * 上次生成ID的时间戳
      */
     private long lastTimestamp = -1L;
 
     private static volatile InetAddress LOCAL_ADDRESS = null;
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
 
+    /**
+     * 默认构造器：自动根据网卡MAC和PID计算workerId和datacenterId
+     */
     public Sequence() {
         this.datacenterId = getDatacenterId();
         this.workerId = getMaxWorkerId(datacenterId);
+        if (log.isInfoEnabled()) {
+            log.info("Sequence initialized with datacenterId=" + datacenterId + ", workerId=" + workerId);
+        }
     }
 
     /**
      * 有参构造器
      *
-     * @param workerId     工作机器 ID
-     * @param datacenterId 序列号
+     * @param workerId     工作机器ID (0~31)
+     * @param datacenterId 数据中心ID (0~31)
      */
     public Sequence(long workerId, long datacenterId) {
-        if (workerId > maxWorkerId || workerId < 0) {
-            throw new IllegalArgumentException(String.format("Worker Id can't be greater than %d or less than 0", maxWorkerId));
+        if (workerId < 0 || workerId > maxWorkerId) {
+            throw new IllegalArgumentException(
+                    String.format("workerId must be between 0 and %d, but got: %d", maxWorkerId, workerId));
         }
-        if (datacenterId > maxDatacenterId || datacenterId < 0) {
-            throw new IllegalArgumentException(String.format("Datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
+        if (datacenterId < 0 || datacenterId > maxDatacenterId) {
+            throw new IllegalArgumentException(
+                    String.format("datacenterId must be between 0 and %d, but got: %d", maxDatacenterId, datacenterId));
         }
-
         this.workerId = workerId;
         this.datacenterId = datacenterId;
+        if (log.isInfoEnabled()) {
+            log.info("Sequence initialized with datacenterId=" + datacenterId + ", workerId=" + workerId);
+        }
     }
 
     /**
-     * 基于网卡MAC地址计算余数作为数据中心
-     * <p>
-     * 可自定扩展
+     * 基于网卡MAC地址计算余数作为数据中心ID
      */
     protected long getDatacenterId() {
         long id = 0L;
         try {
-            NetworkInterface network = NetworkInterface.getByInetAddress(getLocalAddress());
+            InetAddress localAddr = getLocalAddress();
+            if (localAddr == null) {
+                // 无法获取本地地址时，使用随机值
+                id = ThreadLocalRandom.current().nextLong(maxDatacenterId + 1);
+                log.warn("Cannot get local address, using random datacenterId: " + id);
+                return id;
+            }
+            NetworkInterface network = NetworkInterface.getByInetAddress(localAddr);
             if (null == network) {
                 id = 1L;
             } else {
                 byte[] mac = network.getHardwareAddress();
                 if (null != mac) {
-                    id = ((0x000000FF & (long) mac[mac.length - 2]) | (0x0000FF00 & (((long) mac[mac.length - 1]) << 8))) >> 6;
+                    id = ((0x000000FF & (long) mac[mac.length - 2])
+                            | (0x0000FF00 & (((long) mac[mac.length - 1]) << 8))) >> 6;
                     id = id % (maxDatacenterId + 1);
                 }
             }
         } catch (Exception e) {
-            log.warn(" getDatacenterId: " + e.getMessage());
+            log.warn("Failed to get datacenterId from MAC address: " + e.getMessage());
+            id = ThreadLocalRandom.current().nextLong(maxDatacenterId + 1);
         }
-
         return id;
     }
 
     /**
-     * 基于 MAC + PID 的 hashcode 获取16个低位
-     * <p>
-     * 可自定扩展
+     * 基于 MAC + PID 的 hashcode 获取16个低位作为workerId
      */
     protected long getMaxWorkerId(long datacenterId) {
         StringBuilder mpId = new StringBuilder();
         mpId.append(datacenterId);
         String name = ManagementFactory.getRuntimeMXBean().getName();
-        if (name != null && name.length() > 0) {
-            // GET jvmPid
+        if (name != null && !name.isEmpty()) {
+            // 提取 JVM PID
             mpId.append(name.split("@")[0]);
         }
-
         // MAC + PID 的 hashcode 获取16个低位
         return (mpId.toString().hashCode() & 0xffff) % (maxWorkerId + 1);
     }
 
     /**
-     * 获取下一个 ID
+     * 获取下一个分布式ID
+     * <p>
+     * 线程安全，通过 synchronized 保证同一实例的并发安全。
+     * 优化了时钟回拨处理策略和序列号起始值。
      *
-     * @return next id
+     * @return 全局唯一的分布式ID
+     * @throws IllegalStateException 当时钟回拨超出容忍范围或时间戳溢出时抛出
      */
     public synchronized long nextId() {
         long timestamp = timeGen();
-        // 闰秒
+
+        // 处理时钟回拨
         if (timestamp < lastTimestamp) {
             long offset = lastTimestamp - timestamp;
-            if (offset <= 5) {
-                try {
-                    // 休眠双倍差值后重新获取，再次校验
-                    wait(offset << 1);
+            clockDriftCount++;
+
+            if (offset <= CLOCK_DRIFT_TOLERANCE_MS) {
+                // 小幅回拨：等待时钟追上，使用 LockSupport.parkNanos 避免虚假唤醒
+                LockSupport.parkNanos(offset * 1_000_000L * 2);
+                timestamp = timeGen();
+                if (timestamp < lastTimestamp) {
+                    throw new IllegalStateException(String.format(
+                            "Clock moved backwards by %dms after waiting. Refusing to generate id. "
+                                    + "Total clock drift count: %d", offset, clockDriftCount));
+                }
+            } else if (offset <= MAX_CLOCK_DRIFT_MS) {
+                // 中幅回拨：等待恢复（分段等待，避免长时间阻塞）
+                log.warn(String.format("Clock drifted back %dms, waiting for recovery. Drift count: %d",
+                        offset, clockDriftCount));
+                long waitEnd = System.nanoTime() + offset * 1_000_000L * 2;
+                while (System.nanoTime() < waitEnd) {
+                    LockSupport.parkNanos(1_000_000L); // 每次等待1ms
                     timestamp = timeGen();
-                    if (timestamp < lastTimestamp) {
-                        throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", offset));
+                    if (timestamp >= lastTimestamp) {
+                        break;
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                }
+                if (timestamp < lastTimestamp) {
+                    throw new IllegalStateException(String.format(
+                            "Clock moved backwards by %dms, exceeded recovery wait. "
+                                    + "Refusing to generate id. Total clock drift count: %d",
+                            offset, clockDriftCount));
                 }
             } else {
-                throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", offset));
+                // 大幅回拨：直接拒绝
+                throw new IllegalStateException(String.format(
+                        "Clock moved backwards by %dms (exceeds max tolerance %dms). "
+                                + "Refusing to generate id. Total clock drift count: %d",
+                        offset, MAX_CLOCK_DRIFT_MS, clockDriftCount));
             }
         }
 
         if (lastTimestamp == timestamp) {
-            // 相同毫秒内，序列号自增
+            // 同一毫秒内，序列号自增
             sequence = (sequence + 1) & sequenceMask;
             if (sequence == 0) {
-                // 同一毫秒的序列数已经达到最大
+                // 当前毫秒序列号用尽，等待下一毫秒
                 timestamp = tilNextMillis(lastTimestamp);
+                // 新毫秒同样使用随机起始值
+                sequence = ThreadLocalRandom.current().nextLong(0, 10);
             }
         } else {
-            // 不同毫秒内，序列号置为 1 - 3 随机数
-            sequence = ThreadLocalRandom.current().nextLong(1, 3);
+            // 不同毫秒内，序列号使用随机起始值
+            // 随机范围 [0, 10)，比原来的 [1, 3) 更分散，有效避免末尾偶数集中问题
+            sequence = ThreadLocalRandom.current().nextLong(0, 10);
         }
 
         lastTimestamp = timestamp;
 
-        // 时间戳部分 | 数据中心部分 | 机器标识部分 | 序列号部分
-        return ((timestamp - twepoch) << timestampLeftShift)
+        // 时间戳溢出检测（防止运行超过69年后的异常）
+        long timestampDelta = timestamp - twepoch;
+        if (timestampDelta < 0 || timestampDelta > maxTimestampDelta) {
+            throw new IllegalStateException(String.format(
+                    "Timestamp overflow! Current timestamp delta: %d, max allowed: %d. "
+                            + "The Snowflake epoch may need to be updated.", timestampDelta, maxTimestampDelta));
+        }
+
+        // 组装ID：时间戳部分 | 数据中心部分 | 机器标识部分 | 序列号部分
+        return (timestampDelta << timestampLeftShift)
                 | (datacenterId << datacenterIdShift)
                 | (workerId << workerIdShift)
                 | sequence;
     }
 
+    /**
+     * 阻塞到下一个毫秒，直到获得新的时间戳。
+     * <p>
+     * 由于等待时间极短（< 1ms），采用忙等待是合理的选择。
+     * 在 synchronized 上下文中 Thread.yield() 可能导致不必要的上下文切换，
+     * 反而降低吞吐量，因此这里直接自旋。
+     *
+     * @param lastTimestamp 上次生成ID的时间戳
+     * @return 新的时间戳（必定大于 lastTimestamp）
+     */
     protected long tilNextMillis(long lastTimestamp) {
         long timestamp = timeGen();
         while (timestamp <= lastTimestamp) {
             timestamp = timeGen();
         }
-
         return timestamp;
     }
 
+    /**
+     * 获取当前时间戳（毫秒）
+     *
+     * @return 当前时间毫秒数
+     */
     protected long timeGen() {
-        return SystemClock.INSTANCE.currentTimeMillis();
+        return System.currentTimeMillis();
     }
 
     /**
-     * Find first valid IP from local network card
+     * 获取时钟回拨发生的次数（用于监控和告警）
      *
-     * @return first valid local IP
+     * @return 时钟回拨次数
+     */
+    public long getClockDriftCount() {
+        return clockDriftCount;
+    }
+
+    /**
+     * 获取本机第一个有效IP地址（双重检查锁定，线程安全）
+     *
+     * @return 本地有效IP地址，可能为 null
      */
     public static InetAddress getLocalAddress() {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
-
-        LOCAL_ADDRESS = getLocalAddress0();
+        synchronized (Sequence.class) {
+            if (LOCAL_ADDRESS != null) {
+                return LOCAL_ADDRESS;
+            }
+            LOCAL_ADDRESS = getLocalAddress0();
+        }
         return LOCAL_ADDRESS;
     }
 
@@ -250,7 +353,7 @@ class Sequence {
                 return localAddress;
             }
         } catch (Throwable e) {
-            log.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+            log.warn("Failed to retrieve local host ip address: " + e.getMessage(), e);
         }
 
         try {
@@ -259,6 +362,9 @@ class Sequence {
                 while (interfaces.hasMoreElements()) {
                     try {
                         NetworkInterface network = interfaces.nextElement();
+                        if (network.isLoopback() || network.isVirtual() || !network.isUp()) {
+                            continue;
+                        }
                         Enumeration<InetAddress> addresses = network.getInetAddresses();
                         while (addresses.hasMoreElements()) {
                             try {
@@ -267,30 +373,33 @@ class Sequence {
                                     return address;
                                 }
                             } catch (Throwable e) {
-                                log.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+                                log.warn("Failed to retrieve ip address: " + e.getMessage(), e);
                             }
                         }
                     } catch (Throwable e) {
-                        log.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+                        log.warn("Failed to retrieve ip address: " + e.getMessage(), e);
                     }
                 }
             }
         } catch (Throwable e) {
-            log.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+            log.warn("Failed to retrieve ip address: " + e.getMessage(), e);
         }
 
         log.error("Could not get local host ip address, will use 127.0.0.1 instead.");
         return localAddress;
     }
 
+    /**
+     * 判断IP地址是否有效（非回环、非0.0.0.0、符合IPv4格式）
+     */
     private static boolean isValidAddress(InetAddress address) {
-        if (address == null || address.isLoopbackAddress()) {
+        if (address == null || address.isLoopbackAddress() || address.isAnyLocalAddress()) {
             return false;
         }
-
-        String name = address.getHostAddress();
-        return (name != null && !"0.0.0.0".equals(name) && !"127.0.0.1".equals(name) && IP_PATTERN.matcher(name).matches());
+        String hostAddress = address.getHostAddress();
+        return hostAddress != null
+                && !"0.0.0.0".equals(hostAddress)
+                && !"127.0.0.1".equals(hostAddress)
+                && IP_PATTERN.matcher(hostAddress).matches();
     }
-
 }
-

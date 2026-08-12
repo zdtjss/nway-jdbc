@@ -7,14 +7,14 @@ import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 class PostSelect {
 
     public static <T> List<T> post(List<T> objs, Class<T> type) {
-        EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(type);
-        List<ColumnInfo> columns = entityInfo.getColumnMap().values()
-                .stream().filter(col -> col.getFillStrategy().isSupport(SqlType.SELECT)).collect(Collectors.toList());
+        List<ColumnInfo> columns = SqlBuilderUtils.getEntityInfo(type).getSelectFillColumns();
+        if (columns.isEmpty()) {
+            return objs;
+        }
         for (T obj : objs) {
             post(obj, columns);
         }
@@ -22,9 +22,7 @@ class PostSelect {
     }
 
     public static <T> T post(T obj, Class<T> type) {
-        EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(type);
-        List<ColumnInfo> columns = entityInfo.getColumnMap().values()
-                .stream().filter(col -> col.getFillStrategy().isSupport(SqlType.SELECT)).collect(Collectors.toList());
+        List<ColumnInfo> columns = SqlBuilderUtils.getEntityInfo(type).getSelectFillColumns();
         return post(obj, columns);
     }
 

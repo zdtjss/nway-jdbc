@@ -5,6 +5,7 @@ import com.nway.spring.jdbc.annotation.MultiColumn;
 import com.nway.spring.jdbc.annotation.Table;
 import com.nway.spring.jdbc.annotation.enums.ColumnType;
 import com.nway.spring.jdbc.sql.builder.SqlBuilderException;
+import com.nway.spring.jdbc.sql.fill.FillStrategy;
 import com.nway.spring.jdbc.sql.fill.NoneFillStrategy;
 import com.nway.spring.jdbc.sql.function.SFunction;
 import com.nway.spring.jdbc.sql.function.SSupplier;
@@ -12,6 +13,7 @@ import com.nway.spring.jdbc.sql.meta.ColumnInfo;
 import com.nway.spring.jdbc.sql.meta.EntityInfo;
 import com.nway.spring.jdbc.sql.meta.MultiValueColumnInfo;
 import com.nway.spring.jdbc.sql.permission.NonePermissionStrategy;
+import com.nway.spring.jdbc.sql.permission.PermissionStrategy;
 import com.nway.spring.jdbc.sql.permission.WhereCondition;
 import com.nway.spring.jdbc.util.ReflectionUtils;
 
@@ -28,11 +30,10 @@ public class SqlBuilderUtils {
 
     private static final Map<Class<?>, EntityInfo> ENTITY_INFO_MAP = new ConcurrentHashMap<>(256);
     private static final Map<Class<?>, SerializedLambda> SERIALIZED_LAMBDA_MAP = new ConcurrentHashMap<>(256);
+    private static final Map<Class<? extends FillStrategy>, FillStrategy> FILL_STRATEGY_CACHE = new ConcurrentHashMap<>(16);
+    private static final Map<Class<? extends PermissionStrategy>, PermissionStrategy> PERMISSION_STRATEGY_CACHE = new ConcurrentHashMap<>(16);
 
-	private static void initEntityInfo(Class<?> claszz) {
-		if (ENTITY_INFO_MAP.containsKey(claszz)) {
-			return;
-		}
+	private static EntityInfo buildEntityInfo(Class<?> claszz) {
 		try {
 			Field[] declaredFields = ReflectionUtils.getAllFields(claszz);
 			EntityInfo entityInfo = new EntityInfo();
@@ -54,8 +55,8 @@ public class SqlBuilderUtils {
 				columnInfo.setColumnName(getColumnName(field));
 				columnInfo.setReadMethod(field);
 				if (column != null) {
-					columnInfo.setFillStrategy(column.fillStrategy().getConstructor().newInstance());
-					columnInfo.setPermissionStrategy(column.permissionStrategy().getConstructor().newInstance());
+					columnInfo.setFillStrategy(getFillStrategy(column.fillStrategy()));
+					columnInfo.setPermissionStrategy(getPermissionStrategy(column.permissionStrategy()));
 					if (ColumnType.ID.equals(column.type())) {
 						entityInfo.setId(columnInfo);
 					} // 两种配置方式
@@ -80,8 +81,8 @@ public class SqlBuilderUtils {
 					}
 				}
 				else {
-					columnInfo.setFillStrategy(new NoneFillStrategy());
-					columnInfo.setPermissionStrategy(new NonePermissionStrategy());
+					columnInfo.setFillStrategy(getFillStrategy(NoneFillStrategy.class));
+					columnInfo.setPermissionStrategy(getPermissionStrategy(NonePermissionStrategy.class));
 				}
 				columnMap.put(field.getName(), columnInfo);
 				// 多值字段在子表查
@@ -89,10 +90,40 @@ public class SqlBuilderUtils {
 					entityInfo.getColumnList().add(columnInfo.getColumnName());
 				}
 			}
-			ENTITY_INFO_MAP.put(claszz, entityInfo);
+			// Pre-compute selectFillColumns to avoid per-query stream operations
+			List<ColumnInfo> selectFillColumns = new ArrayList<>();
+			for (ColumnInfo col : columnMap.values()) {
+				if (col.getFillStrategy().isSupport(SqlType.SELECT)) {
+					selectFillColumns.add(col);
+				}
+			}
+			entityInfo.setSelectFillColumns(Collections.unmodifiableList(selectFillColumns));
+			// Pre-build the comma-joined column string to avoid per-query Stream/String.join
+			entityInfo.setAllColumnStr(String.join(",", entityInfo.getColumnList()));
+			return entityInfo;
 		} catch (Exception e) {
 			throw new SqlBuilderException(e);
 		}
+	}
+
+	private static FillStrategy getFillStrategy(Class<? extends FillStrategy> clazz) {
+		return FILL_STRATEGY_CACHE.computeIfAbsent(clazz, k -> {
+			try {
+				return k.getConstructor().newInstance();
+			} catch (Exception e) {
+				throw new SqlBuilderException(e);
+			}
+		});
+	}
+
+	private static PermissionStrategy getPermissionStrategy(Class<? extends PermissionStrategy> clazz) {
+		return PERMISSION_STRATEGY_CACHE.computeIfAbsent(clazz, k -> {
+			try {
+				return k.getConstructor().newInstance();
+			} catch (Exception e) {
+				throw new SqlBuilderException(e);
+			}
+		});
 	}
 
 	private static boolean isMultiVal(Column column) throws NoSuchMethodException {
@@ -100,22 +131,14 @@ public class SqlBuilderUtils {
 	}
 
 	public static EntityInfo getEntityInfo(Class<?> claszz) {
-		return Optional.ofNullable(ENTITY_INFO_MAP.get(claszz))
-				.orElseGet(() -> {
-					initEntityInfo(claszz);
-					return ENTITY_INFO_MAP.get(claszz);
-				});
+		return ENTITY_INFO_MAP.computeIfAbsent(claszz, SqlBuilderUtils::buildEntityInfo);
 	}
 
 	public static <T, R> EntityInfo getEntityInfo(SFunction<T, R> lambda) {
 		SerializedLambda serializedLambda = getSerializedLambda(lambda);
 		try {
 			final Class<?> claszz = Class.forName(serializedLambda.getImplClass().replace("/", "."));
-			return Optional.ofNullable(ENTITY_INFO_MAP.get(claszz))
-					.orElseGet(() -> {
-						initEntityInfo(claszz);
-						return ENTITY_INFO_MAP.get(claszz);
-					});
+			return ENTITY_INFO_MAP.computeIfAbsent(claszz, SqlBuilderUtils::buildEntityInfo);
 		} catch (ClassNotFoundException e) {
 			throw new SqlBuilderException(e);
 		}
@@ -292,11 +315,7 @@ public class SqlBuilderUtils {
 	}
 
 	public static String getIdName(Class<?> beanClass) {
-		EntityInfo entityInfo = ENTITY_INFO_MAP.get(beanClass);
-		if (entityInfo == null) {
-			initEntityInfo(beanClass);
-		}
-		return ENTITY_INFO_MAP.get(beanClass).getId().getColumnName();
+		return getEntityInfo(beanClass).getId().getColumnName();
 	}
 
 	public static Object getIdValue(Class<?> beanClass, Object obj) {

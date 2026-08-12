@@ -48,9 +48,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * 注意：
@@ -69,13 +69,18 @@ import java.util.stream.IntStream;
 public class SqlExecutor implements InitializingBean {
 
     private final Log logger = LogFactory.getLog(getClass());
-    private final boolean isDebugEnabled = logger.isDebugEnabled();
     private PaginationSupport paginationSupport;
     private JdbcTemplate jdbcTemplate;
     private DataSource dataSource;
     private BeanProcessor beanProcessor;
 
     private static final ColumnMapRowMapper COLUMN_MAP_ROW_MAPPER = new ColumnMapRowMapper();
+
+    /**
+     * Fast-path cache for Java class to JDBC SQL type mapping.
+     * Avoids repeated type resolution via StatementCreatorUtils.javaTypeToSqlParameterType.
+     */
+    private static final Map<Class<?>, Integer> SQL_TYPE_CACHE = new ConcurrentHashMap<>(32);
 
     public SqlExecutor() {
     }
@@ -91,12 +96,12 @@ public class SqlExecutor implements InitializingBean {
     public int update(ISqlBuilder sqlBuilder) {
         String sql = sqlBuilder.getSql();
         Object[] params = sqlBuilder.getParam().toArray();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
         int update = jdbcTemplate.update(sql, params);
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("update = " + update);
         }
         return update;
@@ -185,14 +190,14 @@ public class SqlExecutor implements InitializingBean {
         ISqlBuilder sqlBuilder = new BatchUpdateByIdBuilder(beanClass).columns(columns).use(objs);
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params.toArray()));
         }
         saveMultiValue(beanClass, objs, columns, true);
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.isEmpty() ? new int[0] : getSqlType((Object[]) params.get(0)));
         int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("rows: " + sum);
         }
         return sum;
@@ -208,7 +213,7 @@ public class SqlExecutor implements InitializingBean {
     public int batchUpdate(ISqlBuilder sqlBuilder) {
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params.toArray()));
         }
@@ -217,7 +222,7 @@ public class SqlExecutor implements InitializingBean {
         }
         int[] effect = jdbcTemplate.batchUpdate(sql, params, params.isEmpty() ? new int[0] : getSqlType((Object[]) params.get(0)));
         int sum = Arrays.stream(effect).filter(c -> c > 0).sum();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("rows: " + sum);
         }
         return sum;
@@ -260,7 +265,7 @@ public class SqlExecutor implements InitializingBean {
         InsertBuilder sqlBuilder = SQL.insert(obj.getClass()).use(obj);
         String sql = sqlBuilder.getSql();
         Object[] params = sqlBuilder.getParam().toArray(new Object[0]);
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -285,7 +290,7 @@ public class SqlExecutor implements InitializingBean {
         BatchInsertBuilder sqlBuilder = new BatchInsertBuilder(objs.get(0).getClass()).use(objs);
         String sql = sqlBuilder.getSql();
         List params = sqlBuilder.getParam();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -298,7 +303,7 @@ public class SqlExecutor implements InitializingBean {
         ISqlBuilder queryBuilder = SQL.query(type).eq(SqlBuilderUtils.getIdName(type), id);
         String sql = queryBuilder.getSql();
         Object[] params = queryBuilder.getParam().toArray(new Object[0]);
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -330,7 +335,7 @@ public class SqlExecutor implements InitializingBean {
      * @throws DataAccessException 数据访问异常
      */
     public <T> T queryBean(String sql, Class<T> type, Object... args) throws DataAccessException {
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(args));
         }
@@ -351,7 +356,7 @@ public class SqlExecutor implements InitializingBean {
         PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 1);
         params.add(pageDialect.getFirstParam());
         params.add(pageDialect.getSecondParam());
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + pageDialect.getSql());
             logger.debug("params = " + objToStr(params));
         }
@@ -375,7 +380,7 @@ public class SqlExecutor implements InitializingBean {
         PageDialect pageDialect = paginationSupport.buildPaginationSql(sql, 1, 2);
         params.add(pageDialect.getFirstParam());
         params.add(pageDialect.getSecondParam());
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + pageDialect.getSql());
             logger.debug("params = " + objToStr(params));
         }
@@ -408,7 +413,6 @@ public class SqlExecutor implements InitializingBean {
      */
     public <T, R> Map<R, T> queryListMap(ISqlBuilder queryBuilder, Function<T, R> key) {
         List<T> dataList = queryList(queryBuilder);
-        fillMultiValue(queryBuilder, dataList);
         return dataList.stream().collect(Collectors.toMap(key, Function.identity()));
     }
 
@@ -441,12 +445,12 @@ public class SqlExecutor implements InitializingBean {
      * @throws DataAccessException 数据访问异常
      */
     public <T> List<T> queryList(String sql, Class<T> type, Object... args) throws DataAccessException {
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(args));
         }
         List<T> retVal = jdbcTemplate.query(sql, args, getSqlType(args), new BeanListHandler<>(type, beanProcessor));
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("total = " + (retVal == null ? 0 : retVal.size()));
         }
         return retVal;
@@ -521,7 +525,7 @@ public class SqlExecutor implements InitializingBean {
             System.arraycopy(params == null ? new Object[0] : params, 0, realParam, 0, paramsLength);
             realParam[realParam.length - 2] = pageDialect.getFirstParam();
             realParam[realParam.length - 1] = pageDialect.getSecondParam();
-            if (isDebugEnabled) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("sql = " + pageDialect.getSql());
                 logger.debug("params = " + objToStr(realParam));
             }
@@ -538,7 +542,7 @@ public class SqlExecutor implements InitializingBean {
     public int count(ISqlBuilder queryBuilder) throws DataAccessException {
         String sql = buildPaginationCountSql(queryBuilder.getSql());
         Object[] params = queryBuilder.getParam().toArray();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(params));
         }
@@ -566,7 +570,7 @@ public class SqlExecutor implements InitializingBean {
         realParam[realParam.length - 2] = pageDialect.getFirstParam();
         realParam[realParam.length - 1] = pageDialect.getSecondParam();
         String sql = pageDialect.getSql();
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + sql);
             logger.debug("params = " + objToStr(realParam));
         }
@@ -690,7 +694,7 @@ public class SqlExecutor implements InitializingBean {
     }
 
     private Integer queryCount(String countSql, Object[] params) {
-        if (isDebugEnabled) {
+        if (logger.isDebugEnabled()) {
             logger.debug("sql = " + countSql);
             logger.debug("params = " + objToStr(params));
         }
@@ -818,9 +822,14 @@ public class SqlExecutor implements InitializingBean {
                         .append(columnInfo.getTable())
                         .append(" where ").append(columnInfo.getFk()).append(" in (");
                 Object[] idValueArr = rows.keySet().toArray(new Object[0]);
-                String placeholder = IntStream.range(0, idValueArr.length).mapToObj(a -> "?").collect(Collectors.joining(","));
-                subSql.append(placeholder).append(") order by ").append(columnInfo.getIdx());
-                if (isDebugEnabled) {
+                for (int i = 0; i < idValueArr.length; i++) {
+                    subSql.append('?');
+                    if (i < idValueArr.length - 1) {
+                        subSql.append(',');
+                    }
+                }
+                subSql.append(") order by ").append(columnInfo.getIdx());
+                if (logger.isDebugEnabled()) {
                     logger.debug("sql = " + subSql);
                     logger.debug("params = " + objToStr(idValueArr));
                 }
@@ -886,10 +895,16 @@ public class SqlExecutor implements InitializingBean {
                         .append("delete from ")
                         .append(columnInfo.getTable())
                         .append(" where ").append(columnInfo.getFk()).append(" in (");
-                String placeholder = IntStream.range(0, data.size()).mapToObj(a -> "?").collect(Collectors.joining(","));
-                delSql.append(placeholder).append(")");
+                int dataSize = data.size();
+                for (int i = 0; i < dataSize; i++) {
+                    delSql.append('?');
+                    if (i < dataSize - 1) {
+                        delSql.append(',');
+                    }
+                }
+                delSql.append(")");
                 Object[] idValueArr = idValMap.values().toArray(new Object[0]);
-                if (isDebugEnabled) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("sql = " + delSql);
                     logger.debug("params = " + objToStr(idValueArr));
                 }
@@ -912,7 +927,7 @@ public class SqlExecutor implements InitializingBean {
                 for (Object bizVal : entryValue) {
                     rows.add(new Object[]{IdWorker.getId(), entry.getKey(), bizVal, ++idx});
                 }
-                if (isDebugEnabled) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("sql = " + insertSql);
                     logger.debug("params = " + objToStr(rows));
                 }
@@ -934,17 +949,22 @@ public class SqlExecutor implements InitializingBean {
         if (objs == null) {
             return null;
         }
-        if (objs.length == 0) {
-            return new int[0];
+        int[] types = new int[objs.length];
+        for (int i = 0; i < objs.length; i++) {
+            if (objs[i] == null) {
+                types[i] = SqlTypeValue.TYPE_UNKNOWN;
+            } else {
+                Class<?> clazz = objs[i].getClass();
+                Integer cached = SQL_TYPE_CACHE.get(clazz);
+                if (cached != null) {
+                    types[i] = cached;
+                } else {
+                    int sqlType = StatementCreatorUtils.javaTypeToSqlParameterType(clazz);
+                    SQL_TYPE_CACHE.put(clazz, sqlType);
+                    types[i] = sqlType;
+                }
+            }
         }
-        return Arrays.stream(objs)
-                .map(obj -> {
-                    if (obj == null) {
-                        return SqlTypeValue.TYPE_UNKNOWN;
-                    }
-                    return StatementCreatorUtils.javaTypeToSqlParameterType(obj.getClass());
-                })
-                .mapToInt(x -> x)
-                .toArray();
+        return types;
     }
 }

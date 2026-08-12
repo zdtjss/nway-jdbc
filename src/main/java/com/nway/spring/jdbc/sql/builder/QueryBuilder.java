@@ -190,10 +190,16 @@ public class QueryBuilder extends SqlBuilder<QueryBuilder> implements MultiValQu
                     .append(" from ").append(getTableName());
         } else {
             EntityInfo entityInfo = SqlBuilderUtils.getEntityInfo(beanClass);
-            List<String> columnList = entityInfo.getColumnList();
-            String columnStr = columnList.stream()
-                    .filter(column -> !excludeColumns.contains(column))
-                    .collect(Collectors.joining(","));
+            String columnStr;
+            if (excludeColumns.isEmpty()) {
+                // Fast path: use pre-built column string when no exclusions
+                columnStr = entityInfo.getAllColumnStr();
+            } else {
+                List<String> columnList = entityInfo.getColumnList();
+                columnStr = columnList.stream()
+                        .filter(column -> !excludeColumns.contains(column))
+                        .collect(Collectors.joining(","));
+            }
             sql.append("select ").append(this.distinct).append(columnStr)
                     .append(" from ").append(getTableName());
         }

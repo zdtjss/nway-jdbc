@@ -25,14 +25,17 @@ public class DeleteBuilder extends SqlBuilder<DeleteBuilder> {
         Optional<ColumnInfo> logicDelField = getLogicDelField();
         if (logicDelField.isPresent()) {
             ColumnInfo columnInfo = logicDelField.get();
+            Object deleteValue = columnInfo.getFillStrategy().getValue(SqlType.DELETE, FillStrategy.DEFAULT_NONE);
+            // Use parameterized query to ensure cross-database compatibility (Oracle, SQL Server, etc.)
+            param.add(0, deleteValue);
             StringBuilder sql = new StringBuilder(128);
             sql.append("update ")
                     .append(getTableName())
-                    .append(" set ").append(columnInfo.getColumnName()).append(" = ").append(columnInfo.getFillStrategy().getValue(SqlType.DELETE, FillStrategy.DEFAULT_NONE))
+                    .append(" set ").append(columnInfo.getColumnName()).append(" = ?")
                     .append(super.getSql());
             return sql.toString();
         }
-        return "delete from " + getTableName()+ " " + super.getSql();
+        return "delete from " + getTableName() + " " + super.getSql();
     }
 
     private Optional<ColumnInfo> getLogicDelField() {

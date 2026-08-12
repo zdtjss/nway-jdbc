@@ -8,17 +8,14 @@ import org.springframework.jdbc.support.JdbcUtils;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class AsmBeanProcessor implements BeanProcessor {
 
-    private static final ConcurrentMap<String, AsmRowMapper> localCache = new ConcurrentHashMap<>(256);
+    private static final ConcurrentMap<String, AsmRowMapper<?>> localCache = new ConcurrentHashMap<>(256);
 
     private Function<ResultSet, String> sqlExtractor;
 
@@ -52,26 +49,50 @@ public class AsmBeanProcessor implements BeanProcessor {
         this.sqlExtractor = extractor;
     }
 
+    @SuppressWarnings("unchecked")
     private <T> RowMapper<T> getMapper(ResultSet rs, Class<T> mappedClass) throws SQLException {
 
         String cacheKey = null;
-        if(sqlExtractor != null) {
+        if (sqlExtractor != null) {
             cacheKey = sqlExtractor.apply(rs);
         }
 
         LinkedHashMap<String, Integer> columnIndexMap = null;
         if (cacheKey == null) {
             columnIndexMap = getColumnIndex(rs);
-            cacheKey = columnIndexMap.keySet().stream().sorted().collect(Collectors.joining()) + mappedClass.hashCode();
+            cacheKey = buildCacheKey(mappedClass, columnIndexMap);
         }
 
-        AsmRowMapper<T> mapper = localCache.get(cacheKey);
-        if(mapper == null) {
-            columnIndexMap = columnIndexMap == null ? getColumnIndex(rs) : columnIndexMap;
-            mapper = new AsmRowMapper<>(mappedClass, columnIndexMap);
-            localCache.put(cacheKey, mapper);
+        // Fast path: cache hit (no locking, no allocation)
+        AsmRowMapper<T> mapper = (AsmRowMapper<T>) localCache.get(cacheKey);
+        if (mapper != null) {
+            return mapper;
         }
-        return mapper;
+
+        // Slow path: generate ASM mapper. Use putIfAbsent to avoid blocking other buckets
+        // during bytecode generation. Accept rare duplicate generation at startup over
+        // holding a bucket lock for ~5ms during ASM class creation.
+        if (columnIndexMap == null) {
+            columnIndexMap = getColumnIndex(rs);
+        }
+        AsmRowMapper<T> newMapper = new AsmRowMapper<>(mappedClass, columnIndexMap);
+        AsmRowMapper<T> existing = (AsmRowMapper<T>) localCache.putIfAbsent(cacheKey, newMapper);
+        return existing != null ? existing : newMapper;
+    }
+
+    /**
+     * Build cache key using class name + sorted column names.
+     * Uses Arrays.sort + StringBuilder to avoid Stream object allocation.
+     */
+    private String buildCacheKey(Class<?> clazz, LinkedHashMap<String, Integer> columnIndexMap) {
+        String[] keys = columnIndexMap.keySet().toArray(new String[0]);
+        Arrays.sort(keys);
+        StringBuilder sb = new StringBuilder(clazz.getName().length() + keys.length * 16);
+        sb.append(clazz.getName());
+        for (String key : keys) {
+            sb.append('|').append(key);
+        }
+        return sb.toString();
     }
 
     private LinkedHashMap<String, Integer> getColumnIndex(ResultSet rs) throws SQLException {

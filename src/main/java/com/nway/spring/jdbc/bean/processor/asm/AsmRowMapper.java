@@ -9,7 +9,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.springframework.jdbc.core.DataClassRowMapper;
-import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -235,8 +234,7 @@ public class AsmRowMapper<T> implements org.springframework.jdbc.core.RowMapper<
         classWriter.visitEnd();
 
         try {
-            DynamicBeanClassLoader beanClassLoader = new DynamicBeanClassLoader(ClassUtils.getDefaultClassLoader());
-            Class<?> processor = beanClassLoader.defineClass(className.replace('/', '.'), classWriter.toByteArray());
+            Class<?> processor = DynamicBeanClassLoader.getInstance().defineClass(className.replace('/', '.'), classWriter.toByteArray());
             return (RowMapper<T>) processor.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("使用ASM创建 [ " + className + " ] 失败", e);
